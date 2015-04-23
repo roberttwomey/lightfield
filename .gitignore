@@ -3,5 +3,6 @@ reference
 software
 documentation
 bin
+*.DS_Store
 *.zip
 *.3dmbak
