@@ -1,0 +1,25 @@
+<!-- lightfield data -->
+<texturefile>/Volumes/Work/Projects/lightfield/data/textures/darktrees_contact_eq_0.8.jpg</texturefile>
+
+<subimagewidth>819</subimagewidth>
+<subimageheight>614</subimageheight>
+
+<numxsubimages>20</numxsubimages>
+<numysubimages>15</numysubimages>
+
+<!-- refocusing parameters -->
+<minscale>-32</minscale>
+<maxscale>8</maxscale>
+
+
+<!-- initial state of refocuser -->
+<start>0</xstart>
+<ystart>0</ystart>
+<xcount>20</xcount>
+<ycount>15</ycount>
+<scale>0</scale>
+
+<!-- debug information (text, mouse, thumbnail) -->
+<drawthumbnail>1</drawthumbnail>
+<hidecursor>1</hidecursor>
+<debug>0</debug>
