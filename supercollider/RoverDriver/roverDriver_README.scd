@@ -15,16 +15,6 @@ SETUP NOTE
 - in setting the limit bobbers, ensure the distance between bobber and limit switch is less than the distance from pulley to Rover ring
 */
 
-// set up rig dimensions: dimensions of the motor suspension
-// motorSeparation: distance between motors (or pulleys)
-// originX, originY: offset from the rig's limit to set the capture canvas's origin 0,0
-// camOffset: offset from the end of the cable at the rover to the camera's center
-r.rigDimensions_(motorSeparation: 60.25, originInsetX: 13.5, originInsetY: 17, camOffset: 1.5 );
-
-// TODO move originInsetX/Y to captureDimensions_
-// TODO move AB<>XY function to rigDimensions_
-// infer xinset from pulley separation and spanx, and set yinset directly
-
 // make sure GRBL is ready (Idle)
 a.postState_(true)
 a.state
@@ -42,25 +32,30 @@ a.home
 a.reset
 a.unlock
 
-//
-f = { |machineX, machineY, lengthA, lengthB|
-	a.worldOffset_( (lengthA.neg + machineX),  (lengthB.neg + machineY))
-}
-// after homing and pulling off, lengthA and lengthB are the
-// distance from the pulley to the Rover ring mount hole center
-f.( -135, -135, 68.5, 68.5 )
+// set up rig dimensions: dimensions of the motor suspension, sets the arduino world offset from the machine coordinate space
+
+// motorSeparation: distance between motors (or pulleys)
+// MachineX/Y :after homing and pulling off, MachineX/Y machine coordinates (usually negative)
+// lengthA/B :after homing and pulling off, lengthA and lengthB are the distance from the pulley to the Rover ring mount hole center
+// camOffset: offset from the end of the cable at the rover to the camera's center
+r.rigDimensions_(motorSeparation: 60.25, machineX: -135, machineY: -135, lengthA: 68.5, lengthB: 68.5, camOffset: 1.5 );
+
 
 // check the state
 a.state
 // the world position should be the length mentioned above (pulley>Roverhole)
-
 
 // now the rig is initialized!
 
 
 
 // set up capture dimensions: dimensions of your capture grid
-r.captureDimensions_(nCols: 10, nRows: 6, spanx: 40, spany: 24 );
+// all args in inches
+// captureSpanX: width of the capture plane
+// captureSpanY: height of the capture plane
+// insetY: vertical offset from the rig's pulley height to the 0,0 camera capture position
+// nCols, nRows: number of rows and columns of subimages to capture
+r.captureDimensions_(captureSpanX: 40, captureSpanY: 24, insetY: 10, nCols: 10, nRows: 6 );
 
 
 // set Rover to capture in 1 of 3 ways:
@@ -69,24 +64,30 @@ r.captureDimensions_(nCols: 10, nRows: 6, spanx: 40, spany: 24 );
 // args:
 // 	rowsFirst, leftToRight, topDown, wrap,	<< bools to determine grid order
 //	displayPath << bool to show the resultant path order
+
 r.gridCapture( rowsFirst: true, leftToRight: true, topDown: true, wrap: true, displayPath: true )
+
 
 // capture in a RANDOM ORDER
 // args:
 //	displayPath << bool to show the resultant path order
+
 r.randomPathCapture( displayPath: true);
 
 
+
 // capture in a CUSTOM ORDER (fancy!)
+(
+// A little array manipulation to get a capture path radiating from a center point
 
 // create your own capture order: provide an array of points on the grid
 // in the order you want them shot
 // first get the points in rows (left>right top>down)
-p = r.getCamPointRows
+p = r.getCamPointRows;
 
 // now manipulate them...
 // get the points in a 1D array
-p = p.flat
+p = p.flat;
 
 // collect the points with their associated distance from the specified origin
 ~radialOrigin = Point(7,13);
@@ -94,6 +95,7 @@ p = p.flat
 
 // sort them in ascending order (capture outward from origin)
 p = ~distancesFromOrigin.sortBy(\dist).collect{ |distDict| distDict[\pt] };
+)
 
 // or descending order (capture in an order converging on origin)
 p = p.reverse;
@@ -102,6 +104,7 @@ p = p.reverse;
 // args:
 //	pointArray		<< a 1D array with grid points (x/y indices) in the order you'd like them captured
 //	displayPath		<< bool to show the resultant path order
+
 r.customPathCapture( pointArray: p, displayPath: true)
 
 
@@ -115,23 +118,18 @@ r.customPathCapture( pointArray: p, displayPath: true)
 //	waitAfterPhoto,	<< time to wait after taking photo before advancing
 //	travelTimeOut,	<< time to wait to timeout in case anything goes wrong waiting for GRBL state to report "Idle"
 //	stateCheckRate	<< number of times GRBL state is queried per second when using auto-advance
+
 r.initCapture( autoAdvance: true, waitToSettle: 1.5, waitAfterPhoto: 1.5, travelTimeOut: 30, stateCheckRate: 5)
 
 
 // set GRBL's feed rate if not set already
-// a.feed_(500) // TODO
-a.send("G0F500")
+a.feed_(500)
+// a.send("G0F500")
 
-r.goHome
-
-
-
-// TODO
-// r.goHome (goes to position after pulloff)
-// r.goToFirstPoint
-
-// TODO
-// check the update state routine's role in making the state check work in autoAdvance () check out ArduinoGRBL's mode is updated
+// return to the location Rover is after pulloff (to check no slippage)
+r.goTopulloffHome
+// go to the location of the first capture point
+r.goToFirstCapturePoint
 
 a.goTo_(68.5, 68.5)
 

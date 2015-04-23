@@ -1,7 +1,11 @@
+// TODO: when on a fixed-advance routine, how to anticipate long moves across the capture plane?
+// workaround - use gridCapture and be sure wrap = true so the steps are small
+
 RoverDriver {
 	var <arduino, <>camAddr;
 	var <>mSeparation, <>x0, <>y0, <>cOffset = 2.5;
-	var <>numCols, <>numRows, <>spanX, <>spanY;
+	var <>numCols, <>numRows, <>spanX, <>spanY, <xStep, <yStep;
+	var <pulloffHome;
 	var <captureTask, <camPts;
 	var <posTxtList;
 
@@ -9,22 +13,39 @@ RoverDriver {
 		^super.newCopyArgs( anArduinoGRBL, cameraNetAddr );
 	}
 
-		// all args in inches
+	// all args in inches
 	// motorSeparation: distance between motors (or pulleys)
-	// originX, originY: offset from the rig's limit to set the capture canvas's origin 0,0
-	// camOffset: offset from the end of the cable at the rover to the camera's center
-	rigDimensions_ { | motorSeparation, originInsetX, originInsetY, camOffset |
+	// MachineX/Y:	after homing and pulling off, MachineX/Y machine coordinates (usually negative)
+	// lengthA/B:	after homing and pulling off, lengthA and lengthB are the distance from the pulley to the Rover ring mount hole center
+	// camOffset:	offset from the end of the cable at the rover to the camera's center
+	rigDimensions_ { | motorSeparation, machineX, machineY, lengthA, lengthB, camOffset |
+		// set the arduino world offset from the machine coordinate space
+		arduino.worldOffset_( (lengthA.neg + machineX),  (lengthB.neg + machineY));
 		motorSeparation !? { mSeparation = motorSeparation };
-		originInsetX !? { x0 = originInsetX };
-		originInsetY !? { y0 = originInsetY };
 		camOffset !? { cOffset = camOffset };
+		pulloffHome = lengthA@lengthB
 	}
 
-	captureDimensions_ { |nCols, nRows, spanx, spany|
+	// all args in inches
+	// captureSpanX: width of the capture plane
+	// captureSpanY: height of the capture plane
+	// insetY: vertical offset from the rig's pulley height to the 0,0 camera capture position
+	// nCols, nRows: number of rows and columns of subimages to capture
+	captureDimensions_ { |captureSpanX, captureSpanY, insetY, nCols, nRows |
+		var insetX;
+
+		captureSpanX !? { spanX = captureSpanX };
+		captureSpanY !? { spanY = captureSpanY };
+
+		insetX = mSeparation - spanX / 2;
+		x0 = insetX;
+		insetY !? { y0 = insetY };
+
 		nCols !? { numCols = nCols };
 		nRows !? { numRows = nRows };
-		spanx !? { spanX = spanx };
-		spany !? { spanY = spany };
+
+		xStep = spanX / (numCols-1);
+		yStep = spanY / (numRows-1);
 	}
 
 	// Returns a 2D array of of rows capture points for subsequent processing.
@@ -100,7 +121,7 @@ RoverDriver {
 
 	}
 
-	goTo { |xPos, yPos, feed|
+	goTo_ { |xPos, yPos, feed|
 		arduino.goTo_(*this.xy2ab(xPos, yPos));
 	}
 
@@ -112,10 +133,8 @@ RoverDriver {
 		// postf("This capture will take approximately % minutes.\n", );
 
 		captureTask = Task({
-			var xStep, yStep, stateCheckWait;
+			var stateCheckWait;
 
-			xStep = spanX/(numCols-1);
-			yStep = spanY/(numRows-1);
 			stateCheckWait = stateCheckRate.reciprocal;
 
 			camPts.do{ |indexPoint, i|
@@ -126,7 +145,7 @@ RoverDriver {
 				postf( "Travelling to index [%, %] ([%, %])\n",
 					indexPoint.x, indexPoint.y, indexPoint.x * xStep, indexPoint.y * yStep);
 
-				this.goTo( indexPoint.x * xStep, indexPoint.y * yStep );
+				this.goTo_( indexPoint.x * xStep, indexPoint.y * yStep );
 
 				// update the GUI if it was made
 				posTxtList !? { { posTxtList.at(i).background_(Color.yellow) }.defer };
@@ -134,10 +153,15 @@ RoverDriver {
 				autoAdvance.if(
 					{
 						// let the motor get going, GRBLE state will be "Run"
-						0.3.wait;
-						// wait for the motore to reach it's destination
+						0.2.wait;
+						arduino.state; // update the state
+						0.2.wait;
+
+						// looping to wait for the motore to reach it's destination
 						while( { (arduino.mode != "Idle") and: ( now < travelTimeOut ) },{
-							stateCheckWait.wait;
+							(stateCheckWait/2).wait;
+							arduino.state;
+							(stateCheckWait/2).wait;
 							now  = Main.elapsedTime - moveStart;
 						});
 
@@ -155,8 +179,10 @@ RoverDriver {
 				waitToSettle.wait;
 
 				// take the photo
-				camAddr.sendMsg("/camera", "snap"); " SNAP".postln;
+				camAddr.sendMsg("/camera", "snap"); "\tSNAP".postln;
+				// update the GUI
 				posTxtList !? { { posTxtList.at(i).background_(Color.green) }.defer };
+
 				// give the photo time to complete capture (incase of lag) before moving on
 				waitAfterPhoto.wait;
 			};
@@ -172,9 +198,10 @@ RoverDriver {
 	reset { captureTask !? { captureTask.stop.reset } }
 
 
-	// return to the origin of the grid
-	goHome { this.goTo(0,0) }
+	// return to the location Rover is after pulloff (to check no slippage)
+	goTopulloffHome { arduino.goTo_(pulloffHome.x, pulloffHome.y) }
 
+	goToFirstCapturePoint {this.goTo_( camPts[0].x * xStep, camPts[0].y * yStep ); }
 
 	displayPath {
 
