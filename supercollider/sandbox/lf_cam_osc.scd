@@ -16,6 +16,6 @@ n.sendMsg("/camera", "paramsnap", p)
 n.sendMsg("/camera", "exit")
 
 // copy files
-"scp pi@rover.local:/home/pi/lfimages/* /Volumes/Work/Projects/lightfield/data/string1".unixCmd
+"scp pi@camerapi.local:/home/pi/lfimages/* /Volumes/Work/Projects/lightfield/data/string1".unixCmd
 
-"rsync -az pi@rover.local:/home/pi/lfimages/* /Volumes/Work/Projects/lightfield/data/".unixCmd
+"rsync -az pi@camerapi.local:/home/pi/lfimages/* /Volumes/Work/Projects/lightfield/data/".unixCmd
