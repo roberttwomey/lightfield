@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ofxXmlSettings.h"
 #include "ofMain.h"
 
 class ofApp : public ofBaseApp{
@@ -9,7 +10,9 @@ public:
     void update();
     void draw();
     
-    void loadImages();
+    void loadXMLSettings();
+    void loadLFImage();
+    void graphicsSetup();
     
     void keyPressed  (int key);
     void keyReleased(int key);
@@ -34,6 +37,8 @@ public:
     ofFbo       fbo;
     ofFbo       maskFbo;
     ofShader    shader;
+    
+    string lfimage_filename;
     
     float sourceWidth, sourceHeight;
     float synScale;

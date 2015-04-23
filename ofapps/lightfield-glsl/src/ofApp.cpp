@@ -3,58 +3,46 @@
 #define STRINGIFY(A) #A
 
 
-void ofApp::loadImages() {
+void ofApp::loadXMLSettings() {
+    ofxXmlSettings xml;
+    xml.loadFile("settings.xml");
     
-//    lfplane.loadImage("home3_contact0.jpg");
-    //    lfplane.loadImage("precise_rect5.jpg");
-//    lfplane.loadImage("chessboard_2_200_negZ.jpg");
-//    lfplane.loadImage("chessboard_2_1_negZ.jpg");
-//    lfplane.loadImage("chessboard_2_1.jpg");
-//    lfplane.loadImage("chessboard_2_1_negy_negz.jpg");
-//    lfplane.loadImage("chessboard_4_1_negy_negz.jpg");
-//    lfplane.loadImage("chessboard_4_1_negz.jpg");
-//     lfplane.loadImage("chessboard_4_1.jpg");
-//    lfplane.loadImage("chessboard_4_1_negx.jpg");
-//    lfplane.loadImage("chessboard_4_1_rinv.jpg");
-//    lfplane.loadImage("chessboard_4_f1_negz.jpg");
-//    lfplane.loadImage("darktrees_contact_0.8.jpg");
-//    lfplane.loadImage("darktrees_contact_eq_0.8.jpg");
+    // lightfield data //
+    lfimage_filename = xml.getValue("texturefile", "test.jpg");
+    subwidth = xml.getValue("subimagewidth", 0);
+    subheight = xml.getValue("subimageheight", 0);
+    xsubimages = xml.getValue("numxsubimages", 0);
+    ysubimages = xml.getValue("numysubimages", 0);
+    
+    // refocusing params //
+    minScale = xml.getValue("minscale", 0);
+    maxScale = xml.getValue("maxscale", 0);
+    
+    // rendering state //
+    xstart = xml.getValue("xstart", 0);
+    ystart = xml.getValue("ystart", 0);
+    xcount = xml.getValue("xcount", xsubimages);
+    ycount = xml.getValue("ycount", ysubimages);
+    synScale = xml.getValue("scale", 0);
+    
+    // debug information (text, mouse, thumbnail) //
+    bDrawThumbnail = xml.getValue("drawthunbnail", 0) > 0;
+    bHideCursor = xml.getValue("hidecursor", 0) > 0;
+    bDebug = xml.getValue("debug", 0) > 0;
+}
 
-//    lfplane.loadImage("towers_eq_0.8.jpg");
-    lfplane.loadImage("towers_0.8.jpg");
+void ofApp::loadLFImage() {
+    lfplane.loadImage(lfimage_filename);
     
     sourceWidth=lfplane.getWidth();
     sourceHeight=lfplane.getHeight();
     
     cout << "IMAGE WIDTHS " << sourceWidth << ", " << sourceHeight << endl;
-    
-}
-//--------------------------------------------------------------
-void ofApp::setup(){
-    
-    ofEnableAlphaBlending();
-    
-    subwidth 		= 819;//564;//1024;//562; 963;//
-    subheight 		= 614;//317;//768;//316; 642;//
-    
-    xsubimages = 20;//29; // 17;//29;//16; //
-    ysubimages = 15;//20; // 17;//20;//14; //
-    
-    minScale = -32;//-1500;
-    maxScale = 8;//1500;
-    
-    xstart = 0;
-    ystart = 0;
-    xcount = xsubimages;
-    ycount = ysubimages;
-    
 
-    // display variables
-    bDrawThumbnail = true;
-    bHideCursor = false;
-    bDebug = false;
-    
-    loadImages();
+}
+
+
+void ofApp::graphicsSetup() {
     
     fbo.allocate(subwidth,subheight);
     maskFbo.allocate(subwidth,subheight);
@@ -85,8 +73,8 @@ void ofApp::setup(){
                                          for (int x=xstart; x<xstart+xcount; x++){		// For each microimage in
                                              for (int y=ystart; y<ystart+ycount; y++) {
                                                  
-//                                                 vec2 subpos = pos + vec2(float(x)*xres, float(y)*yres) + vec2(scale * 4.0, scale * -4.0);
-                                                vec2 subpos = pos + vec2(float(x)*xres, float(y)*yres);
+                                                 //                                                 vec2 subpos = pos + vec2(float(x)*xres, float(y)*yres) + vec2(scale * 4.0, scale * -4.0);
+                                                 vec2 subpos = pos + vec2(float(x)*xres, float(y)*yres);
                                                  
                                                  color += texture2DRect(lfplane, subpos+vec2( (1.0+(offset/xres)) * scale*(float(x) - halfxcount) + 100.0, (1.0+(offset/yres))*scale*(float(y)-halfycount)));
                                                  
@@ -118,12 +106,24 @@ void ofApp::setup(){
     shader.begin();
     
     shader.setUniformTexture("lfplane", lfplane, 1);
-
+    
     shader.end();
     
-    GLint maxTextureSize;
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-    std::cout <<"Max texture size: " << maxTextureSize << std::endl;
+    //    GLint maxTextureSize;
+    //    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+    //    std::cout <<"Max texture size: " << maxTextureSize << std::endl;
+
+}
+//--------------------------------------------------------------
+void ofApp::setup(){
+    
+    ofEnableAlphaBlending();
+    
+    loadXMLSettings();
+    
+    loadLFImage();
+
+    graphicsSetup();
 }
 
 //--------------------------------------------------------------
