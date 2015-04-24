@@ -35,10 +35,10 @@ a.unlock
 // set up rig dimensions: dimensions of the motor suspension, sets the arduino world offset from the machine coordinate space
 
 // motorSeparation: distance between motors (or pulleys)
-// MachineX/Y :after homing and pulling off, MachineX/Y machine coordinates (usually negative)
-// lengthA/B :after homing and pulling off, lengthA and lengthB are the distance from the pulley to the Rover ring mount hole center
-// camOffset: offset from the end of the cable at the rover to the camera's center
-r.rigDimensions_(motorSeparation: 60.25, machineX: -135, machineY: -135, lengthA: 68.5, lengthB: 68.5, camOffset: 1.5 );
+// MachineX/Y:	after homing and pulling off, MachineX/Y machine coordinates (usually negative)
+// lengthA/B:	after homing and pulling off, lengthA and lengthB are the distance from the pulley to the middle Rover's width (where the cables would intersect if they extended)
+// camOffset:	offset from the end of the cable at the rover to the camera's center
+r.rigDimensions_(motorSeparation: 60.25, machineX: -135, machineY: -135, lengthA: 68.5, lengthB: 68.5) //, camOffset: 1.5 );
 
 
 // check the state
@@ -126,12 +126,12 @@ r.initCapture( autoAdvance: true, waitToSettle: 1.5, waitAfterPhoto: 1.5, travel
 a.feed_(500)
 // a.send("G0F500")
 
-// return to the location Rover is after pulloff (to check no slippage)
-r.goTopulloffHome
+
 // go to the location of the first capture point
 r.goToFirstCapturePoint
 
-a.goTo_(68.5, 68.5)
+// make sure the camera is ready to take images
+n.sendMsg("/camera", "start")
 
 // ROVE
 r.run  // or r.play
@@ -141,6 +141,19 @@ r.stop // or r.pause
 r.run
 // or reset from the beginning of the shoot
 r.reset
+
+// a.goTo_(68.5, 68.5)
+// return to the location Rover is after pulloff (to check no slippage)
+r.goTopulloffHome
+
+n.sendMsg("/camera", "stop")
+
+n.sendMsg("/camera", "exit")
+
+// download all images
+"rsync -avz pi@rover.local:/home/pi/lfimages/* /Volumes/Work/Projects/lightfield/data/".unixCmd
+
+
 
 // TEST IT: get status as it moves
 x = Routine.run({ inf.do{a.state; 0.2.wait} })

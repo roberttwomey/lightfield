@@ -45,6 +45,7 @@ c.value_(3)
 c.plot(plotLength: 50, updateRate:12)
 
 c.lfo_(SinOsc, 0.1, 0, 1)
+c.lfo_(LFDNoise3, 3.reciprocal, 0.51, 0.71, 0.04)
 
 (
 ~sliderMaker = { |controller, label="myCtl", spec|

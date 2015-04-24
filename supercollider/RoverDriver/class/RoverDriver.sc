@@ -4,10 +4,11 @@
 RoverDriver {
 	var <arduino, <>camAddr;
 	var <>mSeparation, <>x0, <>y0, <>cOffset = 2.5;
-	var <>numCols, <>numRows, <>spanX, <>spanY, <xStep, <yStep;
+	var <>numCols, <>numRows, <>spanX, <>spanY, <xStep, <yStep, <lenA, <lenB;
 	var <pulloffHome;
 	var <captureTask, <camPts;
-	var <posTxtList;
+	var <posTxtList, <photoTaken = false, <handshakeResponder;
+	var rigDimDefined = false, capDimDefined = false;
 
 	*new { |anArduinoGRBL, cameraNetAddr|
 		^super.newCopyArgs( anArduinoGRBL, cameraNetAddr );
@@ -16,14 +17,15 @@ RoverDriver {
 	// all args in inches
 	// motorSeparation: distance between motors (or pulleys)
 	// MachineX/Y:	after homing and pulling off, MachineX/Y machine coordinates (usually negative)
-	// lengthA/B:	after homing and pulling off, lengthA and lengthB are the distance from the pulley to the Rover ring mount hole center
+	// lengthA/B:	after homing and pulling off, lengthA and lengthB are the distance from the pulley to the middle Rover's width (where the cables would intersect if they extended)
 	// camOffset:	offset from the end of the cable at the rover to the camera's center
-	rigDimensions_ { | motorSeparation, machineX, machineY, lengthA, lengthB, camOffset |
+	rigDimensions_ { | motorSeparation, machineX, machineY, lengthA, lengthB | //, camOffset |
 		// set the arduino world offset from the machine coordinate space
 		arduino.worldOffset_( (lengthA.neg + machineX),  (lengthB.neg + machineY));
 		motorSeparation !? { mSeparation = motorSeparation };
-		camOffset !? { cOffset = camOffset };
-		pulloffHome = lengthA@lengthB
+		// camOffset !? { cOffset = camOffset };
+		pulloffHome = lengthA@lengthB;
+		rigDimDefined = true;
 	}
 
 	// all args in inches
@@ -33,6 +35,8 @@ RoverDriver {
 	// nCols, nRows: number of rows and columns of subimages to capture
 	captureDimensions_ { |captureSpanX, captureSpanY, insetY, nCols, nRows |
 		var insetX;
+
+		rigDimDefined.not.if{ error("rig dimensions are not yet defined!") };
 
 		captureSpanX !? { spanX = captureSpanX };
 		captureSpanY !? { spanY = captureSpanY };
@@ -46,6 +50,26 @@ RoverDriver {
 
 		xStep = spanX / (numCols-1);
 		yStep = spanY / (numRows-1);
+
+		this.checkCornerExtents;
+
+		capDimDefined = true;
+	}
+
+	checkCornerExtents {
+		var widthLim, hypotLim;
+
+		widthLim = spanX + ((mSeparation - spanX) / 2);
+		hypotLim = hypot(spanX + x0, spanY + y0);
+
+		if( (lenA < widthLim) or: (lenB < widthLim) ){
+			warn( "Rover will not reach the top corners at the specified X span"; );
+		};
+
+		if( (lenA < hypotLim) or: (lenB < hypotLim) ){
+			warn( "Rover will not reach the bottom corners at the specified capture dimensions"; );
+		};
+
 	}
 
 	// Returns a 2D array of of rows capture points for subsequent processing.
@@ -125,20 +149,30 @@ RoverDriver {
 		arduino.goTo_(*this.xy2ab(xPos, yPos));
 	}
 
-	initCapture { | autoAdvance=true, stepWait=5, waitToSettle=1.0, waitAfterPhoto=1.0, travelTimeOut=30, stateCheckRate=5 |
+	initCapture { | autoAdvance=true, handShake=false, stepWait=5, waitToSettle=1.0, waitAfterPhoto=1.0, travelTimeOut=30, stateCheckRate=5 |
 
 		captureTask !? { captureTask.stop.clock.clear };
 		arduino.state; // update internal ArduinoGRBL state bookkeeping
+		camAddr.sendMsg("/camera", "start"); // make sure Rover is ready to take photos
 
-		// postf("This capture will take approximately % minutes.\n", );
+		(handShake and: handshakeResponder.isNil).if{ this.prCreateHandshakeResponder };
+
+		// TODO postf("This capture will take approximately % minutes.\n", );
 
 		captureTask = Task({
-			var stateCheckWait;
+			var stateCheckWait, advanceFunc, now;
 
 			stateCheckWait = stateCheckRate.reciprocal;
 
+			advanceFunc = handShake.if(
+				{ (arduino.mode != "Idle") and: ( now < travelTimeOut ) },
+				{ (arduino.mode != "Idle") and: ( now < travelTimeOut ) and: (photoTaken == true) }
+			);
+
+			photoTaken = false;
+
 			camPts.do{ |indexPoint, i|
-				var moveStart, now;
+				var moveStart;
 				moveStart = Main.elapsedTime;
 				now  = Main.elapsedTime - moveStart;
 
@@ -157,12 +191,13 @@ RoverDriver {
 						arduino.state; // update the state
 						0.2.wait;
 
-						// looping to wait for the motore to reach it's destination
-						while( { (arduino.mode != "Idle") and: ( now < travelTimeOut ) },{
-							(stateCheckWait/2).wait;
-							arduino.state;
-							(stateCheckWait/2).wait;
-							now  = Main.elapsedTime - moveStart;
+						// looping to wait for the motore to have reached it's destination and
+						// to have taken the last photo (if handshaking)
+						while( advanceFunc, {
+								(stateCheckWait/2).wait;
+								arduino.state;
+								(stateCheckWait/2).wait;
+								now  = Main.elapsedTime - moveStart;
 						});
 
 						// check for timeout
@@ -174,6 +209,8 @@ RoverDriver {
 						stepWait.wait;
 					}
 				);
+
+				photoTaken = false;
 
 				// let the camera settle after moving
 				waitToSettle.wait;
@@ -202,6 +239,13 @@ RoverDriver {
 	goTopulloffHome { arduino.goTo_(pulloffHome.x, pulloffHome.y) }
 
 	goToFirstCapturePoint {this.goTo_( camPts[0].x * xStep, camPts[0].y * yStep ); }
+
+	prCreateHandshakeResponder {
+		handshakeResponder = OSCdef(\cameraHandshake, {
+			"Rover snapped a photo".postln;
+			photoTaken = true;
+		}, '/cameraSnapped');
+	}
 
 	displayPath {
 
@@ -234,6 +278,19 @@ RoverDriver {
 
 	}
 
+
+	// convert image capture coordinates to the rig coordinates
+	xy2ab { | captureX, captureY |
+		var gridX, gridY, a, b;
+
+		gridX = captureX+x0;
+		gridY = captureY+y0;
+
+		a = hypot( gridX, gridY );
+		b = hypot( mSeparation - gridX, gridY);
+
+		^[a,b]
+	}
 
 	// convert image capture coordinates to the rig coordinates
 	xy2ab { |inX,inY|
