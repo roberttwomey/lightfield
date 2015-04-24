@@ -109,13 +109,19 @@ void ofApp::graphicsSetup() {
     
     shader.end();
     
-    //    GLint maxTextureSize;
-    //    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-    //    std::cout <<"Max texture size: " << maxTextureSize << std::endl;
-
+    GLint maxTextureSize;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+    std::cout <<"Max texture size: " << maxTextureSize << std::endl;
+    
 }
 //--------------------------------------------------------------
 void ofApp::setup(){
+
+    // OSC
+    // listen on the given port
+    cout << "listening for osc messages on port " << PORT << "\n";
+    receiver.setup(PORT);
+    
     
     ofEnableAlphaBlending();
     
@@ -158,6 +164,151 @@ void ofApp::update(){
     fbo.end();
     
     ofSetWindowTitle( ofToString( ofGetFrameRate()));
+    
+    
+    // ~~~ OSC handling ~~~
+    
+    // check for waiting messages
+    while(receiver.hasWaitingMessages()){
+        // get the next message
+        ofxOscMessage m;
+        receiver.getNextMessage(&m);
+        
+        
+        if( m.getAddress() == "/lf/focus" ){
+            synScale = ofMap(m.getArgAsFloat(0), 0.0, 1.0, minScale, maxScale);
+        }
+        else if( m.getAddress() == "/lf/xStart" ){
+            int startRequested, constrainByRange, xAvail;
+            
+            startRequested = m.getArgAsInt32(0);
+            if ( m.getNumArgs() == 2 ){
+                constrainByRange = m.getArgAsInt32(1);
+            } else {
+                constrainByRange = 0; // default to unconstrained
+            };
+            xAvail = xsubimages - xstart;
+            
+            if( (startRequested + xcount) <= xsubimages ){
+                xstart = startRequested;
+            }
+            else if( constrainByRange == 1 ){
+                xstart = xsubimages - xcount;
+            }
+            // can shrink range to acheive requested start
+            else{
+                xstart = min( startRequested, xsubimages);
+                xcount = xsubimages - xstart;
+            }
+        }
+        
+        else if(m.getAddress() == "/lf/yStart"){
+            int startRequested, constrainByRange, yAvail;
+            
+            startRequested = m.getArgAsInt32(0);
+            if ( m.getNumArgs() == 2 ){
+                constrainByRange = m.getArgAsInt32(1);
+            } else {
+                constrainByRange = 0; // default to unconstrained
+            };
+            yAvail = ysubimages - ystart;
+            
+            if( (startRequested + ycount) <= ysubimages ){
+                ystart = startRequested;
+            }
+            else if( constrainByRange == 1 ){
+                ystart = ysubimages - ycount;
+            }
+            // can shrink range to acheive requested start
+            else{
+                ystart = min( startRequested, ysubimages);
+                ycount = ysubimages - ystart;
+            }
+        }
+        
+        else if(m.getAddress() == "/lf/xRange"){
+            int rangeRequested, constrainByXStart, xAvail;
+            
+            rangeRequested = m.getArgAsInt32(0);
+            if ( m.getNumArgs() == 2 ){
+                constrainByXStart = m.getArgAsInt32(1);
+            } else {
+                constrainByXStart = 0; // default to unconstrained
+            };
+            xAvail = xsubimages - xstart;
+            
+            if( rangeRequested <= xAvail ){
+                xcount = rangeRequested;
+            }
+            else if( constrainByXStart == 1 ){
+                xcount = xAvail;
+            }
+            // can grow by moving xstart
+            else{
+                int xshift;
+                xshift = rangeRequested - xAvail;
+                xstart = max( xstart - xshift, 0);
+                xcount = xsubimages - xstart;
+            }
+        }
+        
+        else if(m.getAddress() == "/lf/yRange"){
+            int rangeRequested, constrainByYStart, yAvail;
+            
+            rangeRequested = m.getArgAsInt32(0);
+            if ( m.getNumArgs() == 2 ){
+                constrainByYStart = m.getArgAsInt32(1);
+            } else {
+                constrainByYStart = 0; // default to unconstrained
+            };
+            yAvail = ysubimages - ystart;
+            
+            if( rangeRequested <= yAvail ){
+                ycount = rangeRequested;
+            }
+            else if( constrainByYStart == 1 ){
+                ycount = yAvail;
+            }
+            // can grow by moving ystart
+            else{
+                int yshift;
+                yshift = rangeRequested - yAvail;
+                ystart = max( ystart - yshift, 0);
+                ycount = ysubimages - ystart;
+            }
+        }
+        
+        else {
+            // unrecognized message: display on the bottom of the screen
+            string msg_string;
+            msg_string += "Unknown OSC msg: ";
+            msg_string += m.getAddress();
+            msg_string += ": ";
+            for(int i = 0; i < m.getNumArgs(); i++){
+                // get the argument type
+                msg_string += m.getArgTypeName(i);
+                msg_string += ": ";
+                // display the argument - make sure we get the right type
+                if(m.getArgType(i) == OFXOSC_TYPE_INT32){
+                    msg_string += ofToString(m.getArgAsInt32(i));
+                }
+                else if(m.getArgType(i) == OFXOSC_TYPE_FLOAT){
+                    msg_string += ofToString(m.getArgAsFloat(i));
+                }
+                else if(m.getArgType(i) == OFXOSC_TYPE_STRING){
+                    msg_string += m.getArgAsString(i);
+                }
+                else{
+                    msg_string += "unknownType";
+                }
+            }
+            // post the uknown message
+            cout << msg_string << endl;
+        }
+        
+    };
+    // ~~~~ end OSC
+    
 }
 
 //--------------------------------------------------------------

@@ -36,3 +36,56 @@ r = Routine.run({
 r.stop
 
 
+s.options.sampleRate_(44100)
+s.boot
+
+c = ControlFade()
+c.source_('static', 0.2 )
+c.value_(3)
+c.plot(plotLength: 50, updateRate:12)
+
+c.lfo_(SinOsc, 0.1, 0, 1)
+
+(
+~sliderMaker = { |controller, label="myCtl", spec|
+	var sldr, nbox;
+	VLayout(
+		StaticText().string_(label.asString).align_('center'),
+		sldr = Slider().action_({|sl|
+			var val = spec.map(sl.value);
+			controller.value_( val );
+			nbox.value = val;
+		}).maxWidth_(30),
+		nbox = NumberBox().maxWidth_(40)
+	)
+}
+)
+(
+~specSets = [
+	[c, "focus", ControlSpec(0, 1)]
+];
+)
+(
+w = Window("MyControls", Rect(0,0,100,200) ).layout_(
+	HLayout(
+		*~specSets.collect({|set|
+			~sliderMaker.(*set)
+		})
+	)
+).front
+)
+
+~broadcastRate = 15;
+
+// broadcast the values:
+~focus = Task({
+	inf.do{
+		c.controlBus.get({| busnum, val |
+			n.sendMsg("/lf/focus", val);
+		});
+		~broadcastRate.reciprocal.wait;
+	}
+});
+
+~focus.play
+~focus.stop

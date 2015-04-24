@@ -2,6 +2,11 @@
 
 #include "ofxXmlSettings.h"
 #include "ofMain.h"
+#include "ofxOsc.h"
+
+// listen on port 12345
+#define PORT 12345
+
 
 class ofApp : public ofBaseApp{
 public:
@@ -23,6 +28,8 @@ public:
     void windowResized(int w, int h);
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
+    
+    ofxOscReceiver receiver;
     
     //vector<ofImage>     lfstack;
     ofImage lfplane;
