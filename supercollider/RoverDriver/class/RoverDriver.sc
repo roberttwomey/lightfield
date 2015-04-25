@@ -9,6 +9,7 @@ RoverDriver {
 	var <captureTask, <camPts;
 	var <posTxtList, <photoTaken = false, <handshakeResponder;
 	var rigDimDefined = false, capDimDefined = false;
+	var <dataFile, <captureData, <dataDir;
 
 	*new { |anArduinoGRBL, cameraNetAddr|
 		^super.newCopyArgs( anArduinoGRBL, cameraNetAddr );
@@ -25,6 +26,8 @@ RoverDriver {
 		motorSeparation !? { mSeparation = motorSeparation };
 		// camOffset !? { cOffset = camOffset };
 		pulloffHome = lengthA@lengthB;
+		lenA = lengthA;
+		lenB = lengthB;
 		rigDimDefined = true;
 	}
 
@@ -149,7 +152,11 @@ RoverDriver {
 		arduino.goTo_(*this.xy2ab(xPos, yPos));
 	}
 
-	initCapture { | autoAdvance=true, handShake=false, stepWait=5, waitToSettle=1.0, waitAfterPhoto=1.0, travelTimeOut=30, stateCheckRate=5 |
+	initCapture { | autoAdvance=true, handShake=false, stepWait=5, waitToSettle=1.0, waitAfterPhoto=1.0, travelTimeOut=30, stateCheckRate=5, writePosData=true, dataDirectory, fileName |
+
+		// this Order corresponds to capture points in GRID (not capture) order
+		// rows L>R, Top>Bottom
+		captureData = Order(numRows*numCols);
 
 		captureTask !? { captureTask.stop.clock.clear };
 		arduino.state; // update internal ArduinoGRBL state bookkeeping
@@ -160,26 +167,28 @@ RoverDriver {
 		// TODO postf("This capture will take approximately % minutes.\n", );
 
 		captureTask = Task({
-			var stateCheckWait, advanceFunc, now;
+			var stateCheckWait, advanceFunc, now = 0.0;
 
+			photoTaken = false;
 			stateCheckWait = stateCheckRate.reciprocal;
 
 			advanceFunc = handShake.if(
-				{ (arduino.mode != "Idle") and: ( now < travelTimeOut ) },
-				{ (arduino.mode != "Idle") and: ( now < travelTimeOut ) and: (photoTaken == true) }
+				{{ (arduino.mode != "Idle") and: ( now < travelTimeOut ) and: (photoTaken == true) }},
+				{{ (arduino.mode != "Idle") and: ( now < travelTimeOut ) }}
 			);
 
-			photoTaken = false;
+
 
 			camPts.do{ |indexPoint, i|
-				var moveStart;
+				var moveStart, gridDest;
 				moveStart = Main.elapsedTime;
 				now  = Main.elapsedTime - moveStart;
+				gridDest = indexPoint * (xStep@yStep);
 
 				postf( "Travelling to index [%, %] ([%, %])\n",
-					indexPoint.x, indexPoint.y, indexPoint.x * xStep, indexPoint.y * yStep);
+					indexPoint.x, indexPoint.y, gridDest.x, gridDest.y);
 
-				this.goTo_( indexPoint.x * xStep, indexPoint.y * yStep );
+				this.goTo_( gridDest.x, gridDest.y );
 
 				// update the GUI if it was made
 				posTxtList !? { { posTxtList.at(i).background_(Color.yellow) }.defer };
@@ -194,10 +203,10 @@ RoverDriver {
 						// looping to wait for the motore to have reached it's destination and
 						// to have taken the last photo (if handshaking)
 						while( advanceFunc, {
-								(stateCheckWait/2).wait;
-								arduino.state;
-								(stateCheckWait/2).wait;
-								now  = Main.elapsedTime - moveStart;
+							(stateCheckWait/2).wait;
+							arduino.state;
+							(stateCheckWait/2).wait;
+							now  = Main.elapsedTime - moveStart;
 						});
 
 						// check for timeout
@@ -217,6 +226,14 @@ RoverDriver {
 
 				// take the photo
 				camAddr.sendMsg("/camera", "snap"); "\tSNAP".postln;
+
+				// log it for the dataFile
+				captureData.put(
+					(numCols * indexPoint.y + indexPoint.x).asInt, // order in the grid
+					// image index, gridDexX, gridDexY, gridPosX, gridPosY
+					[ i, indexPoint.x, indexPoint.y, gridDest.x, gridDest.y ]
+				);
+
 				// update the GUI
 				posTxtList !? { { posTxtList.at(i).background_(Color.green) }.defer };
 
@@ -224,8 +241,55 @@ RoverDriver {
 				waitAfterPhoto.wait;
 			};
 
+			writePosData.if{ this.writeDataToFile( dataDirectory, fileName ) };
 			"Capture Finished!".postln;
 		});
+	}
+
+	writeDataToFile { |dataDirectory, fileName|
+		var name;
+
+		// prepare a data file to write capture data to
+		dataDir = if( dataDirectory.isNil,
+			{ dataDir ?? "~/Desktop/".standardizePath },
+			{ File.exists(dataDirectory).not.if(
+				{	warn("specified data directory doesn't exist, writing to desktop.");
+					"~/Desktop/".standardizePath;
+				},{ dataDirectory }
+			)
+			}
+		);
+		(dataDir.last == $/).not.if{dataDir = dataDir ++ "/"};
+
+		name = fileName !? { fileName.contains(".txt").if({ fileName }, {fileName ++ ".txt"}) };
+		name ?? { name = Date.getDate.stamp ++ ".txt" };
+
+		dataFile !? {dataFile.close};  // close any formerly open files
+		dataFile = File(dataDir++name,"w");
+
+		captureData.do{|capturePointData|
+			// image index, gridDexX, gridDexY, gridPosX(inches), gridPosY(inches)
+			capturePointData.do{|val|
+				dataFile.putString( val.asString ++ "\n")
+			};
+		};
+
+		dataFile.close;
+	}
+
+	readDataFile { |path, postResults = true|
+		this.class.readDataFile( path, postResults )
+	}
+
+	*readDataFile { |path, postResults = true|
+		var data;
+
+		data = FileReader.readInterpret( path, skipEmptyLines: true, delimiter: $\n).at(0).clump(5);
+
+		postResults.if{
+			"| image index | gridDexX | gridDexY | gridPosX(inches) | gridPosY(inches) |".postln;
+			data.do(_.postln);
+		};
 	}
 
 	stop { captureTask !? { captureTask.stop } }
@@ -262,7 +326,7 @@ RoverDriver {
 								if((pnt.x == col) and: (pnt.y == row)) { dex = i }
 							};
 
-							txt = StaticText().string_(dex)
+							txt = StaticText().string_(dex).align_('center')
 							.stringColor_(Color.white)
 							.background_(Color.black.alpha_( (dex+1 / (numCols*numRows) * 0.8) ));
 
@@ -292,12 +356,12 @@ RoverDriver {
 		^[a,b]
 	}
 
-	// convert image capture coordinates to the rig coordinates
-	xy2ab { |inX,inY|
-		^[
-			sqrt( (x0 + inX).pow(2) +  (y0 + inY).pow(2) ) - cOffset,
-			sqrt( (mSeparation - (x0 + inX)).pow(2) +  (y0 + inY).pow(2) - cOffset )
-		]
-	}
+	// // convert image capture coordinates to the rig coordinates
+	// xy2ab { |inX,inY|
+	// 	^[
+	// 		sqrt( (x0 + inX).pow(2) +  (y0 + inY).pow(2) ) - cOffset,
+	// 		sqrt( (mSeparation - (x0 + inX)).pow(2) +  (y0 + inY).pow(2) - cOffset )
+	// 	]
+	// }
 
 }
