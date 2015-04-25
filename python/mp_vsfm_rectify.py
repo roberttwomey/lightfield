@@ -31,7 +31,7 @@ from pylab import *
 def readImageFilenames(dir_name):
     # read in image filenames
     dir_list = []
-    for extension in (".png", ".jpg", ".jpeg", '.JPG'):
+    for extension in (".png", ".jpg", ".jpeg"):
         try:
             temp = os.listdir(dir_name)
             temp = filter(lambda x: x.find(extension) > -1, temp)
@@ -206,15 +206,14 @@ def warpAvg(src, params, R_avg, C_avg):
 
     # image files
     undistort = os.path.join(undistortpath, undistort_fname)
-    # src_img_rgb = cv2.imread(undistort)
-    o
-    
+    src_img_rgb = cv2.imread(undistort)
+
     w = src_img_rgb.shape[1]
     h = src_img_rgb.shape[0]
 
-
-    w_offset = (C1[0] - C_avg[0]) #* f1 #* 200#w/2
-    h_offset = (C1[2] - C_avg[1]) #* f1 #* 200# w/2
+    # magic number
+    w_offset = (C1[0] - C_avg[0]) * 200#w/2
+    h_offset = (C1[2] - C_avg[1]) * 200# w/2
 
        # http://math.stackexchange.com/questions/87338/change-in-rotation-matrix
 
@@ -234,14 +233,12 @@ def warpAvg(src, params, R_avg, C_avg):
     # R_rod2, jacobian = cv2.Rodrigues(R_mat2)
     # print "R_rod2:", R_rod2
 
-    R_rod_12 = R_rod1 - R_avg
-    # R_rod_12 = R_avg - R_rod1
-    
+    R_rod_12 = R_rod1 - R_avg #R_avg - R_rod1 #
     #print "R_rod_12:", R_rod_12 * (180 / pi)
     # print R_rod_12
 
     # switch order of 2nd and 3rd rotation
-    R_rod_12 = np.array([R_rod_12[0], R_rod_12[1], -1 * R_rod_12[2]])
+    R_rod_12 = np.array([R_rod_12[0], R_rod_12[1], -1*R_rod_12[2]])
     
     #lprint R_rod_12
     
@@ -294,8 +291,8 @@ def warpAvg(src, params, R_avg, C_avg):
     R = R_12 #R_mat1.T
 
     #Create trans mat and combine with translation matrix
-    T = np.array([[1], [0], [(-w/2)+w_offset],
-                       [0], [1], [(-h/2)+h_offset],
+    T = np.array([[1], [0], [-w/2+w_offset],
+                       [0], [1], [-h/2+h_offset],
                        [0], [0], [1]]).reshape((3,3))
     # T[2,2] = 2
     # T = T / T[2,2]
@@ -310,7 +307,7 @@ def warpAvg(src, params, R_avg, C_avg):
     trans[2,2] += w
 
     # adjustment to focal length
-    fscale = 4.0
+    fscale = 0.8
     K = np.array([[f1*fscale], [0], [w/2],
                   [0], [f1*fscale], [h/2],
                   [0], [0], [1]]).reshape(3,3)
@@ -320,7 +317,7 @@ def warpAvg(src, params, R_avg, C_avg):
     H = np.dot(K, trans)
 
     # pad and recenter
-    oversize = 0#0.05
+    oversize = 0.05
     
     move_h = np.matrix(np.identity(3), np.float32)
 
@@ -338,7 +335,7 @@ def warpAvg(src, params, R_avg, C_avg):
     src_img_warp = cv2.warpPerspective(src_img_rgb, H, (img_w, img_h))#w, h))
 
     fname, ext = os.path.splitext(os.path.basename(src))
-    warp_file = os.path.join(warpedpath, fname+"_warp"+ext.lower())
+    warp_file = os.path.join(warpedpath, fname+"_warp"+ext)
     cv2.imwrite(warp_file, src_img_warp)
     
     # generate thumbnail
@@ -347,7 +344,7 @@ def warpAvg(src, params, R_avg, C_avg):
     thumb_h = thumb_w * img_h / img_w
     
     thumb_img = cv2.resize(src_img_warp, (thumb_w, thumb_h))
-    thumb_file = os.path.join(thumbpath, fname+ext.lower())
+    thumb_file = os.path.join(thumbpath, fname+ext)
     cv2.imwrite(thumb_file, thumb_img)
 
     # return (warp_file, thumb_file)
@@ -376,16 +373,13 @@ if __name__ == '__main__':
     camerapos = args.camerapos
     contactimg_file = args.contactimg
     
-    # create output paths as necessary
+    # create output path if necessary
     if not os.path.exists(warpedpath):
         os.makedirs(warpedpath)
-
-    if not os.path.exists(thumbpath):
-        os.makedirs(thumbpath)
     
     # read image filenames
     image_files = readImageFilenames(imagedir)
-    #print image_files
+    
     # read Cameras V2 file (results from VSFM)    
     camresults, R_avg, C_avg = readCamerasV2File(camerasfile)
     
@@ -396,8 +390,8 @@ if __name__ == '__main__':
     #     warpAvg(src, camresults[src_fname], R_avg, C_avg)
 
     max_texture_size = 16384
-    grid_w = 17#29
-    grid_h = 17#20
+    grid_w = 29
+    grid_h = 20
     acq_grid = (grid_w, grid_h)
 
     results = mp_warp(image_files, camresults, R_avg, C_avg, 8)
@@ -405,7 +399,7 @@ if __name__ == '__main__':
     
     # generate tiled image
     
-    thumb_file = os.path.join(thumbpath, "IMG_{0:04d}.jpg".format(7272+0))
+    thumb_file = os.path.join(thumbpath, "test_{0:04d}.jpg".format(0))
     thumb_img = cv2.imread(thumb_file)
     thumb_h, thumb_w, thumb_chan = thumb_img.shape
     
@@ -419,7 +413,7 @@ if __name__ == '__main__':
     for j in range(grid_h):
         for i in range(grid_w):
             num = i + (j * grid_w)
-            thumb_file = os.path.join(thumbpath, "IMG_{0:04d}.jpg".format(7272+num))
+            thumb_file = os.path.join(thumbpath, "test_{0:04d}.jpg".format(num))
             # print thumb_file
             if os.path.exists(thumb_file):
                 thumb_img = cv2.imread(thumb_file)

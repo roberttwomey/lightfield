@@ -1,8 +1,8 @@
 <!-- lightfield data -->
-<texturefile>./textures/darktrees_contact_eq_0.8_sm.jpg</texturefile>
+<texturefile>./textures/darktrees_contact_eq_0.8.jpg</texturefile>
 
-<subimagewidth>409.5</subimagewidth>
-<subimageheight>307</subimageheight>
+<subimagewidth>819</subimagewidth>
+<subimageheight>614</subimageheight>
 
 <numxsubimages>20</numxsubimages>
 <numysubimages>15</numysubimages>

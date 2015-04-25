@@ -5,7 +5,7 @@
 
 void ofApp::loadXMLSettings() {
     ofxXmlSettings xml;
-    xml.loadFile("settings.xml");
+    xml.loadFile("textures/settings_tivon1.xml");
     
     // lightfield data //
     lfimage_filename = xml.getValue("texturefile", "test.jpg");
@@ -76,7 +76,7 @@ void ofApp::graphicsSetup() {
                                                  //                                                 vec2 subpos = pos + vec2(float(x)*xres, float(y)*yres) + vec2(scale * 4.0, scale * -4.0);
                                                  vec2 subpos = pos + vec2(float(x)*xres, float(y)*yres);
                                                  
-                                                 color += texture2DRect(lfplane, subpos+vec2( (1.0+(offset/xres)) * scale*(float(x) - halfxcount) + 100.0, (1.0+(offset/yres))*scale*(float(y)-halfycount)));
+                                                 color += texture2DRect(lfplane, subpos+vec2( (1.0+(offset/xres)) * scale*(float(x) - halfxcount), (1.0+(offset/yres))*scale*(float(y)-halfycount)));
                                                  
                                                  // 0.562
                                                  //color += texture2DRect(textures[i], pos+vec2(scale*float(i), 0)) * weight;
