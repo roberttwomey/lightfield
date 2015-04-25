@@ -10,31 +10,31 @@
 	<string>lightfieldGLSL</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>3B8A560D515C6157161C9E52F6362AD46D2C39B1</key>
-		<string>code.dxarts.washington.edu:oftwomey72.git</string>
+		<key>51D8437328DECFE732E966D321FF9BC60F5A1985</key>
+		<string>code.dxarts.washington.edu:rover.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>lightfield-glsl/lightfieldGLSL.xcodeproj</string>
+	<string>ofapps/lightfield-glsl/lightfieldGLSL.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>3B8A560D515C6157161C9E52F6362AD46D2C39B1</key>
-		<string>../../..</string>
+		<key>51D8437328DECFE732E966D321FF9BC60F5A1985</key>
+		<string>../../../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>code.dxarts.washington.edu:oftwomey72.git</string>
+	<string>code.dxarts.washington.edu:rover.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>3B8A560D515C6157161C9E52F6362AD46D2C39B1</string>
+	<string>51D8437328DECFE732E966D321FF9BC60F5A1985</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>3B8A560D515C6157161C9E52F6362AD46D2C39B1</string>
+			<string>51D8437328DECFE732E966D321FF9BC60F5A1985</string>
 			<key>IDESourceControlWCCName</key>
-			<string>oftwomey</string>
+			<string>lightfield</string>
 		</dict>
 	</array>
 </dict>

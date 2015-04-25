@@ -4,10 +4,6 @@
 #include "ofMain.h"
 #include "ofxOsc.h"
 
-// listen on port 12345
-#define PORT 12345
-
-
 class ofApp : public ofBaseApp{
 public:
     
@@ -15,9 +11,10 @@ public:
     void update();
     void draw();
     
-    void loadXMLSettings();
+    void loadXMLSettings(string settingsfile);
     void loadLFImage();
     void graphicsSetup();
+    void process_OSC(ofxOscMessage m);
     
     void keyPressed  (int key);
     void keyReleased(int key);
@@ -30,8 +27,8 @@ public:
     void gotMessage(ofMessage msg);
     
     ofxOscReceiver receiver;
+    int port;
     
-    //vector<ofImage>     lfstack;
     ofImage lfplane;
     
     ofDirectory dir;
@@ -53,9 +50,11 @@ public:
     int xcount, ycount, xstart, ystart;
     int xsubimages, ysubimages, subwidth, subheight;
     float minScale, maxScale;
+    float xoffset, yoffset;
     
     bool bDrawThumbnail;
     bool bHideCursor;
     bool bDebug;
     
+
 };

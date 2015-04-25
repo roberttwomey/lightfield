@@ -4,6 +4,6 @@ software
 documentation
 bin
 build
-*.DS_Store
+.DS_Store
 *.zip
 *.3dmbak
