@@ -171,7 +171,6 @@ def write_blank(src):
     thumb_file = os.path.join(thumbpath, fname+ext.lower())
     cv2.imwrite(thumb_file, thumb_img)
     
-    
 def mp_warp(srcs, params, R_avg, C_avg, nprocs):
     
     def worker(srcs, params, R_avg, C_avg, out_q):
@@ -246,8 +245,8 @@ def warpAvg(src, params, R_avg, C_avg):
     w = src_img_rgb.shape[1]
     h = src_img_rgb.shape[0]
 
-    w_translate = (C1[0] - C_avg[0]) #* f1 #* 200#w/2
-    h_translate = (C1[2] - C_avg[1]) #* f1 #* 200# w/2
+    w_translate = 0#(C1[0] - C_avg[0]) #* f1 #* 200#w/2
+    h_translate = 0#(C1[2] - C_avg[1]) #* f1 #* 200# w/2
 
        # http://math.stackexchange.com/questions/87338/change-in-rotation-matrix
 
@@ -432,12 +431,16 @@ def write_camera_positions(camerapos, image_files, camresults):
     # save camera positions
     count = 0
     out_f = file(camerapos, 'w')
+    out_f.write("<cameras>\n")
     for src in image_files:
         src_fname = os.path.basename(src)
         if src_fname in camresults.keys():
             C_src = camresults[src_fname][2]
-            out_f.write('{0} {1} {2}\n'.format(count, (C_avg[0]-C_src[0]), (C_avg[1]-C_src[2])))
+            xpos = C_avg[0]-C_src[0]
+            ypos = C_avg[1]-C_src[2]
+            out_f.write("\t<cam>\n\t\t<x>{0}</x>\n\t\t<y>{1}</y>\n\t</cam>>\n".format(xpos, ypos))
         count = count + 1
+    out_f.write("</cameras>")
 
 if __name__ == '__main__':
     global featurepath, warpedpath, undistortpath, thumbpath, max_texture_size, acq_grid, num_textures, contactimg_file
@@ -446,30 +449,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='apply Visual SFM quaternions to a folder of lightfield images')
     parser.add_argument('inpath', help='path to input images')
     parser.add_argument('grid', help='acquisition grid as WxH')
-    parser.add_argument('undistortpath', help='path to undistorted images')
     parser.add_argument('camerasv2', help='cameras_v2.txt file from VSFM')
-    parser.add_argument('warpedpath', help='output path to save the warped image files')
-    parser.add_argument('thumbpath', help='output path the save the thumbnail image files')
     parser.add_argument('camerapos', help='output file for list of camera positions')
-    parser.add_argument('contactimg', help='output file for contact sheet image')
-    
     args = parser.parse_args()
 
     imagedir = args.inpath  # directory of input images
     gridstr = args.grid
-    undistortpath = args.undistortpath # directory of undistorted images
     camerasfile = args.camerasv2  # results of N-view match from Visual SFM in windows
-    warpedpath = args.warpedpath    # out path to save the results
-    thumbpath = args.thumbpath
     camerapos = args.camerapos
-    contactimg_file = args.contactimg
-    
-    # create output paths as necessary
-    if not os.path.exists(warpedpath):
-        os.makedirs(warpedpath)
-
-    if not os.path.exists(thumbpath):
-        os.makedirs(thumbpath)
     
     # grid
     grid_w, grid_h = gridstr.split("x")
@@ -504,6 +491,6 @@ if __name__ == '__main__':
     # # make contact sheet
     # generate_contact_sheet(reorder)
     #
-    # # export camera center coordinates
-    # write_camera_positions(camerapos, image_files, camresults)
+    # export camera center coordinates
+    write_camera_positions(camerapos, image_files, camresults)
     #
