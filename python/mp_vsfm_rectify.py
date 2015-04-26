@@ -51,6 +51,8 @@ def readImageFilenames(dir_name):
     
     
 def readCamerasV2File(camerasfile):
+    global datapath
+    
     infile = open(camerasfile, 'r')
     
     lines = infile.readlines()
@@ -136,7 +138,8 @@ def readCamerasV2File(camerasfile):
     xcents.append(avgxcenter)
     ycents.append(avgycenter)
     scatter(xcents, ycents)
-    show()
+    savefig(os.path.join(datapath, 'cameras.png'))
+    # show()
 
     xcents = np.array(xcents)
     ycents = np.array(ycents)
@@ -231,23 +234,21 @@ def warpAvg(src, params, R_avg, C_avg):
 
     # image files
     
-    undistort = os.path.join(undistortpath, undistort_fname)
-    src_img_rgb = cv2.imread(undistort)
+    # undistort = os.path.join(undistortpath, undistort_fname)
+    # src_img_rgb = cv2.imread(undistort)
 
     # name, ext = os.path.splitext(os.path.basename(src))
-    # eq_img = os.path.join(undistortpath, name + ".jpg")#"_eq.jpg")
-
+    # eq_img = os.path.join(undistortpath, name + "_eq.jpg")
     #print eq_img
-
     # src_img_rgb = cv2.imread(eq_img)
 
-    #src_img_rgb = cv2.imread(src)
+    src_img_rgb = cv2.imread(src)
     
     w = src_img_rgb.shape[1]
     h = src_img_rgb.shape[0]
 
-    w_translate = (C1[0] - C_avg[0]) #* f1 #* 200#w/2
-    h_translate = (C1[2] - C_avg[1]) #* f1 #* 200# w/2
+    w_translate = 0#(C1[0] - C_avg[0]) #* f1 #* 200#w/2
+    h_translate = 0#(C1[2] - C_avg[1]) #* f1 #* 200# w/2
 
        # http://math.stackexchange.com/questions/87338/change-in-rotation-matrix
 
@@ -340,7 +341,7 @@ def warpAvg(src, params, R_avg, C_avg):
     trans[2,2] += w
 
     # adjustment to focal length
-    fscale = 1.0
+    fscale = 0.8
     K = np.array([[f1*fscale], [0], [w/2],
                   [0], [f1*fscale], [h/2],
                   [0], [0], [1]]).reshape(3,3)
@@ -428,43 +429,63 @@ def generate_contact_sheet(reorder = None):
         cv2.imwrite(contactimg_file, contact_img)
           
                    
-def write_camera_positions(camerapos, image_files, camresults):
+def write_camera_positions(camerapos, image_files, camresults, reorder = None):
     # save camera positions
     count = 0
-    out_f = file(camerapos, 'w')
+    positions = []
     for src in image_files:
         src_fname = os.path.basename(src)
         if src_fname in camresults.keys():
             C_src = camresults[src_fname][2]
-            out_f.write('{0} {1} {2}\n'.format(count, (C_avg[0]-C_src[0]), (C_avg[1]-C_src[2])))
-        count = count + 1
+            xpos = C_avg[0]-C_src[0]
+            ypos = C_avg[1]-C_src[2]
+            positions.append((xpos, ypos))
+            count = count + 1
+
+    out_f = file(camerapos, 'w')
+    out_f.write("<cameras>\n")
+    for i in range(count):
+        num = i
+        if reorder != None:
+            num = reorder[i]
+        xpos, ypos = positions[num]
+        out_f.write("\t<cam>\n\t\t<x>{0}</x>\n\t\t<y>{1}</y>\n\t</cam>>\n".format(xpos, ypos))
+    out_f.write("</cameras>")
 
 if __name__ == '__main__':
-    global featurepath, warpedpath, undistortpath, thumbpath, max_texture_size, acq_grid, num_textures, contactimg_file
+    global datapath, featurepath, warpedpath, undistortpath, thumbpath, max_texture_size, acq_grid, num_textures, contactimg_file
 
     # Define command line argument interface
     parser = argparse.ArgumentParser(description='apply Visual SFM quaternions to a folder of lightfield images')
-    parser.add_argument('inpath', help='path to input images')
+    parser.add_argument('datapath', help='path to lightfield data')
     parser.add_argument('grid', help='acquisition grid as WxH')
-    parser.add_argument('undistortpath', help='path to undistorted images')
-    parser.add_argument('camerasv2', help='cameras_v2.txt file from VSFM')
-    parser.add_argument('warpedpath', help='output path to save the warped image files')
-    parser.add_argument('thumbpath', help='output path the save the thumbnail image files')
+    parser.add_argument('reorder', help='order of acquisition (normal, wrap)')
     parser.add_argument('camerapos', help='output file for list of camera positions')
     parser.add_argument('contactimg', help='output file for contact sheet image')
     
     args = parser.parse_args()
 
-    imagedir = args.inpath  # directory of input images
-    gridstr = args.grid
-    undistortpath = args.undistortpath # directory of undistorted images
-    camerasfile = args.camerasv2  # results of N-view match from Visual SFM in windows
-    warpedpath = args.warpedpath    # out path to save the results
-    thumbpath = args.thumbpath
-    camerapos = args.camerapos
-    contactimg_file = args.contactimg
+    datapath = args.datapath
+
+    # directory of input images
+    imagedir = os.path.join(args.datapath, 'original')  
+
+    gridstr = args.grid     # grid layout
+    order = args.reorder    # arugment order
+
+    # directory of undistorted images
+    undistortpath = os.path.join(args.datapath, 'undistorted') 
+
+    # results of N-view match from Visual SFM in windows
+    camerasfile = os.path.join(args.datapath, "results/results.cmvs/00/cameras_v2.txt") 
     
-    # create output paths as necessary
+    # output paths to save the results
+    warpedpath = os.path.join(args.datapath, 'warped')    
+    thumbpath = os.path.join(args.datapath, 'thumbs')
+    camerapos = os.path.join(args.datapath, args.camerapos)
+    contactimg_file = os.path.join(args.datapath, args.contactimg)
+
+    # create folders as necessary
     if not os.path.exists(warpedpath):
         os.makedirs(warpedpath)
 
@@ -488,22 +509,33 @@ if __name__ == '__main__':
     # read Cameras V2 file (results from VSFM)    
     camresults, R_avg, C_avg = readCamerasV2File(camerasfile)
     
-    # # rectify images
-    # results = mp_warp(image_files, camresults, R_avg, C_avg, 8)
-    #
-    # # reorder
-    # reorder = []
-    # for i in range(grid_h):
-    #     if i%2==0:
-    #         reorder += range(i*grid_w, (i+1)*grid_w)
-    #     else:
-    #         reorder += range((i+1)*grid_w-1,i*grid_w-1, -1)
-    #
-    # #print reorder
-    #
-    # # make contact sheet
-    # generate_contact_sheet(reorder)
-    #
-    # # export camera center coordinates
-    # write_camera_positions(camerapos, image_files, camresults)
-    #
+    # rectify images
+    results = mp_warp(image_files, camresults, R_avg, C_avg, 8)
+    
+    if order=='wrap':
+        print "wrapping"
+
+        # reorder
+        reorder = []
+        for i in range(grid_h):
+            if i%2==0:
+                reorder += range(i*grid_w, (i+1)*grid_w)
+            else:
+                reorder += range((i+1)*grid_w-1,i*grid_w-1, -1)
+
+        #print reorder
+    
+        # make contact sheet
+        generate_contact_sheet(reorder)
+
+        # export camera center coordinates    
+        write_camera_positions(camerapos, image_files, camresults, reorder)
+
+    else:
+        
+        # make contact sheet
+        generate_contact_sheet()#reorder)
+
+        # export camera center coordinates    
+        write_camera_positions(camerapos, image_files, camresults)#, reorder)
+        
