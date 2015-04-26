@@ -1,6 +1,6 @@
 SerialPort.listDevices
 
-a = ArduinoGRBL("/dev/tty.usbserial-A94JRL5D", 115200)
+a = ArduinoGRBL("/dev/tty.usbserial-A9KBFHXP", 115200)
 // a.free
 
 // args:
@@ -55,7 +55,7 @@ a.state
 // captureSpanY: height of the capture plane
 // insetY: vertical offset from the rig's pulley height to the 0,0 camera capture position
 // nCols, nRows: number of rows and columns of subimages to capture
-r.captureDimensions_(captureSpanX: 40, captureSpanY: 24, insetY: 10, nCols: 10, nRows: 6 );
+r.captureDimensions_(captureSpanX: 43.673, captureSpanY: 22.321, insetY: 10, nCols: 5, nRows: 3 );
 
 
 // set Rover to capture in 1 of 3 ways:
@@ -65,7 +65,7 @@ r.captureDimensions_(captureSpanX: 40, captureSpanY: 24, insetY: 10, nCols: 10, 
 // 	rowsFirst, leftToRight, topDown, wrap,	<< bools to determine grid order
 //	displayPath << bool to show the resultant path order
 
-r.gridCapture( rowsFirst: true, leftToRight: true, topDown: true, wrap: true, displayPath: true )
+r.gridCapture( rowsFirst: false, leftToRight: true, topDown: false, wrap: true, displayPath: true )
 
 
 // capture in a RANDOM ORDER
@@ -119,11 +119,11 @@ r.customPathCapture( pointArray: p, displayPath: true)
 //	travelTimeOut,	<< time to wait to timeout in case anything goes wrong waiting for GRBL state to report "Idle"
 //	stateCheckRate	<< number of times GRBL state is queried per second when using auto-advance
 
-r.initCapture( autoAdvance: true, waitToSettle: 1.5, waitAfterPhoto: 1.5, travelTimeOut: 30, stateCheckRate: 5)
+r.initCapture( autoAdvance: true, waitToSettle: 0.5, waitAfterPhoto: 0.5, travelTimeOut: 30, stateCheckRate: 5, writePosData: true, fileName: "test3")
 
 
 // set GRBL's feed rate if not set already
-a.feed_(500)
+a.feed_(4500)
 // a.send("G0F500")
 
 
@@ -153,6 +153,11 @@ n.sendMsg("/camera", "exit")
 // download all images
 "rsync -avz pi@rover.local:/home/pi/lfimages/* /Volumes/Work/Projects/lightfield/data/".unixCmd
 
+// for setting up the contact sheet, it's useful to read the data file:
+r.readDataFile( r.dataDir ++ "test3.txt", postResults: true )
+// use the image index to know which image to place in order on
+// the contact sheet from top to bottom, left to right
+// (this assumes Rover captured images with a 0-based index for each capture path)
 
 
 // TEST IT: get status as it moves
