@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../addons/ofxXmlSettings/src/ofxXmlSettings.cpp"
+            timestampString = "451669820.018191"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "79"
+            endingLineNumber = "79"
+            landmarkName = "ofxXmlSettings::loadFile(const string&amp; xmlFile)"
+            landmarkType = "5">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ofxXmlSettings::loadFile(std::string const&amp;)"
+                  moduleName = "lightfieldGLSL"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/rtwomey/code/of_v0.8.4_osx_release/addons/ofxXmlSettings/src/ofxXmlSettings.cpp"
+                  timestampString = "451670343.46887"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "79"
+                  endingLineNumber = "79"
+                  offsetFromSymbolStart = "50">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ofxXmlSettings::load(std::string const&amp;)"
+                  moduleName = "lightfieldGLSL"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/rtwomey/code/of_v0.8.4_osx_release/addons/ofxXmlSettings/src/ofxXmlSettings.cpp"
+                  timestampString = "451670343.46913"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "79"
+                  endingLineNumber = "79"
+                  offsetFromSymbolStart = "50">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>
