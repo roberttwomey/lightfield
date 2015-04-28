@@ -15,7 +15,7 @@ c.plot
 (
 var busnum, ratePeriodSpec, oscTag, ctlFades, outVal;
 var win, msgTxt, broadcastChk, updateBx, outValTxt;
-var nBoxWidth = 30, validLFOs, addPlotter, addCtl, cltLayout, plotterAdded = false;
+var nBoxWidth = 30, validLFOs, addPlotter, plotter, addCtl, cltLayout, plotterAdded = false, updatePlotterBounds;
 var broadcastAddr, broadcastBus, broadcastRate, broadcastWaittime, broadcastTag, pollTask, broadcasting=false;
 
 broadcastRate = 10;
@@ -25,6 +25,7 @@ broadcastTag = "/myMessage";
 
 ctlFades = [];
 busnum = s.controlBusAllocator.alloc(1);
+postf("busnum %\n", busnum);
 // create a ctk bus to read from for broadcasting, with the same busnum that the ControlFades write to
 broadcastBus = CtkControl(1, 0, 0, busnum);
 
@@ -138,8 +139,8 @@ pollTask.play;
 	updateOffset = {
 		var range;
 		range = ctl.high - ctl.low;
-		offsSpec.minval_(range.half);
-		offsSpec.maxval_(range.half.neg);
+		offsSpec.minval_(range.half.neg);
+		offsSpec.maxval_(range.half);
 	};
 
 	// define the actions
@@ -147,12 +148,14 @@ pollTask.play;
 	minBx.action_({ |bx|
 		ctl.low_(bx.value);
 		max = bx.value;
+		updatePlotterBounds.();
 		updateOffset.();
 	}).value_(min);
 
 	maxBx.action_({ |bx|
 		ctl.high_(bx.value);
 		max = bx.value;
+		updatePlotterBounds.();
 		updateOffset.();
 	}).value_(max);
 
@@ -193,7 +196,7 @@ pollTask.play;
 		ctl.freq_( rateHz );
 
 		rateSl.value_( ratePeriodSpec.unmap(rateSec) );
-	});
+	}).value_(ratePeriodSpec.default);
 
 	periodChk.action_({ |chk|
 		var bool, curRateBx;
@@ -226,7 +229,7 @@ pollTask.play;
 	}).value_(sclSpec.unmap(sclSpec.default));
 
 
-	plotterAdded.not.if{ addPlotter.(ctl) };
+	plotterAdded.not.if{ addPlotter.() };
 
 	rmvBut.action_({
 		var vHeight = view.bounds.height;
@@ -239,18 +242,19 @@ pollTask.play;
 			win.setInnerExtent(
 				win.view.bounds.width, win.view.bounds.height - vHeight );
 		}.fork(AppClock)
-	})
+	});
+
 };
 
-addPlotter = { |ctl|
+addPlotter = {
 	var view;
-	ctl.plot(75, 45);
-	view = ctl.plotter.mon.plotter.parent.view;
+	// TODO: create ControlPlotter directly here
+	plotter = ControlPlotter( busnum, 1, 75, 24).start;
+	view = plotter.mon.plotter.parent.view;
 	// view.bounds_(view.bounds.height_(height));
 	win.layout.add( view.minHeight_(view.bounds.height) );//.minHeight_(height) );
 
 	plotterAdded = true;
-	c = ctl;
 };
 
 
@@ -285,6 +289,13 @@ msgTxt.action_({|txt|
 
 broadcastChk.action_({|chk| broadcasting = chk.value.asBoolean });
 
+updatePlotterBounds = {
+	var min, max, range;
+	min = ctlFades.collect({ |ctl| ctl.low }).minItem;
+	max = ctlFades.collect({ |ctl| ctl.high }).maxItem;
+	range = max - min;
+	plotter.bounds_( min - (range * 0.25), max + (range * 0.25) );
+};
 
 updateBx.action_({ |bx|
 	broadcastRate = bx.value;
