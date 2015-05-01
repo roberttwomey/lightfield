@@ -83,7 +83,7 @@ def readCamerasV2File(camerasfile):
         focallength = (np.array(results[2].split(' ')))[0].astype(np.float)    
 
         # 2-vec Principal Point (image center)
-        principalpoint = (np.array(results[3].split(' '))).astype(np.int)   
+        principalpoint = (np.array(results[3].split(' '))).astype(np.float)   
 
         # 3-vec Translation T (as in P = K[R T])
         T = (np.array(results[4].split(' '))).astype(np.float)

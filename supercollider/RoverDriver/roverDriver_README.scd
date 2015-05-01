@@ -8,6 +8,8 @@ a = ArduinoGRBL("/dev/tty.usbserial-A9KBFHXP", 115200)
 //	cameraNetAddr, << a NetAddr for the pi snapping photos
 r = RoverDriver(a, NetAddr("localhost", 12345));
 
+r = RoverDriver(a, NetAddr("rover.local", 9000));
+
 /*
 SETUP NOTE
 - put the c stands at the same height, make the line taut with Rover far enough down to reach the farthest corner of the capture plane (max radius from oppostite pulley)
