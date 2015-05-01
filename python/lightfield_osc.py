@@ -25,7 +25,7 @@ def getImagePath():  # new
 # ==== OSC SECTION ==== #
 
 # tupple with ip the OSC server will listen to. 
-receive_address = '169.254.0.2', 9000
+receive_address = '192.168.42.1', 9000
  
 # OSC Server. there are three different types of server.
 server = OSC.OSCServer(receive_address) # basic
