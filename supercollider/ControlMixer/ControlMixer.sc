@@ -1,14 +1,15 @@
 ControlMixer {
 	// copyArga
-	var <broadcastTag, <broadcastAddr, <broadcastRate, <server, loadCond;
+	var <broadcastTag, <broadcastAddr, <broadcastRate, <server, loadCond, colorShift;
 
 	var <busnum, ratePeriodSpec, <oscTag, <ctlFades, outVal;
 	var <mixView, msgTxt, broadcastChk, plotChk, updateBx, outValTxt;
 	var nBoxWidth = 30, validLFOs, <plotter, cltLayout, plotterAdded = false;
 	var broadcastBus, broadcastWaittime, broadcastTag, pollTask, broadcasting=false;
+	var baseColor, idColor, mixColor, colorStep;
 
-	*new { | broadcastTag="/myMessage", broadcastNetAddr, broadcastRate=10, server, loadCond |
-		^super.newCopyArgs( broadcastTag, broadcastNetAddr, broadcastRate, server, loadCond ).init;
+	*new { | broadcastTag="/myMessage", broadcastNetAddr, broadcastRate=10, server, loadCond, colorShift = 0.03 |
+		^super.newCopyArgs( broadcastTag, broadcastNetAddr, broadcastRate, server, loadCond, colorShift ).init;
 	}
 
 	init {
@@ -19,7 +20,7 @@ ControlMixer {
 
 		ctlFades = [];
 		server = server ?? Server.default;
-
+		this.prDefineColors;
 		server.waitForBoot({
 			busnum = server.controlBusAllocator.alloc(1);
 			postf("Creating ControlMixer to output to %\n", busnum);
@@ -72,7 +73,7 @@ ControlMixer {
 
 		ctlFades = ctlFades.add(ctl);
 
-		view = View().background_(Color.rand).maxHeight_(125)
+		view = View().background_(mixColor).maxHeight_(125)
 		.layout_(
 			VLayout(
 
@@ -257,7 +258,7 @@ ControlMixer {
 		mixView = View().layout_(
 			VLayout(
 					cltLayout = VLayout(
-						View().background_(Color.rand).layout_(
+						View().background_(idColor).layout_(
 							HLayout(
 								[ msgTxt = TextField().string_(broadcastTag.asString).minWidth_(80), a: \left],
 								outValTxt = StaticText().string_("broadcast").align_(\left).fixedWidth_(55),
@@ -394,6 +395,24 @@ ControlMixer {
 		).unixCmd
 	}
 
+	prDefineColors {
+		baseColor = Color.hsv(
+			// Color.newHex("BA690B").asHSV;
+			// Color.newHex("2C4770").asHSV;
+			0.60049019607843, 0.60714285714286, 0.43921568627451, 1 );
+
+		idColor = Color.hsv(
+			*baseColor.asHSV.put( 0, (baseColor.asHSV[0] + colorShift).wrap(0,1) )
+		);
+
+		mixColor = Color.hsv(
+			*idColor.asHSV
+			.put(3, 0.8)
+			.put(2, idColor.asHSV[2] * 1.35)
+			//.put(2, (baseColor.asHSV[2] * 1.4).clip(0,1))
+		);
+	}
+
 	// // which 0: synth1, 1: synth2, 2: both
 	// storePreset { |key, overwrite =false|
 	// 	var arch, synth;
@@ -467,16 +486,20 @@ ControlMixMaster {
 		mixers = [];
 
 		server.waitForBoot({
+			var cshift;
+
+			cshift = rrand(-0.1, 0.1); // -0.03888, 0.093191576004028
+			postf("shifting color %\n", cshift);
 
 			this.makeWin;
 
-			broadcastTags.asArray.do({ |tag|
-				this.addMixer(tag, broadcastNetAddr , broadcastRate, server);
+			broadcastTags.asArray.do({ |tag, i|
+				this.addMixer(tag, broadcastNetAddr , broadcastRate, server, (cshift*i));
 			});
 		});
 	}
 
-	addMixer { |sendToNetAddr, oscTag="/myControlVal", sendRate=15, server|
+	addMixer { |sendToNetAddr, oscTag="/myControlVal", sendRate=15, server, colorShift = -0.03888|
 		var mixer;
 		var loadCond = Condition();
 		sendToNetAddr ?? {sendToNetAddr = NetAddr("localhost", NetAddr.langPort)};
@@ -484,7 +507,7 @@ ControlMixMaster {
 
 		{
 			// win.setInnerExtent( win.view.bounds.width + mixWidth );
-			mixer = ControlMixer(sendToNetAddr, oscTag, sendRate, server, loadCond);
+			mixer = ControlMixer(sendToNetAddr, oscTag, sendRate, server, loadCond, colorShift);
 			mixers = mixers.add(mixer);
 			loadCond.wait;
 			win.layout.add( mixer.mixView.postln; );
