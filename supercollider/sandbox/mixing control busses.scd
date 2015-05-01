@@ -33,7 +33,7 @@ validLFOs = [
 	'static', SinOsc, LFPar, LFTri, LFCub, LFDNoise0, LFDNoise1, LFDNoise3
 ].collect(_.asSymbol);
 
-ratePeriodSpec = ControlSpec(15.reciprocal, 15, -2.5, default: 3);
+ratePeriodSpec = ControlSpec(15.reciprocal, 15, 2.5, default: 3);
 
 pollTask = Task({
 	inf.do{
@@ -106,7 +106,7 @@ pollTask.play;
 					[ rmvBut = Button().states_([["X", Color.black, Color.red]]).fixedWidth_(nBoxWidth/2).fixedHeight_(nBoxWidth/2), a: \topRight],
 					HLayout(
 						StaticText().string_("Val").align_(\right),
-						valBx = NumberBox().fixedWidth_(nBoxWidth*1.5)
+						valBx = NumberBox().fixedWidth_(nBoxWidth*1.2)
 					).spacing_(5),
 				).spacing_(5), a: \right ],
 			),
@@ -131,7 +131,7 @@ pollTask.play;
 					)
 				),
 			)
-		)
+		).margins_(4).spacing_(2)
 	);
 
 	cltLayout.add( view );
@@ -258,7 +258,7 @@ addPlotter = {
 };
 
 
-win = Window(broadcastTag.asString, Rect(0,0,470,100)).layout_(
+win = Window(broadcastTag.asString, Rect(0,0,405,100)).layout_(
 	VLayout(
 		cltLayout = VLayout(
 			View().background_(Color.rand).layout_(
@@ -272,11 +272,11 @@ win = Window(broadcastTag.asString, Rect(0,0,470,100)).layout_(
 					[ broadcastChk = CheckBox().fixedWidth_(15), a: \right],
 					[ StaticText().string_("Update Hz").align_(\right), a: \right],
 					[ updateBx = NumberBox().fixedWidth_(nBoxWidth), a: \right],
-				)
+				).margins_(2)
 			).maxHeight_(45),
-		),
+		).margins_(2),
 		Button().states_([["+"]]).action_({~addCtl.()})
-	)
+	).margins_(4).spacing_(3)
 ).onClose_({
 	ctlFades.do(_.free);
 	broadcastBus.free;
