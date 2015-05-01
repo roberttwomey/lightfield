@@ -1,14 +1,28 @@
 SerialPort.listDevices
 
-a = ArduinoGRBL("/dev/tty.usbserial-A9KBFHXP", 115200)
-// a.free
+// Connect arduino to Computer
+a = ArduinoGRBL("/dev/tty.usbserial-A94JRL5D", 115200)
+
+// home the first time around
+a.home
+// be ready if it wigs out:
+a.reset
+a.unlock
+
+// set the homeing pulloff the first time around
+a.settings
+// pulloff should be less than the distance from the limit switch to the pulley
+a.send("$27=65")
+
+// Turn on Rover
+// Connect to Rover_AP. pwd: roverrover
+// dhcp
 
 // args:
 //	anArduinoGRBL, << an instance of ArduinoGRBL that is driving the rig
 //	cameraNetAddr, << a NetAddr for the pi snapping photos
-r = RoverDriver(a, NetAddr("localhost", 12345));
-
 r = RoverDriver(a, NetAddr("rover.local", 9000));
+
 
 /*
 SETUP NOTE
@@ -17,38 +31,32 @@ SETUP NOTE
 - in setting the limit bobbers, ensure the distance between bobber and limit switch is less than the distance from pulley to Rover ring
 */
 
+
 // make sure GRBL is ready (Idle)
 a.postState_(true)
 a.state
 // unlock if needed
 a.unlock
 
-// set the homeing pulloff the first time around
-a.settings
-// pulloff should be less than the distance from the limit switch to the pulley
-a.send("$27=65")
-
-// home the first time around
-a.home
-// be ready if it wigs out:
-a.reset
-a.unlock
 
 // set up rig dimensions: dimensions of the motor suspension, sets the arduino world offset from the machine coordinate space
+// motorSep = 66
+// lengthA/B: 71 + 1.5 = 72.5
+// MachineX/Y: -135, -135
 
 // motorSeparation: distance between motors (or pulleys)
 // MachineX/Y:	after homing and pulling off, MachineX/Y machine coordinates (usually negative)
 // lengthA/B:	after homing and pulling off, lengthA and lengthB are the distance from the pulley to the middle Rover's width (where the cables would intersect if they extended)
 // camOffset:	offset from the end of the cable at the rover to the camera's center
-r.rigDimensions_(motorSeparation: 60.25, machineX: -135, machineY: -135, lengthA: 68.5, lengthB: 68.5) //, camOffset: 1.5 );
+r.rigDimensions_(motorSeparation: 66, machineX: -135, machineY: -135, lengthA: 72.5, lengthB: 72.5) //, camOffset: 1.5 );
 
 
 // check the state
 a.state
-// the world position should be the length mentioned above (pulley>Roverhole)
+// the world position (first two numbers after Idle) should be the length mentioned above (pulley>Roverhole), eg:
+// [ Idle, [ 72.499, 72.499, 0 ], [ -135.001, -135.001, 0 ] ]
 
 // now the rig is initialized!
-
 
 
 // set up capture dimensions: dimensions of your capture grid
@@ -57,7 +65,7 @@ a.state
 // captureSpanY: height of the capture plane
 // insetY: vertical offset from the rig's pulley height to the 0,0 camera capture position
 // nCols, nRows: number of rows and columns of subimages to capture
-r.captureDimensions_(captureSpanX: 43.673, captureSpanY: 22.321, insetY: 10, nCols: 5, nRows: 3 );
+r.captureDimensions_(captureSpanX: 30, captureSpanY: 20, insetY: 10, nCols: 5, nRows: 3 );
 
 
 // set Rover to capture in 1 of 3 ways:
@@ -67,8 +75,10 @@ r.captureDimensions_(captureSpanX: 43.673, captureSpanY: 22.321, insetY: 10, nCo
 // 	rowsFirst, leftToRight, topDown, wrap,	<< bools to determine grid order
 //	displayPath << bool to show the resultant path order
 
-r.gridCapture( rowsFirst: false, leftToRight: true, topDown: false, wrap: true, displayPath: true )
+r.gridCapture( rowsFirst: true, leftToRight: true, topDown: true, wrap: true, displayPath: true )
 
+
+/*
 
 // capture in a RANDOM ORDER
 // args:
@@ -109,7 +119,7 @@ p = p.reverse;
 
 r.customPathCapture( pointArray: p, displayPath: true)
 
-
+*/
 
 
 // Choose the capture sequence timing
@@ -121,19 +131,25 @@ r.customPathCapture( pointArray: p, displayPath: true)
 //	travelTimeOut,	<< time to wait to timeout in case anything goes wrong waiting for GRBL state to report "Idle"
 //	stateCheckRate	<< number of times GRBL state is queried per second when using auto-advance
 
-r.initCapture( autoAdvance: true, waitToSettle: 0.5, waitAfterPhoto: 0.5, travelTimeOut: 30, stateCheckRate: 5, writePosData: true, fileName: "test3")
+r.initCapture( autoAdvance: true, waitToSettle: 0.5, waitAfterPhoto: 1.0, travelTimeOut: 30, stateCheckRate: 5, writePosData: true, fileName: "test1")
 
 
+// TODO set this in RoverDriver class
 // set GRBL's feed rate if not set already
-a.feed_(4500)
+a.feed_(500)
 // a.send("G0F500")
 
 
 // go to the location of the first capture point
 r.goToFirstCapturePoint
 
-// make sure the camera is ready to take images
-n.sendMsg("/camera", "start")
+
+// logon to rover and check status of camera service
+// in terminal:
+// ssh pi@rover.local
+// screen -ls
+// also empty out lfimages directory:
+// rm -r ~/lfimages/*
 
 // ROVE
 r.run  // or r.play
@@ -153,10 +169,12 @@ n.sendMsg("/camera", "stop")
 n.sendMsg("/camera", "exit")
 
 // download all images
-"rsync -avz pi@rover.local:/home/pi/lfimages/* /Volumes/Work/Projects/lightfield/data/".unixCmd
+//"rsync -avz pi@rover.local:/home/pi/lfimages/* /Volumes/Work/Projects/lightfield/data/".unixCmd
+d = "rtest3"
+("rsync -avz pi@rover.local:/home/pi/lfimages/* /Volumes/Work/Projects/lightfield/"++d++"/").unixCmd
 
 // for setting up the contact sheet, it's useful to read the data file:
-r.readDataFile( r.dataDir ++ "test3.txt", postResults: true )
+r.readDataFile( r.dataDir ++ "test1.txt", postResults: true )
 // use the image index to know which image to place in order on
 // the contact sheet from top to bottom, left to right
 // (this assumes Rover captured images with a 0-based index for each capture path)
@@ -173,6 +191,32 @@ r.goHome
 // free GRBL when done
 a.free
 
+
+
+//////////////////////////////////////////////
+// setting steps/mm
+//////////////////////////////////////////////
+
+a = ArduinoGRBL("/dev/tty.usbserial-A94JRL5D", 115200)
+
+// home
+a.home
+
+// be ready if it wigs out:
+a.reset
+a.unlock
+
+
+// measure actual pull off compared to pulloff setting ($27)
+a.settings
+
+// set new steps/mm as necessary, eg:
+// 64.0 measures / 65.0 setting * current steps/mm = new steps/mm
+a.send("$100=206.59798263355")
+a.send("$101=206.59798263355")
+
+// pulloff should be less than the distance from the limit switch to the pulley
+a.send("$27=65")
 
 
 
