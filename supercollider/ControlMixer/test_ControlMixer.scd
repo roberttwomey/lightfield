@@ -1,5 +1,6 @@
 // test file for ControlMixer
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount"], NetAddr("localhost", 57120) )
+c = ControlMixMaster( ["focus", "xstart", "ystart"], NetAddr("localhost", 57120) )
 
 // c = ControlMixer( "/focus", NetAddr("localhost", 57120) );
 // d = ControlMixer( "/test2", NetAddr("localhost", 57120) );
