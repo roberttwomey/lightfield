@@ -1,6 +1,10 @@
 #include "ofApp.h"
 
+// make string
 #define STRINGIFY(A) #A
+
+// process other macros then make string
+#define EXPAND_AND_QUOTE(A) STRINGIFY(A)
 
 
 //--------------------------------------------------------------
@@ -8,10 +12,11 @@ void ofApp::setup(){
 
     ofEnableAlphaBlending();
     
-    loadXMLSettings("./textures/darktrees.xml");
-    //loadXMLSettings("settings.xml");
+//    loadXMLSettings("./textures/dark_trees_calib.xml");
+    loadXMLSettings("./textures/yellowcliff_sm.xml");
+//    loadXMLSettings("./textures/cliffside.xml");
     
-    loadLFImage();
+    loadLFImage();  
 
     graphicsSetup();
     
@@ -23,9 +28,6 @@ void ofApp::setup(){
     shader.setUniform1f("yres", subheight);//316);
     
     int count = xsubimages * ysubimages;
-//    for(int x=0; x < xsubimages; x++)
-//        for(int y=0; y < ysubimages; y++)
-//            offsets[x + y * xsubimages]= x * 100;
     
     shader.setUniform2fv("offsets", offsets, count);
     shader.setUniform1i("xsubimages", xsubimages);
@@ -36,22 +38,19 @@ void ofApp::setup(){
     // OSC - listen on the given port
     cout << "listening for osc messages on port " << port << "\n";
     receiver.setup(port);
-
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
     
-    // This just
+    // why is this here?
     maskFbo.begin();
     ofClear(255, 0, 0,255);
-    //    multimaskImg.draw( mouseX-multimaskImg.getWidth()*0.5, 0 );
     maskFbo.end();
     
-    // MULTITEXTURE MIXING FBO
-
     fbo.begin();
     ofClear(0, 0, 0,255);
+    
     shader.begin();
     
     shader.setUniform1f("scale", synScale);
@@ -62,13 +61,14 @@ void ofApp::update(){
     shader.setUniform1f("xoffset", xoffset);
     shader.setUniform1f("yoffset", yoffset);
     shader.setUniform1f("zoom", zoom);
+    
     maskFbo.draw(0,0);
     
     shader.end();
+    
     fbo.end();
     
     ofSetWindowTitle( ofToString( ofGetFrameRate()));
-    
     
     // ~~~ OSC handling ~~~
     
@@ -91,19 +91,20 @@ void ofApp::draw(){
     
     // thumbnail size
     float tWidth = 160;//320;
-    float tHeight = 90;//180;
+    float tHeight = 160/xsubimages * ysubimages; //90;//180;
     
     // fused image size
     float height = ofGetWindowHeight();
     float width = height/subheight*subwidth;
     float xoff = (ofGetWindowWidth() - width)/2;
+    
     ofSetColor(255);
     
     // draw fused image
     fbo.draw(xoff, 0, width, height);
 
     // draw thumbnail with indicator
-    if(bDrawThumbnail) {
+    if(bShowThumbnail == true) {
         ofSetColor(255);
         lfplane.draw(5,5,tWidth,tHeight);
         ofSetColor(255, 0, 0);
@@ -113,62 +114,22 @@ void ofApp::draw(){
         ofRect(5+xstart*xunit, 5+ystart*yunit, xcount*xunit, ycount*yunit);
     }
     
-    if(bDebug) {
+    if(bDebug == true) {
         // display text about refocusing
         ofSetColor(255);
         ofTranslate(10, ofGetHeight()-75);
         ofDrawBitmapString("scale:   \t"+ofToString(synScale), 0, 0);
-        ofDrawBitmapString("offset:  \t"+ofToString(xoffset)+" "+ofToString(yoffset), 0, 15);
-        ofDrawBitmapString("ap_loc:  \t"+ofToString(xstart)+" "+ofToString(ystart), 0, 30);
+        ofDrawBitmapString("roll:    \t"+ofToString(xoffset)+" "+ofToString(yoffset), 0, 15);
+        ofDrawBitmapString("ap_loc:  \t"+ofToString(xstart)+" "+ofToString(ystart) +" ("+ofToString(xstart + ystart * xsubimages)+")", 0, 30);
         ofDrawBitmapString("ap_size: \t"+ofToString(xcount)+" "+ofToString(ycount), 0, 45);
         ofDrawBitmapString("zoom:    \t"+ofToString(zoom), 0, 60);
+//        cout << bDebug << bShowThumbnail << endl;
     }
 }
 
 //--------------------------------------------------------------
-void ofApp::keyPressed(int key){
-    if(key=='f')
-        ofToggleFullscreen();
-    if(key=='b') {
-        // zoom
-        zoom = ofMap(mouseX, 0, ofGetWindowWidth(), 1.0, 0.01);
-    }
-    if(key=='z') {
-        // parallax
-        xstart = ofMap(mouseX, 0, ofGetWindowWidth(), 0, xsubimages-xcount+1);
-        ystart = ofMap(mouseY, 0, ofGetWindowHeight(), 0, ysubimages-ycount+1);
-    }
-    if(key=='x') {
-        // number of subimages in resynthesis
-        xcount = ofMap(mouseX, 0, ofGetWindowWidth(), 0, xsubimages);
-        ycount = ofMap(mouseY, 0, ofGetWindowHeight(), 0, ysubimages);
-        if(xcount+xstart > xsubimages)
-            xstart = xsubimages - xcount;
-        if(ycount + ystart > ysubimages)
-            ystart = ysubimages - ycount;
-    }
-    if(key == 'v') {
-        // offsets
-        xoffset = ofMap(mouseX, 0, ofGetWindowWidth(), -subwidth, subwidth);
-        yoffset = ofMap(mouseY, 0, ofGetWindowHeight(), -subheight, subheight);
-    }
-    if(key == 'c')
-        // focus
-        synScale = ofMap(mouseX, 0, ofGetWindowWidth(), minScale, maxScale);
-    if(key == 't')
-        bDrawThumbnail = !bDrawThumbnail;
-    if(key == 'm') {
-        bHideCursor = !bHideCursor;
-        if (bHideCursor) {
-            ofHideCursor();
-        } else {
-            ofShowCursor();
-        };
-    }
-    if(key == 'd')
-        bDebug = !bDebug;
-    
-}
+// settings
+//--------------------------------------------------------------
 
 void ofApp::loadXMLSettings(string settingsfile) {
     ofxXmlSettings xml;
@@ -199,7 +160,7 @@ void ofApp::loadXMLSettings(string settingsfile) {
     yoffset = 0;
     
     // debug information (text, mouse, thumbnail) //
-    bDrawThumbnail = (xml.getValue("drawthumbnail", 0) > 0);
+    bShowThumbnail = (xml.getValue("drawthumbnail", 0) > 0);
     bHideCursor = (xml.getValue("hidecursor", 0) > 0);
     bDebug = (xml.getValue("debug", 0) > 0);
     
@@ -226,7 +187,7 @@ void ofApp::loadLFImage() {
     sourceWidth=lfplane.getWidth();
     sourceHeight=lfplane.getHeight();
     
-    cout << "IMAGE WIDTHS " << sourceWidth << ", " << sourceHeight << endl;
+    cout << "LF Texture: " << sourceWidth << ", " << sourceHeight << endl;
     
 }
 
@@ -235,7 +196,7 @@ void ofApp::graphicsSetup() {
     fbo.allocate(subwidth,subheight);
     maskFbo.allocate(subwidth,subheight);
     
-    string shaderProgram = STRINGIFY(
+    string shaderProgram = EXPAND_AND_QUOTE(
                                      uniform sampler2DRect lfplane;
                                      uniform sampler2DRect lfplane2;
                                      
@@ -252,10 +213,11 @@ void ofApp::graphicsSetup() {
                                      uniform float xoffset;
                                      uniform float yoffset;
                                      uniform int count;
-                                     uniform vec2 offsets[500];
+                                     uniform vec2 offsets[MAX_SUBIMAGES];
                                      
                                      void main (void){
-                                         vec2 pixelpos = gl_TexCoord[0].st * zoom;
+                                         vec2 roll = vec2(xoffset, yoffset);
+                                         vec2 pixelpos = (gl_TexCoord[0].st - roll) * zoom;
                                          
                                          vec4 color = vec4(0,0,0,0);
                                          float halfxcount = float(xcount) / 2.0;
@@ -266,9 +228,8 @@ void ofApp::graphicsSetup() {
                                              for (int y=ystart; y<ystart+ycount; y++) {
                                                  vec2 subimg_corner = vec2(float(x)*xres, float(y)*yres);
                                                  vec2 shift = scale * offsets[x + (y* xsubimages)];
-                                                 vec2 roll = vec2(xoffset, yoffset);
                                                  
-                                                 color += texture2DRect(lfplane, subimg_corner + pixelpos - shift - roll);
+                                                 color += texture2DRect(lfplane, subimg_corner + pixelpos - shift);
                                                  
                                                  //                                                 color += texture2DRect(lfplane, subpos + vec2( (1.0 * scale*(float(x) - halfxcount-float(xstart)+0.5)), (1.0*scale*(float(y)-halfycount-float(ystart)+0.5))));
                                                  
@@ -299,8 +260,65 @@ void ofApp::graphicsSetup() {
     //    GLint maxTextureSize;
     //    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
     //    std::cout <<"Max texture size: " << maxTextureSize << std::endl;
+
+//        GLint v_maj;
+//    glGetIntegerv(GL_MAJOR_VERSION, &v_maj);
+//        std::cout <<"gl major version: " << v_maj << std::endl;
     
 }
+
+//--------------------------------------------------------------
+void ofApp::keyPressed(int key){
+    //    cout << bShowThumbnail << " " << bHideCursor << " " << bDebug << endl;
+    if(key=='f')
+        ofToggleFullscreen();
+    if(key=='b') {
+        // zoom
+        zoom = ofMap(mouseX, 0, ofGetWindowWidth(), 1.0, 0.01);
+    }
+    if(key=='z') {
+        // parallax
+        xstart = ofMap(mouseX, 0, ofGetWindowWidth(), 0, xsubimages-xcount+1);
+        ystart = ofMap(mouseY, 0, ofGetWindowHeight(), 0, ysubimages-ycount+1);
+    }
+    if(key=='x') {
+        // number of subimages in resynthesis
+        xcount = ofMap(mouseX, 0, ofGetWindowWidth(), 0, xsubimages);
+        ycount = ofMap(mouseY, 0, ofGetWindowHeight(), 0, ysubimages);
+        if(xcount+xstart > xsubimages)
+            xstart = xsubimages - xcount;
+        if(ycount + ystart > ysubimages)
+            ystart = ysubimages - ycount;
+    }
+    if(key == 'v') {
+        // offsets
+        xoffset = ofMap(mouseX, 0, ofGetWindowWidth(), -subwidth, subwidth);
+        yoffset = ofMap(mouseY, 0, ofGetWindowHeight(), -subheight, subheight);
+    }
+    if(key == 'c')
+        // focus
+        synScale = ofMap(mouseX, 0, ofGetWindowWidth(), minScale, maxScale);
+    if(key == 't') {
+        bShowThumbnail = (bShowThumbnail == 0);
+        cout << "t " << bShowThumbnail << endl;
+    }
+    if(key == 'm') {
+        bHideCursor = !bHideCursor;
+        if (bHideCursor) {
+            ofHideCursor();
+        } else {
+            ofShowCursor();
+        };
+    }
+    
+    if(key == 'd') {
+        bDebug = (bDebug == 0) ;
+        cout << "d " << bDebug << endl;
+        
+    }
+    
+}
+
 
 void ofApp::process_OSC(ofxOscMessage m) {
     
