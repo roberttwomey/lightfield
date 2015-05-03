@@ -2,9 +2,9 @@ ControlMixer {
 	// copyArga
 	var <broadcastTag, <broadcastAddr, <broadcastRate, <server, loadCond, colorShift;
 
-	var <busnum, ratePeriodSpec, <oscTag, <ctlFades, outVal;
+	var <busnum, ratePeriodSpec, <oscTag, <ctlFades, <ctlViews, outVal;
 	var <mixView, msgTxt, broadcastChk, plotChk, updateBx, outValTxt;
-	var nBoxWidth = 30, validLFOs, <plotter, cltLayout, plotterAdded = false;
+	var nBoxWidth = 30, validLFOs, <plotter, <ctlLayout, plotterAdded = false;
 	var broadcastBus, broadcastWaittime, broadcastTag, pollTask, broadcasting=false;
 	var baseColor, idColor, mixColor, colorStep;
 
@@ -19,6 +19,7 @@ ControlMixer {
 		(broadcastTag.asString[0].asSymbol != '/').if{ broadcastTag = "/" ++ broadcastTag };
 
 		ctlFades = [];
+		ctlViews = [];
 		server = server ?? Server.default;
 		this.prDefineColors;
 		server.waitForBoot({
@@ -59,17 +60,19 @@ ControlMixer {
 		});
 	}
 
-	addCtl { |min= -1, max=1|
+	addCtl { |min= -1, max=1, finishCond|
 
 		var ctl, view, sclSpec, offsSpec, updateOffset;
 		var minBx, maxBx, rateBx, rateSl, rateTxt, periodChk, mixBx;
-		var valBx, mixKnb, sigPUp, rmvBut, sclBx, sclKnb, offsBx, offsKnb;
+		var valBx, mixKnb, sigPUp, rmvBut, sclBx, sclKnb, offsBx, offsKnb, completeFunc;
 
 		sclSpec = ControlSpec(0, 2, 'lin', default: 1);
 		// offsSpec = ControlSpec(max.neg, max, 'lin', default: 0);
 		offsSpec = ControlSpec(-1, 1, 'lin', default: 0);
 
-		ctl = ControlFade(fadeTime: 0.0, initVal: 0, busnum: busnum, server: server);
+		completeFunc = finishCond.notNil.if({ {finishCond.test_(true).signal} },{ {} });
+
+		ctl = ControlFade(fadeTime: 0.0, initVal: 0, busnum: busnum, server: server, onComplete: completeFunc);
 
 		ctlFades = ctlFades.add(ctl);
 
@@ -135,7 +138,8 @@ ControlMixer {
 			).margins_(4).spacing_(2)
 		);
 
-		cltLayout.add( view );
+		ctlLayout.add( view );
+		ctlViews = ctlViews.add(view);
 
 		// TODO: move this out, make ctl arg or make a class for each control
 		updateOffset = {
@@ -238,12 +242,18 @@ ControlMixer {
 			ctl.release(0.3, freeBus: false); // leave the bus running if others are writing to it
 
 			block{ |break| ctlFades.do{ |cFade, i|
-				if(cFade === ctl){ctlFades.removeAt(i); "removing a ctl".postln; break.()} } };
-			{
+				if(cFade === ctl){
+					ctlFades.removeAt(i); "removing a ctl".postln;
+					ctlViews.removeAt(i); "removed ctl view".postln;
+					break.()
+				}
+			}};
+
+			fork({
 				view.remove;
 				0.1.wait;
 				// win.setInnerExtent(win.view.bounds.width, win.view.bounds.height - vHeight );
-			}.fork(AppClock)
+			}, AppClock);
 		});
 
 		mixBx.action_({|bx| ctl.amp_(bx.value); mixKnb.value_(bx.value) }).value_(1);
@@ -257,7 +267,7 @@ ControlMixer {
 	makeView {
 		mixView = View().layout_(
 			VLayout(
-					cltLayout = VLayout(
+					ctlLayout = VLayout(
 						View().background_(idColor).layout_(
 							HLayout(
 								[ msgTxt = TextField().string_(broadcastTag.asString).minWidth_(80), a: \left],
@@ -297,7 +307,7 @@ ControlMixer {
 
 		win = Window("Broadcast Controls", Rect(0,0,320,100)).layout_(
 			VLayout(
-				cltLayout = VLayout(
+				ctlLayout = VLayout(
 					View().background_(Color.rand).layout_(
 						HLayout(
 							[ msgTxt = TextField().string_(broadcastTag.asString).minWidth_(65), a: \left],
@@ -499,7 +509,7 @@ ControlMixMaster {
 						\min, ctlfade.low,
 						\max, ctlfade.high,
 						\signal, ctlfade.lfo,
-						\rate, ctlfade.freq,
+						\freq, ctlfade.freq,
 						\val, ctlfade.value,
 						\scale, ctlfade.scale,
 						\offset, ctlfade.offset,
@@ -521,6 +531,80 @@ ControlMixMaster {
 
 		postf("Preset Stored\n%\n", key);
 		arch[key].keysValuesDo{|k,v| [k,v].postln;}
+	}
+
+	prRecallCtlFaderState { | mixer, faderStates |
+		var kind, ctlFade;
+
+		faderStates.do{ |fDict, fDex|
+
+			ctlFade = mixer.ctlFades[fDex];
+
+			// static or lfo?
+			if( fDict[\signal] == 'static' )
+			{	// just recall the static val
+				ctlFade.value_(fDict[\val])
+			}
+			{	// recall the lfo with bounds, etc...
+				ctlFade.lfo_(fDict[\signal], fDict[\freq], fDict[\min], fDict[\max])
+			};
+
+			// recall mix, scale offset
+			ctlFade.scale_(fDict[\scale]);
+			ctlFade.offset_(fDict[\offset]);
+			ctlFade.amp_(fDict[\mix]);
+		}
+	}
+
+	recallPreset { |key|
+		var p;
+		block { |break|
+
+			p = this.archive[key] ?? {"Preset not found".error; break.()};
+
+			p[\mixers].keysValuesDo({ |ptag, faderStates|
+				var recalled=false;
+				postf("recalling mixer %\n", ptag.asString);
+
+				fork({ var cond = Condition();
+					mixers.do{ |mixer, i|
+
+						if( mixer.broadcastTag.asSymbol == ptag ){
+							// check that the current mixer has the same number of controlfaders as the preset
+							var numFadersDiff = faderStates.size - mixer.ctlFades.size;
+
+							case
+							{numFadersDiff > 0}{
+								// recall presets, adding numFadersDiff controls to update
+								numFadersDiff.do{
+									mixer.addCtl(finishCond: cond);
+									cond.wait; 0.1.wait; // wait a little extra time for fade synth to start
+								};
+							}
+							{numFadersDiff < 0}{
+								numFadersDiff.abs.do{
+									"removing a control".postln;
+									mixer.ctlFades.last.release(freeBus: false);
+									mixer.ctlFades.removeAt(mixer.ctlFades.size-1);
+									mixer.ctlViews.last.remove;
+								};
+							};
+
+							this.prRecallCtlFaderState( mixer, faderStates );
+
+							recalled =true
+						};
+					};
+
+					recalled.not.if{
+						error( format(
+							"No mixer found in the current layout to set the preset tag % not found in current setup",
+							ptag ) );
+						// TODO add a mixer that was not found present, remove present mixers that aren't in the preset
+					};
+				}, AppClock );
+			});
+		}
 	}
 
 

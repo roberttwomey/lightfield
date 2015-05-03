@@ -4,8 +4,20 @@ c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount"], NetAddr
 // c = ControlMixer( "/focus", NetAddr("localhost", 57120) );
 // d = ControlMixer( "/test2", NetAddr("localhost", 57120) );
 
-c.removePreset( \first )
+
 c.storePreset( \first )
+c.storePreset( \second )
+c.storePreset( \third )
+c.storePreset( \fourth )
+
+c.recallPreset( \first )
+c.recallPreset( \second )
+c.recallPreset( \third )
+c.recallPreset( \fourth )
+
+
+c.removePreset( \first )
+
 c.presets[\first].mixers.keys
 c.presets[\first].mixers['/ycount'].size
 
