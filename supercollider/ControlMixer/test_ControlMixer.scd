@@ -4,6 +4,28 @@ c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount"], NetAddr
 // c = ControlMixer( "/focus", NetAddr("localhost", 57120) );
 // d = ControlMixer( "/test2", NetAddr("localhost", 57120) );
 
+c.removePreset( \first )
+c.storePreset( \first )
+c.presets[\first].mixers.keys
+c.presets[\first].mixers['/ycount'].size
+
+(
+c.presets[\first].mixers.keysValuesDo({|k,v| k.postln; v.do({|ctlFadeStates, i| i.postln; ctlFadeStates.keysValuesDo({|k,v| [k,v].postln }) }); "".postln; });
+nil
+)
+
+(
+c.presets[\first].mixers['/ycount'].do({|ctlFadeStates, i| i.postln; ctlFadeStates.keysValuesDo({|k,v| [k,v].postln }) });
+nil
+)
+
+c.presets[\first].mixers['/xstart']
+c.presets[\first].mixers['/xstart'].size
+(
+c.presets[\first].mixers['/xstart'].do({|ctlFadeStates, i| i.postln; ctlFadeStates.keysValuesDo({|k,v| [k,v].postln }) });
+nil
+)
+
 
 c.addMixer
 

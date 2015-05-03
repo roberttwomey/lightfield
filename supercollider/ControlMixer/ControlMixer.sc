@@ -8,7 +8,7 @@ ControlMixer {
 	var broadcastBus, broadcastWaittime, broadcastTag, pollTask, broadcasting=false;
 	var baseColor, idColor, mixColor, colorStep;
 
-	*new { | broadcastTag="/myMessage", broadcastNetAddr, broadcastRate=10, server, loadCond, colorShift = 0.03 |
+	*new { | broadcastTag="/myMessage", broadcastNetAddr, broadcastRate=15, server, loadCond, colorShift=0.03 |
 		^super.newCopyArgs( broadcastTag, broadcastNetAddr, broadcastRate, server, loadCond, colorShift ).init;
 	}
 
@@ -361,40 +361,6 @@ ControlMixer {
 		pollTask !? { pollTask.stop.clock.clear };
 	}
 
-	/* Preset/Archive Support */
-
-	prInitArchive {
-		^Archive.global.put(\roverPresets, IdentityDictionary(know: true));
-	}
-
-	archive { ^Archive.global[\roverPresets] }
-	presets { ^Archive.global[\roverPresets].keys }
-	listPresets { ^this.presets.asArray.sort.do(_.postln) }
-
-	backupPreset {
-		format( "cp %% %%%",
-			Archive.archiveDir,
-			"/archive.sctxar",
-			"~/Desktop/archive.sctxar_BAK_",
-			Date.getDate.stamp,
-			".sctxar"
-		).replace(
-			" Support","\\ Support"
-		).unixCmd
-	}
-
-	*backupPreset {
-		format( "cp %% %%%",
-			Archive.archiveDir,
-			"/archive.sctxar",
-			"~/Desktop/archive.sctxar_BAK_",
-			Date.getDate.stamp,
-			".sctxar"
-		).replace(
-			" Support","\\ Support"
-		).unixCmd
-	}
-
 	prDefineColors {
 		baseColor = Color.hsv(
 			// Color.newHex("BA690B").asHSV;
@@ -413,61 +379,6 @@ ControlMixer {
 		);
 	}
 
-	// // which 0: synth1, 1: synth2, 2: both
-	// storePreset { |key, overwrite =false|
-	// 	var arch, synth;
-	//
-	// 	arch = Archive.global[\roverPresets] ?? { this.prInitArchive };
-	//
-	// 	(arch[key].notNil and: overwrite.not).if {
-	// 		format("preset already exists! choose another name or first perform .removePreset(%)", key).throw
-	// 	};
-	//
-	// 	arch.put( key.asSymbol ?? {Date.getDate.stamp.asSymbol},
-	//
-	// 		IdentityDictionary( know: true ).putPairs([
-	// 			\params, IdentityDictionary( know: true ).putPairs([
-	// 				\min, ctl.low
-	// 				\max, ctl.high
-	// 				\signal, ctl.lfo,
-	// 				\rate, ctl.freq
-	// 				\val, ctl.value
-	// 				\scale, ctl.scale
-	// 				\offset, ctl.offset
-	// 				\mix, ctl.amp
-	// 			]),
-	// 			// recalling these vars depend on whether 1 or both synths are recalled
-	// 			\balanceAmp,	synth.collect{|synth| synth.balanceAmp },
-	// 			\fileName,		synth.collect{|synth| PathName(synth.buffer.path).fileName },
-	// 			\numStored,		synth.size,
-	// 		]);
-	// 	);
-	//
-	// 	lastUpdated = key;
-	//
-	// 	postf("Preset Stored\n%\n", key);
-	// 	arch[key].fileName.postln;
-	// 	arch[key].params.keysValuesDo{|k,v| [k,v].postln;}
-	// }
-	//
-	//
-	// updatePreset {
-	// 	lastUpdated.notNil.if({
-	// 		this.storePreset( lastRecalledSynthDex, lastUpdated, true );
-	// 		},{
-	// 			"last updated key is not known".warn
-	// 	});
-	// }
-	//
-	//
-	// removePreset { |key|
-	//
-	// 	Archive.global[\grainFaderStates][key] ?? {
-	// 		format("preset % not found!", key).error
-	// 	};
-	//
-	// 	Archive.global[\grainFaderStates].removeAt(key)
-	// }
 }
 
 ControlMixMaster {
@@ -525,5 +436,105 @@ ControlMixMaster {
 
 	free {
 		mixers.do(_.free);
+	}
+
+	/* Preset/Archive Support */
+
+	prInitArchive {
+		^Archive.global.put(\roverPresets, IdentityDictionary(know: true));
+	}
+
+	archive { ^Archive.global[\roverPresets] }
+	presets { ^Archive.global[\roverPresets] }
+	listPresets { ^this.presets.keys.asArray.sort.do(_.postln) }
+
+	backupPreset {
+		format( "cp %% %%%",
+			Archive.archiveDir,
+			"/archive.sctxar",
+			"~/Desktop/archive.sctxar_BAK_",
+			Date.getDate.stamp,
+			".sctxar"
+		).replace(
+			" Support","\\ Support"
+		).unixCmd
+	}
+
+	*backupPreset {
+		format( "cp %% %%%",
+			Archive.archiveDir,
+			"/archive.sctxar",
+			"~/Desktop/archive.sctxar_BAK_",
+			Date.getDate.stamp,
+			".sctxar"
+		).replace(
+			" Support","\\ Support"
+		).unixCmd
+	}
+
+
+	// keyValPairs: any other data to store in the dictionary associated with this key
+	// e.g. [\scenefile, "darktrees.xml"]
+	storePreset { |key, overwrite =false, keyValPairs|
+		var arch, synth, mixerDict, ctlInfoDict;
+
+		arch = Archive.global[\roverPresets] ?? { this.prInitArchive };
+
+		(arch[key].notNil and: overwrite.not).if {
+			format("preset already exists! choose another name or first perform .removePreset(%)", key).throw
+		};
+
+
+		mixerDict = IdentityDictionary(know: true);
+
+		mixers.do{ |mixer, i|
+			var ctlFadeArr = [];
+			postf("mixer %\n", i);
+
+			// each mixer can have multiple ctlFades
+			mixer.ctlFades.do{ |ctlfade, j|
+				postf("\tctlfade %\n", j);
+				ctlFadeArr = ctlFadeArr.add(
+					IdentityDictionary( know: true ).putPairs([
+						\min, ctlfade.low,
+						\max, ctlfade.high,
+						\signal, ctlfade.lfo,
+						\rate, ctlfade.freq,
+						\val, ctlfade.value,
+						\scale, ctlfade.scale,
+						\offset, ctlfade.offset,
+						\mix, ctlfade.amp,
+					])
+				)
+			};
+
+			mixerDict.put( mixer.broadcastTag.asSymbol, ctlFadeArr);
+		};
+
+		arch.put( key.asSymbol ?? {Date.getDate.stamp.asSymbol},
+			IdentityDictionary( know: true ).put( \mixers, mixerDict )
+		);
+
+		keyValPairs !? {
+			keyValPairs.clump(2).do{ |kvArr| ctlInfoDict.put(kvArr[0].asSymbol, kvArr[1]) };
+		};
+
+		postf("Preset Stored\n%\n", key);
+		arch[key].keysValuesDo{|k,v| [k,v].postln;}
+	}
+
+
+	// updatePreset {
+	// 	lastUpdated.notNil.if({
+	// 		this.storePreset( lastRecalledSynthDex, lastUpdated, true );
+	// 		},{
+	// 			"last updated key is not known".warn
+	// 	});
+	// }
+
+
+	removePreset { |key|
+		Archive.global[\roverPresets][key] ?? { format("preset % not found!", key).error };
+		Archive.global[\roverPresets].removeAt(key)
 	}
 }
