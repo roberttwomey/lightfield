@@ -160,7 +160,9 @@ RoverDriver {
 
 		captureTask !? { captureTask.stop.clock.clear };
 		arduino.state; // update internal ArduinoGRBL state bookkeeping
-		camAddr.sendMsg("/camera", "start"); // make sure Rover is ready to take photos
+
+		// only send start if using raspifastcamd
+		//camAddr.sendMsg("/camera", "start"); // make sure Rover is ready to take photos
 
 		(handShake and: handshakeResponder.isNil).if{ this.prCreateHandshakeResponder };
 
@@ -181,6 +183,7 @@ RoverDriver {
 
 			camPts.do{ |indexPoint, i|
 				var moveStart, gridDest;
+				var camParams; // camera parameters for paramsnap
 				moveStart = Main.elapsedTime;
 				now  = Main.elapsedTime - moveStart;
 				gridDest = indexPoint * (xStep@yStep);
@@ -224,8 +227,12 @@ RoverDriver {
 				// let the camera settle after moving
 				waitToSettle.wait;
 
-				// take the photo
-				camAddr.sendMsg("/camera", "snap"); "\tSNAP".postln;
+				// take the photo with raspicamfastd
+				// camAddr.sendMsg("/camera", "snap"); "\tSNAP".postln;
+
+				// take photo with raspistill, custom file-naming:
+				camParams = format("-t 1 -o /home/pi/lfimages/frame_%.jpg", i);
+				camAddr.sendMsg("/camera", "paramsnap", camParams);
 
 				// log it for the dataFile
 				captureData.put(

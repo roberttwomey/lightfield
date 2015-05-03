@@ -94,6 +94,7 @@ if __name__ == '__main__':
     
     print "Undistorting images...",
     mp_undistort(files, K, d, outpath, 8)
+
     print "done!"
     
     # print "Undistorting images...",
