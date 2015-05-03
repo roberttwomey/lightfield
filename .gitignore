@@ -5,6 +5,7 @@ documentation
 bin
 build
 .DS_Store
+.AppleDouble
 Thumbs.DB
 *.zip
 *.3dmbak
