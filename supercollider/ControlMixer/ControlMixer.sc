@@ -1,14 +1,15 @@
 ControlMixer {
 	// copyArga
-	var <broadcastTag, <broadcastAddr, <broadcastRate, <server, loadCond;
+	var <broadcastTag, <broadcastAddr, <broadcastRate, <server, loadCond, colorShift;
 
-	var <busnum, ratePeriodSpec, <oscTag, <ctlFades, outVal;
+	var <busnum, ratePeriodSpec, <oscTag, <ctlFades, <ctlViews, outVal;
 	var <mixView, msgTxt, broadcastChk, plotChk, updateBx, outValTxt;
-	var nBoxWidth = 30, validLFOs, <plotter, cltLayout, plotterAdded = false;
+	var nBoxWidth = 30, validLFOs, <plotter, <ctlLayout, plotterAdded = false;
 	var broadcastBus, broadcastWaittime, broadcastTag, pollTask, broadcasting=false;
+	var baseColor, idColor, mixColor, colorStep;
 
-	*new { | broadcastTag="/myMessage", broadcastNetAddr, broadcastRate=10, server, loadCond |
-		^super.newCopyArgs( broadcastTag, broadcastNetAddr, broadcastRate, server, loadCond ).init;
+	*new { | broadcastTag="/myMessage", broadcastNetAddr, broadcastRate=15, server, loadCond, colorShift=0.03 |
+		^super.newCopyArgs( broadcastTag, broadcastNetAddr, broadcastRate, server, loadCond, colorShift ).init;
 	}
 
 	init {
@@ -18,8 +19,9 @@ ControlMixer {
 		(broadcastTag.asString[0].asSymbol != '/').if{ broadcastTag = "/" ++ broadcastTag };
 
 		ctlFades = [];
+		ctlViews = [];
 		server = server ?? Server.default;
-
+		this.prDefineColors;
 		server.waitForBoot({
 			busnum = server.controlBusAllocator.alloc(1);
 			postf("Creating ControlMixer to output to %\n", busnum);
@@ -58,21 +60,23 @@ ControlMixer {
 		});
 	}
 
-	addCtl { |min= -1, max=1|
+	addCtl { |min= -1, max=1, finishCond|
 
 		var ctl, view, sclSpec, offsSpec, updateOffset;
 		var minBx, maxBx, rateBx, rateSl, rateTxt, periodChk, mixBx;
-		var valBx, mixKnb, sigPUp, rmvBut, sclBx, sclKnb, offsBx, offsKnb;
+		var valBx, mixKnb, sigPUp, rmvBut, sclBx, sclKnb, offsBx, offsKnb, completeFunc;
 
 		sclSpec = ControlSpec(0, 2, 'lin', default: 1);
 		// offsSpec = ControlSpec(max.neg, max, 'lin', default: 0);
 		offsSpec = ControlSpec(-1, 1, 'lin', default: 0);
 
-		ctl = ControlFade(fadeTime: 0.0, initVal: 0, busnum: busnum, server: server);
+		completeFunc = finishCond.notNil.if({ {finishCond.test_(true).signal} },{ {} });
+
+		ctl = ControlFade(fadeTime: 0.0, initVal: 0, busnum: busnum, server: server, onComplete: completeFunc);
 
 		ctlFades = ctlFades.add(ctl);
 
-		view = View().background_(Color.rand).maxHeight_(125)
+		view = View().background_(mixColor).maxHeight_(125)
 		.layout_(
 			VLayout(
 
@@ -134,7 +138,8 @@ ControlMixer {
 			).margins_(4).spacing_(2)
 		);
 
-		cltLayout.add( view );
+		ctlLayout.add( view );
+		ctlViews = ctlViews.add(view);
 
 		// TODO: move this out, make ctl arg or make a class for each control
 		updateOffset = {
@@ -237,12 +242,18 @@ ControlMixer {
 			ctl.release(0.3, freeBus: false); // leave the bus running if others are writing to it
 
 			block{ |break| ctlFades.do{ |cFade, i|
-				if(cFade === ctl){ctlFades.removeAt(i); "removing a ctl".postln; break.()} } };
-			{
+				if(cFade === ctl){
+					ctlFades.removeAt(i); "removing a ctl".postln;
+					ctlViews.removeAt(i); "removed ctl view".postln;
+					break.()
+				}
+			}};
+
+			fork({
 				view.remove;
 				0.1.wait;
 				// win.setInnerExtent(win.view.bounds.width, win.view.bounds.height - vHeight );
-			}.fork(AppClock)
+			}, AppClock);
 		});
 
 		mixBx.action_({|bx| ctl.amp_(bx.value); mixKnb.value_(bx.value) }).value_(1);
@@ -256,8 +267,8 @@ ControlMixer {
 	makeView {
 		mixView = View().layout_(
 			VLayout(
-					cltLayout = VLayout(
-						View().background_(Color.rand).layout_(
+					ctlLayout = VLayout(
+						View().background_(idColor).layout_(
 							HLayout(
 								[ msgTxt = TextField().string_(broadcastTag.asString).minWidth_(80), a: \left],
 								outValTxt = StaticText().string_("broadcast").align_(\left).fixedWidth_(55),
@@ -296,7 +307,7 @@ ControlMixer {
 
 		win = Window("Broadcast Controls", Rect(0,0,320,100)).layout_(
 			VLayout(
-				cltLayout = VLayout(
+				ctlLayout = VLayout(
 					View().background_(Color.rand).layout_(
 						HLayout(
 							[ msgTxt = TextField().string_(broadcastTag.asString).minWidth_(65), a: \left],
@@ -360,6 +371,83 @@ ControlMixer {
 		pollTask !? { pollTask.stop.clock.clear };
 	}
 
+	prDefineColors {
+		baseColor = Color.hsv(
+			// Color.newHex("BA690B").asHSV;
+			// Color.newHex("2C4770").asHSV;
+			0.60049019607843, 0.60714285714286, 0.43921568627451, 1 );
+
+		idColor = Color.hsv(
+			*baseColor.asHSV.put( 0, (baseColor.asHSV[0] + colorShift).wrap(0,1) )
+		);
+
+		mixColor = Color.hsv(
+			*idColor.asHSV
+			.put(3, 0.8)
+			.put(2, idColor.asHSV[2] * 1.35)
+			//.put(2, (baseColor.asHSV[2] * 1.4).clip(0,1))
+		);
+	}
+
+}
+
+ControlMixMaster {
+	// copyArgs
+	var broadcastTags, broadcastNetAddr, broadcastRate, server;
+	var <win, <mixers, mixWidth = 320;
+
+	*new { |broadcastTags="/myControlVal", broadcastNetAddr, broadcastRate=15, server|
+		^super.newCopyArgs(broadcastTags, broadcastNetAddr, broadcastRate, server).init
+	}
+
+	init {
+		broadcastNetAddr ?? {broadcastNetAddr = NetAddr("localhost", NetAddr.langPort)};
+		server = server ?? Server.default;
+
+		mixers = [];
+
+		server.waitForBoot({
+			var cshift;
+
+			cshift = rrand(-0.1, 0.1); // -0.03888, 0.093191576004028
+			postf("shifting color %\n", cshift);
+
+			this.makeWin;
+
+			broadcastTags.asArray.do({ |tag, i|
+				this.addMixer(tag, broadcastNetAddr , broadcastRate, server, (cshift*i));
+			});
+		});
+	}
+
+	addMixer { |sendToNetAddr, oscTag="/myControlVal", sendRate=15, server, colorShift = -0.03888|
+		var mixer;
+		var loadCond = Condition();
+		sendToNetAddr ?? {sendToNetAddr = NetAddr("localhost", NetAddr.langPort)};
+		server = server ?? Server.default;
+
+		{
+			// win.setInnerExtent( win.view.bounds.width + mixWidth );
+			mixer = ControlMixer(sendToNetAddr, oscTag, sendRate, server, loadCond, colorShift);
+			mixers = mixers.add(mixer);
+			loadCond.wait;
+			win.layout.add( mixer.mixView.postln; );
+		}.fork(AppClock);
+	}
+
+	makeWin {
+
+		win = Window("Broadcast Controls", Rect(0,0,mixWidth,100)).layout_(
+			HLayout().margins_(2).spacing_(2)
+		).onClose_({ this.free });
+
+		win.front;
+	}
+
+	free {
+		mixers.do(_.free);
+	}
+
 	/* Preset/Archive Support */
 
 	prInitArchive {
@@ -367,8 +455,8 @@ ControlMixer {
 	}
 
 	archive { ^Archive.global[\roverPresets] }
-	presets { ^Archive.global[\roverPresets].keys }
-	listPresets { ^this.presets.asArray.sort.do(_.postln) }
+	presets { ^Archive.global[\roverPresets] }
+	listPresets { ^this.presets.keys.asArray.sort.do(_.postln) }
 
 	backupPreset {
 		format( "cp %% %%%",
@@ -394,44 +482,132 @@ ControlMixer {
 		).unixCmd
 	}
 
-	// // which 0: synth1, 1: synth2, 2: both
-	// storePreset { |key, overwrite =false|
-	// 	var arch, synth;
-	//
-	// 	arch = Archive.global[\roverPresets] ?? { this.prInitArchive };
-	//
-	// 	(arch[key].notNil and: overwrite.not).if {
-	// 		format("preset already exists! choose another name or first perform .removePreset(%)", key).throw
-	// 	};
-	//
-	// 	arch.put( key.asSymbol ?? {Date.getDate.stamp.asSymbol},
-	//
-	// 		IdentityDictionary( know: true ).putPairs([
-	// 			\params, IdentityDictionary( know: true ).putPairs([
-	// 				\min, ctl.low
-	// 				\max, ctl.high
-	// 				\signal, ctl.lfo,
-	// 				\rate, ctl.freq
-	// 				\val, ctl.value
-	// 				\scale, ctl.scale
-	// 				\offset, ctl.offset
-	// 				\mix, ctl.amp
-	// 			]),
-	// 			// recalling these vars depend on whether 1 or both synths are recalled
-	// 			\balanceAmp,	synth.collect{|synth| synth.balanceAmp },
-	// 			\fileName,		synth.collect{|synth| PathName(synth.buffer.path).fileName },
-	// 			\numStored,		synth.size,
-	// 		]);
-	// 	);
-	//
-	// 	lastUpdated = key;
-	//
-	// 	postf("Preset Stored\n%\n", key);
-	// 	arch[key].fileName.postln;
-	// 	arch[key].params.keysValuesDo{|k,v| [k,v].postln;}
-	// }
-	//
-	//
+
+	// keyValPairs: any other data to store in the dictionary associated with this key
+	// e.g. [\scenefile, "darktrees.xml"]
+	storePreset { |key, overwrite =false, keyValPairs|
+		var arch, synth, mixerDict, ctlInfoDict;
+
+		arch = Archive.global[\roverPresets] ?? { this.prInitArchive };
+
+		(arch[key].notNil and: overwrite.not).if {
+			format("preset already exists! choose another name or first perform .removePreset(%)", key).throw
+		};
+
+
+		mixerDict = IdentityDictionary(know: true);
+
+		mixers.do{ |mixer, i|
+			var ctlFadeArr = [];
+			postf("mixer %\n", i);
+
+			// each mixer can have multiple ctlFades
+			mixer.ctlFades.do{ |ctlfade, j|
+				postf("\tctlfade %\n", j);
+				ctlFadeArr = ctlFadeArr.add(
+					IdentityDictionary( know: true ).putPairs([
+						\min, ctlfade.low,
+						\max, ctlfade.high,
+						\signal, ctlfade.lfo,
+						\freq, ctlfade.freq,
+						\val, ctlfade.value,
+						\scale, ctlfade.scale,
+						\offset, ctlfade.offset,
+						\mix, ctlfade.amp,
+					])
+				)
+			};
+
+			mixerDict.put( mixer.broadcastTag.asSymbol, ctlFadeArr);
+		};
+
+		arch.put( key.asSymbol ?? {Date.getDate.stamp.asSymbol},
+			IdentityDictionary( know: true ).put( \mixers, mixerDict )
+		);
+
+		keyValPairs !? {
+			keyValPairs.clump(2).do{ |kvArr| ctlInfoDict.put(kvArr[0].asSymbol, kvArr[1]) };
+		};
+
+		postf("Preset Stored\n%\n", key);
+		arch[key].keysValuesDo{|k,v| [k,v].postln;}
+	}
+
+	prRecallCtlFaderState { | mixer, faderStates |
+		var kind, ctlFade;
+
+		faderStates.do{ |fDict, fDex|
+
+			ctlFade = mixer.ctlFades[fDex];
+
+			// static or lfo?
+			if( fDict[\signal] == 'static' )
+			{	// just recall the static val
+				ctlFade.value_(fDict[\val])
+			}
+			{	// recall the lfo with bounds, etc...
+				ctlFade.lfo_(fDict[\signal], fDict[\freq], fDict[\min], fDict[\max])
+			};
+
+			// recall mix, scale offset
+			ctlFade.scale_(fDict[\scale]);
+			ctlFade.offset_(fDict[\offset]);
+			ctlFade.amp_(fDict[\mix]);
+		}
+	}
+
+	recallPreset { |key|
+		var p;
+		block { |break|
+
+			p = this.archive[key] ?? {"Preset not found".error; break.()};
+
+			p[\mixers].keysValuesDo({ |ptag, faderStates|
+				var recalled=false;
+				postf("recalling mixer %\n", ptag.asString);
+
+				fork({ var cond = Condition();
+					mixers.do{ |mixer, i|
+
+						if( mixer.broadcastTag.asSymbol == ptag ){
+							// check that the current mixer has the same number of controlfaders as the preset
+							var numFadersDiff = faderStates.size - mixer.ctlFades.size;
+
+							case
+							{numFadersDiff > 0}{
+								// recall presets, adding numFadersDiff controls to update
+								numFadersDiff.do{
+									mixer.addCtl(finishCond: cond);
+									cond.wait; 0.1.wait; // wait a little extra time for fade synth to start
+								};
+							}
+							{numFadersDiff < 0}{
+								numFadersDiff.abs.do{
+									"removing a control".postln;
+									mixer.ctlFades.last.release(freeBus: false);
+									mixer.ctlFades.removeAt(mixer.ctlFades.size-1);
+									mixer.ctlViews.last.remove;
+								};
+							};
+
+							this.prRecallCtlFaderState( mixer, faderStates );
+
+							recalled =true
+						};
+					};
+
+					recalled.not.if{
+						error( format(
+							"No mixer found in the current layout to set the preset tag % not found in current setup",
+							ptag ) );
+						// TODO add a mixer that was not found present, remove present mixers that aren't in the preset
+					};
+				}, AppClock );
+			});
+		}
+	}
+
+
 	// updatePreset {
 	// 	lastUpdated.notNil.if({
 	// 		this.storePreset( lastRecalledSynthDex, lastUpdated, true );
@@ -439,68 +615,10 @@ ControlMixer {
 	// 			"last updated key is not known".warn
 	// 	});
 	// }
-	//
-	//
-	// removePreset { |key|
-	//
-	// 	Archive.global[\grainFaderStates][key] ?? {
-	// 		format("preset % not found!", key).error
-	// 	};
-	//
-	// 	Archive.global[\grainFaderStates].removeAt(key)
-	// }
-}
 
-ControlMixMaster {
-	// copyArgs
-	var broadcastTags, broadcastNetAddr, broadcastRate, server;
-	var <win, <mixers, mixWidth = 320;
 
-	*new { |broadcastTags="/myControlVal", broadcastNetAddr, broadcastRate=15, server|
-		^super.newCopyArgs(broadcastTags, broadcastNetAddr, broadcastRate, server).init
-	}
-
-	init {
-		broadcastNetAddr ?? {broadcastNetAddr = NetAddr("localhost", NetAddr.langPort)};
-		server = server ?? Server.default;
-
-		mixers = [];
-
-		server.waitForBoot({
-
-			this.makeWin;
-
-			broadcastTags.asArray.do({ |tag|
-				this.addMixer(tag, broadcastNetAddr , broadcastRate, server);
-			});
-		});
-	}
-
-	addMixer { |sendToNetAddr, oscTag="/myControlVal", sendRate=15, server|
-		var mixer;
-		var loadCond = Condition();
-		sendToNetAddr ?? {sendToNetAddr = NetAddr("localhost", NetAddr.langPort)};
-		server = server ?? Server.default;
-
-		{
-			// win.setInnerExtent( win.view.bounds.width + mixWidth );
-			mixer = ControlMixer(sendToNetAddr, oscTag, sendRate, server, loadCond);
-			mixers = mixers.add(mixer);
-			loadCond.wait;
-			win.layout.add( mixer.mixView.postln; );
-		}.fork(AppClock);
-	}
-
-	makeWin {
-
-		win = Window("Broadcast Controls", Rect(0,0,mixWidth,100)).layout_(
-			HLayout().margins_(2).spacing_(2)
-		).onClose_({ this.free });
-
-		win.front;
-	}
-
-	free {
-		mixers.do(_.free);
+	removePreset { |key|
+		Archive.global[\roverPresets][key] ?? { format("preset % not found!", key).error };
+		Archive.global[\roverPresets].removeAt(key)
 	}
 }
