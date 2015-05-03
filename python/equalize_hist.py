@@ -70,9 +70,9 @@ def mp_equalize(srcs, nprocs):
             eqimg = equalize(img)
 
             fname, ext = os.path.splitext(os.path.basename(imgfile))
-            eqfile = os.path.join(outpath, fname+"_eq"+ext.lower())
+            eqfile = os.path.join(outpath, fname+ext.lower())
             cv2.imwrite(eqfile, eqimg)
-            print ".",
+            sys.stdout.write(".")
             sys.stdout.flush()
                         
         out_q.put(outdict)
@@ -108,12 +108,11 @@ if __name__ == '__main__':
 
     # Define command line argument interface
     parser = argparse.ArgumentParser(description='equalize intensity of rover images')
-    parser.add_argument('inpath', help='path to input images')
     parser.add_argument('outpath', help='output path to equalized images')
+    parser.add_argument('files', nargs='*', help='glob of input files')
     
     args = parser.parse_args()
 
-    imagedir = args.inpath  # directory of input images
     outpath = args.outpath    # out path to save the results
     
     # create output paths as necessary
@@ -121,9 +120,10 @@ if __name__ == '__main__':
         os.makedirs(outpath)
     
     # read image filenames
-    img_files = readImageFilenames(imagedir)
+    # img_files = readImageFilenames(imagedir)
+    img_files = args.files
     
-    mp_equalize(img_files, 4)
+    mp_equalize(img_files, 8)
         
     # for imgfile in img_files:
     #     img = cv2.imread(imgfile)

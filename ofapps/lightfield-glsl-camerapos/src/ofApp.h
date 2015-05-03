@@ -4,6 +4,9 @@
 #include "ofMain.h"
 #include "ofxOsc.h"
 
+#define MAX_SUBIMAGES 600
+#define MAX_OFFSETS 1200
+
 class ofApp : public ofBaseApp{
 public:
     
@@ -52,11 +55,9 @@ public:
     float minScale, maxScale;
     float xoffset, yoffset;
     
-    float offsets[500];
+    float offsets[MAX_OFFSETS];
     
-    bool bDrawThumbnail;
+    bool bShowThumbnail;
     bool bHideCursor;
     bool bDebug;
-    
-
 };

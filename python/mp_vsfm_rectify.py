@@ -175,7 +175,7 @@ def write_blank(src):
     cv2.imwrite(thumb_file, thumb_img)
     
     
-def mp_warp(srcs, params, R_avg, C_avg, nprocs):
+def mp_warp(srcs, params, R_avg, C_avg, nprocs=8):
     
     def worker(srcs, params, R_avg, C_avg, out_q):
         """ The worker function, invoked in a process. 'srcs' is a
@@ -189,11 +189,14 @@ def mp_warp(srcs, params, R_avg, C_avg, nprocs):
 
         for src in srcs:
             src_fname = os.path.basename(src)
+            # src_fname = os.path.basename(src)[:-7]+".jpg"
+            # sys.stdout.write(src_fname)
             if src_fname in params.keys():
                 outdict[src] = warpAvg(src, params[src_fname], R_avg, C_avg)
+                sys.stdout.write(".")
             else:
                 write_blank(src)
-            sys.stdout.write(".")
+                sys.stdout.write("*")
             sys.stdout.flush()
             
         out_q.put(outdict)
@@ -239,7 +242,6 @@ def warpAvg(src, params, R_avg, C_avg):
 
     # name, ext = os.path.splitext(os.path.basename(src))
     # eq_img = os.path.join(undistortpath, name + "_eq.jpg")
-    #print eq_img
     # src_img_rgb = cv2.imread(eq_img)
 
     src_img_rgb = cv2.imread(src)
@@ -275,7 +277,7 @@ def warpAvg(src, params, R_avg, C_avg):
     # print R_rod_12
 
     # switch order of 2nd and 3rd rotation
-    R_rod_12 = np.array([R_rod_12[0], R_rod_12[1], -1 * R_rod_12[2]])
+    R_rod_12 = np.array([R_rod_12[0], R_rod_12[1], -1*R_rod_12[2]])
     
     #lprint R_rod_12
     
@@ -341,7 +343,7 @@ def warpAvg(src, params, R_avg, C_avg):
     trans[2,2] += w
 
     # adjustment to focal length
-    fscale = 0.8
+    fscale = 1.0#0.8
     K = np.array([[f1*fscale], [0], [w/2],
                   [0], [f1*fscale], [h/2],
                   [0], [0], [1]]).reshape(3,3)
@@ -370,7 +372,7 @@ def warpAvg(src, params, R_avg, C_avg):
 
     fname, ext = os.path.splitext(os.path.basename(src))
     warp_file = os.path.join(warpedpath, fname+"_warp"+ext.lower())
-    cv2.imwrite(warp_file, src_img_warp)
+    cv2.imwrite(warp_file, src_img_warp, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
     
     # generate thumbnail
     acq_w, acq_h = acq_grid
@@ -379,20 +381,22 @@ def warpAvg(src, params, R_avg, C_avg):
     
     thumb_img = cv2.resize(src_img_warp, (thumb_w, thumb_h))
     thumb_file = os.path.join(thumbpath, fname+ext.lower())
-    cv2.imwrite(thumb_file, thumb_img)
+    cv2.imwrite(thumb_file, thumb_img, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
 
     # return (warp_file, thumb_file)
                
 
-def generate_contact_sheet(reorder = None):
+def generate_contact_sheet(files, reorder = None):
     global thumbpath, max_texture_size, grid_h, grid_w, num_textures, contactimg_file
     
     # generate tiled image
-    thumbstr = "image{0:04d}.jpg"
-    thumb_file = os.path.join(thumbpath, thumbstr.format(1))
+    # thumbstr = "image{0:04d}_eq.jpg"
+    thumbstr = os.path.basename(files[0])
+    thumb_file = os.path.join(thumbpath, thumbstr)
     thumb_img = cv2.imread(thumb_file)
     thumb_h, thumb_w, thumb_chan = thumb_img.shape
-
+    # print thumbstr
+    
     max_texture_w = max_texture_size
     max_texture_h = thumb_h * grid_h
 
@@ -411,20 +415,22 @@ def generate_contact_sheet(reorder = None):
               if reorder != None:
                   #print num
                   num = reorder[num]
-              thumb_file = os.path.join(thumbpath, thumbstr.format(num))
-              # print thumb_file,
-              if os.path.exists(thumb_file):
-                  thumb_img = cv2.imread(thumb_file)
-                  thumb_h, thumb_w, thumb_chan = thumb_img.shape
-                  x = i * thumb_w
-                  y = j * thumb_h
-                  # print x,y, thumb_w ,thumb_h
-                  # print contact_img.shape
-                  contact_img[y:(y+thumb_h), x:(x+thumb_w)] = thumb_img
+              if num < len(files):
+                  thumbstr = os.path.basename(files[num])
+                  thumb_file = os.path.join(thumbpath, thumbstr)              
+                  # print thumb_file
+                  if os.path.exists(thumb_file):
+                      thumb_img = cv2.imread(thumb_file)
+                      thumb_h, thumb_w, thumb_chan = thumb_img.shape
+                      x = i * thumb_w
+                      y = j * thumb_h
+                      # print x,y, thumb_w ,thumb_h
+                      # print contact_img.shape
+                      contact_img[y:(y+thumb_h), x:(x+thumb_w)] = thumb_img
 
         print "writing contact image", contact_img.shape, "to",
-        fname, ext = os.path.splitext(contactimg_file)
-        contactimg_file = fname+str(n)+ext
+        # fname, ext = os.path.splitext(contactimg_file)
+        # contactimg_file = fname+str(n)+ext
         print contactimg_file
         cv2.imwrite(contactimg_file, contact_img)
           
@@ -434,6 +440,7 @@ def write_camera_positions(camerapos, image_files, camresults, reorder = None):
     count = 0
     positions = []
     for src in image_files:
+        # src_fname = os.path.basename(src)[:-7]+".jpg"
         src_fname = os.path.basename(src)
         if src_fname in camresults.keys():
             C_src = camresults[src_fname][2]
@@ -441,6 +448,7 @@ def write_camera_positions(camerapos, image_files, camresults, reorder = None):
             ypos = C_avg[1]-C_src[2]
             positions.append((xpos, ypos))
             count = count + 1
+            # print xpos,ypos
 
     out_f = file(camerapos, 'w')
     out_f.write("<cameras>\n")
@@ -462,6 +470,7 @@ if __name__ == '__main__':
     parser.add_argument('reorder', help='order of acquisition (normal, wrap)')
     parser.add_argument('camerapos', help='output file for list of camera positions')
     parser.add_argument('contactimg', help='output file for contact sheet image')
+    parser.add_argument('files', nargs='*', help='glob of input files')
     
     args = parser.parse_args()
 
@@ -472,12 +481,13 @@ if __name__ == '__main__':
 
     gridstr = args.grid     # grid layout
     order = args.reorder    # arugment order
-
+    
     # directory of undistorted images
     undistortpath = os.path.join(args.datapath, 'undistorted') 
 
     # results of N-view match from Visual SFM in windows
-    camerasfile = os.path.join(args.datapath, "results/results.cmvs/00/cameras_v2.txt") 
+    camerasfile = os.path.join(args.datapath, "results/results.nvm.cmvs/00/cameras_v2.txt") 
+    
     
     # output paths to save the results
     warpedpath = os.path.join(args.datapath, 'warped')    
@@ -492,6 +502,10 @@ if __name__ == '__main__':
     if not os.path.exists(thumbpath):
         os.makedirs(thumbpath)
     
+    # read image filenames
+    #image_files = readImageFilenames(imagedir)
+    image_files = args.files
+    
     # grid
     grid_w, grid_h = gridstr.split("x")
     grid_w = int(grid_w)
@@ -503,11 +517,11 @@ if __name__ == '__main__':
     num_textures = 1
     acq_grid = (grid_w, grid_h)
 
-    # read image filenames
-    image_files = readImageFilenames(imagedir)
-
+    
     # read Cameras V2 file (results from VSFM)    
     camresults, R_avg, C_avg = readCamerasV2File(camerasfile)
+    
+    # print camresults.keys()
     
     # rectify images
     results = mp_warp(image_files, camresults, R_avg, C_avg, 8)
@@ -524,9 +538,8 @@ if __name__ == '__main__':
                 reorder += range((i+1)*grid_w-1,i*grid_w-1, -1)
 
         #print reorder
-    
         # make contact sheet
-        generate_contact_sheet(reorder)
+        generate_contact_sheet(image_files, reorder)
 
         # export camera center coordinates    
         write_camera_positions(camerapos, image_files, camresults, reorder)
@@ -534,7 +547,7 @@ if __name__ == '__main__':
     else:
         
         # make contact sheet
-        generate_contact_sheet()#reorder)
+        generate_contact_sheet(image_files)#reorder)
 
         # export camera center coordinates    
         write_camera_positions(camerapos, image_files, camresults)#, reorder)

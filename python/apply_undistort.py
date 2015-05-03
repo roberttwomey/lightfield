@@ -93,7 +93,8 @@ if __name__ == '__main__':
     d = dist_coeffs
     
     print "Undistorting images...",
-    mp_undistort(files, K, d, outpath)
+    mp_undistort(files, K, d, outpath, 8)
+
     print "done!"
     
     # print "Undistorting images...",
