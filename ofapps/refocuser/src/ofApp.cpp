@@ -1,54 +1,17 @@
 #include "ofApp.h"
 
-// make string
-#define STRINGIFY(A) #A
-
-// process other macros then make string
-#define EXPAND_AND_QUOTE(A) STRINGIFY(A)
-
 
 //--------------------------------------------------------------
 void ofApp::setup(){
 
     ofEnableAlphaBlending();
 //    loadXMLSettings("./textures/dark_trees_calib.xml");
-//    loadXMLSettings("./textures/yellowcliff.xml");
-  loadXMLSettings("./textures/cliffside.xml");
+//    loadXMLSettings("./textures/yellowcliff_sm.xml");
+    loadXMLSettings("./textures/cliffside.xml");
 
     loadLFImage();
 
     graphicsSetup();
-
-    // initialize refocus shader
-
-    shader.begin();
-
-    shader.setUniformTexture("lftex", lfplane, 1);
-
-    shader.setUniform2f("resolution", subwidth, subheight);
-    shader.setUniform2i("subimages", xsubimages, ysubimages);
-
-    int numCams = xsubimages * ysubimages;
-//    shader.setUniform2fv("cam_positions", offsets, num_cams);//count);
-
-    // 1. Making arrays of float pixels with position information
-    float * pos = new float[numCams*3];
-    for (int x = 0; x < xsubimages; x++){
-        for (int y = 0; y < ysubimages; y++){
-            int i = x + y * xsubimages;//
-
-            pos[i*3 + 0] = offsets[i*2];
-            pos[i*3 + 1] = offsets[i*2 +1]; //y*offset;
-            pos[i*3 + 2] = 0.0;
-        }
-    }
-
-    cam_positions.allocate(xsubimages, ysubimages, GL_RGB);
-    cam_positions.getTextureReference().loadData(pos, xsubimages, ysubimages, GL_RGB);
-    delete pos;
-
-    shader.setUniformTexture("campos_tex", cam_positions, 2);
-    shader.end();
 
     // OSC - listen on the given port
     cout << "listening for osc messages on port " << port << "\n";
@@ -77,7 +40,7 @@ void ofApp::update(){
 
     // zoom / pan
     shader.setUniform1f("zoom", zoom);
-    shader.setUniform2f("pixroll", xoffset, yoffset);
+    shader.setUniform2f("roll", xoffset, yoffset);
 
     maskFbo.draw(0,0);
 
@@ -184,7 +147,7 @@ void ofApp::loadXMLSettings(string settingsfile) {
     // osc receiving
     port = xml.getValue("oscport", 12345);
 
-    // cameras
+    // read camera positions
     xml.pushTag("cameras");
     for(int i = 0; i < xml.getNumTags("cam"); i++) {
         xml.pushTag("cam", i);
@@ -196,6 +159,7 @@ void ofApp::loadXMLSettings(string settingsfile) {
         xml.popTag();
     }
     xml.popTag();
+    
 }
 
 void ofApp::loadLFImage() {
@@ -213,11 +177,7 @@ void ofApp::graphicsSetup() {
     fbo.allocate(subwidth,subheight);
     maskFbo.allocate(subwidth,subheight);
 
-    //  shader.load("test.vert", "test.frag");
-    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "refocus.frag");
-    shader.linkProgram();
-
-    // LetÇs clear the FBOÇs
+    // Lets clear the FBOs
     // otherwise it will bring some junk with it from the memory
     fbo.begin();
     ofClear(0,0,0,255);
@@ -227,13 +187,51 @@ void ofApp::graphicsSetup() {
     ofClear(0,0,0,255);
     maskFbo.end();
 
+    // load camera positions into texture
+    int numCams = xsubimages * ysubimages;
+    
+    // make array of float pixels with camera position information
+    float * pos = new float[numCams*3];
+    for (int x = 0; x < xsubimages; x++){
+        for (int y = 0; y < ysubimages; y++){
+            int i = x + (y * xsubimages);
+            
+            pos[i*3 + 0] = offsets[i*2];
+            pos[i*3 + 1] = offsets[i*2+1]; //y*offset;
+            pos[i*3 + 2] = 0.0;
+        }
+    }
+    
+    campos_tex.allocate(xsubimages, ysubimages, GL_RGB32F);
+    campos_tex.getTextureReference().loadData(pos, xsubimages, ysubimages, GL_RGB);
+    delete pos;
+    
+
+    // setup refocus shader
+    //  shader.load("test.vert", "test.frag");
+    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "refocus.frag");
+    shader.linkProgram();
+    
+
+    shader.begin();
+    
+    // camera images
+    shader.setUniformTexture("lftex", lfplane, 1);
+    
+    shader.setUniform2f("resolution", subwidth, subheight);
+    shader.setUniform2i("subimages", xsubimages, ysubimages);
+    
+    shader.setUniformTexture("campos_tex", campos_tex, 2);
+    shader.end();
+
+  
     //    GLint maxTextureSize;
     //    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
     //    std::cout <<"Max texture size: " << maxTextureSize << std::endl;
-
-//        GLint v_maj;
-//    glGetIntegerv(GL_MAJOR_VERSION, &v_maj);
-//        std::cout <<"gl major version: " << v_maj << std::endl;
+    
+    //        GLint v_maj;
+    //    glGetIntegerv(GL_MAJOR_VERSION, &v_maj);
+    //        std::cout <<"gl major version: " << v_maj << std::endl;
 
 }
 

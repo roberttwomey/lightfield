@@ -25,7 +25,7 @@ public:
     int port;
 
     ofImage lfplane;
-    ofFbo cam_positions;
+    ofFbo campos_tex;
 
     ofDirectory dir;
 
