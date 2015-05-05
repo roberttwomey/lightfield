@@ -49,7 +49,7 @@ ControlPlotter {
 		var argTemplate;
 		pLength = (plotLength / busindex.size ).asInt;
 		monval = Array.fill(busindex.size, 0);
-		pFunc = { server.listSendMsg( ["/c_get"]++busindex ); monval };
+		pFunc = { server.listSendMsg( ["/c_get"]++busindex ); monval  };
 
 		argTemplate = [busindex, Array.fill(busindex.size, nil)].lace(busindex.size*2);
 		responder = OSCFunc({ |msg, time, addr, recvPort|

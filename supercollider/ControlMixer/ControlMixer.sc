@@ -76,10 +76,17 @@ ControlMixer {
 
 		ctlFades = ctlFades.add(ctl);
 
-		view = View().background_(mixColor).maxHeight_(125)
+		view = View().background_(mixColor).maxHeight_(205)
 		.layout_(
 			VLayout(
-
+				HLayout(
+					[ VLayout(
+						// StaticText().string_("Signal"),
+						sigPUp = PopUpMenu().maxWidth_(125).maxHeight_(17)
+					).spacing_(0), a: \left ],
+					nil,
+					[ rmvBut = Button().states_([["X", Color.black, Color.red]]).fixedWidth_(nBoxWidth/2).fixedHeight_(nBoxWidth/2), a: \topRight]
+				),
 				HLayout(
 					[ VLayout(
 						StaticText().string_("min"),
@@ -89,51 +96,44 @@ ControlMixer {
 						StaticText().string_("max"),
 						maxBx = NumberBox().fixedWidth_(nBoxWidth)
 					).spacing_(0), a: \left ],
-					[ VLayout(
-						StaticText().string_("Signal"),
-						sigPUp = PopUpMenu().maxWidth_(125)
-					).spacing_(0), a: \left ],
-					[ VLayout(
-						StaticText().string_("period").align_(\center),
-						periodChk = CheckBox().fixedWidth_(15),
-					).spacing_(0), a: \left ],
-
 					nil,
 					[ VLayout(
 						StaticText().string_("StaticVal").align_(\left),
 						valBx = NumberBox().fixedWidth_(nBoxWidth*1.2)
 					).spacing_(5), a: \right ],
-					nil,
-					[ rmvBut = Button().states_([["X", Color.black, Color.red]]).fixedWidth_(nBoxWidth/2).fixedHeight_(nBoxWidth/2), a: \topRight]
 				),
 				HLayout(
+					[ VLayout(
+						rateTxt = StaticText().string_("Rate(sec)"),
+						rateBx = NumberBox().fixedWidth_(nBoxWidth*1.5),
+					).spacing_(0), a: \left ],
+					[ VLayout(
+						StaticText().string_("period").align_(\center),
+						periodChk = CheckBox().fixedWidth_(15),
+					).spacing_(0), a: \left ],
+					nil
+				),
+				rateSl = Slider().orientation_(\horizontal).maxHeight_(25).minWidth_(120),
+				HLayout(
 					VLayout(
-						HLayout(
-							[ VLayout(
-								rateTxt = StaticText().string_("Rate(sec)"),
-								rateBx = NumberBox().fixedWidth_(nBoxWidth*1.5),
-							).spacing_(0), a: \left ],
-							rateSl = Slider().orientation_(\horizontal).maxHeight_(25).minWidth_(120),
-						),
-						HLayout(
-							VLayout(
-								StaticText().string_("scale").align_(\center),
-								sclBx = NumberBox().fixedWidth_(nBoxWidth),
-							).spacing_(0),
-							sclKnb = Knob().mode_(\vert).centered_(true),
-							VLayout(
-								StaticText().string_("offset").align_(\center),
-								offsBx = NumberBox().fixedWidth_(nBoxWidth),
-							).spacing_(0),
-							offsKnb = Knob().mode_(\vert).centered_(true),
-							nil,
-							VLayout(
-								StaticText().string_("mix").align_(\right).fixedWidth_(nBoxWidth),
-								mixBx = NumberBox().fixedWidth_(nBoxWidth).maxWidth_(50),
-							).spacing_(0),
-							mixKnb = Knob().mode_(\vert),
-						)
-					),
+						StaticText().string_("scale").align_(\center),
+						sclBx = NumberBox().fixedWidth_(nBoxWidth),
+					).spacing_(0),
+					sclKnb = Knob().mode_(\vert).centered_(true),
+					VLayout(
+						StaticText().string_("offset").align_(\center),
+						offsBx = NumberBox().fixedWidth_(nBoxWidth),
+					).spacing_(0),
+					offsKnb = Knob().mode_(\vert).centered_(true),
+				),
+				HLayout(
+					nil,
+					[VLayout(
+						StaticText().string_("mix").align_(\right).fixedWidth_(nBoxWidth),
+						mixBx = NumberBox().fixedWidth_(nBoxWidth).maxWidth_(50),
+					).spacing_(0), a: \center],
+					[ mixKnb = Knob().mode_(\vert), a: \center],
+					nil
 				)
 			).margins_(4).spacing_(2)
 		);
@@ -267,12 +267,15 @@ ControlMixer {
 	makeView {
 		mixView = View().layout_(
 			VLayout(
-					ctlLayout = VLayout(
-						View().background_(idColor).layout_(
+				ctlLayout = VLayout(
+					[ View().background_(idColor).layout_(
+						VLayout(
 							HLayout(
 								[ msgTxt = TextField().string_(broadcastTag.asString).minWidth_(80), a: \left],
-								outValTxt = StaticText().string_("broadcast").align_(\left).fixedWidth_(55),
-
+								[ outValTxt = StaticText().string_("broadcast").background_(Color.gray.alpha_(0.25))
+									.align_(\left).fixedWidth_(55), a: \right],
+							),
+							HLayout(
 								[ StaticText().string_("Send OSC").align_(\right), a: \right],
 								[ broadcastChk = CheckBox().fixedWidth_(15), a: \right],
 
@@ -281,15 +284,18 @@ ControlMixer {
 
 								[ StaticText().string_("Plot").align_(\right), a: \right],
 								[ plotChk = CheckBox().fixedWidth_(15), a: \right],
+							)
+						).margins_(2)
+					).maxHeight_(66),
 
-							).margins_(2)
-						).maxHeight_(45),
-					).margins_(2),
-					Button().states_([["+"]]).action_({this.addCtl()})
-				).margins_(4).spacing_(3)
+					a: \top ]
+				).margins_(2),
+				[ Button().states_([["+"]]).action_({this.addCtl()}), a: \top ],
+				nil
+			).margins_(4).spacing_(3)
 		).maxWidth_(290);
 
-		msgTxt.action_({|txt|
+		msgTxt.action_({ |txt|
 			broadcastTag = (txt.value.asSymbol);
 		});
 
@@ -303,56 +309,15 @@ ControlMixer {
 
 	}
 
-	/*makeWin {
-
-		win = Window("Broadcast Controls", Rect(0,0,320,100)).layout_(
-			VLayout(
-				ctlLayout = VLayout(
-					View().background_(Color.rand).layout_(
-						HLayout(
-							[ msgTxt = TextField().string_(broadcastTag.asString).minWidth_(65), a: \left],
-							nil,
-
-							outValTxt = StaticText().string_("broadcast").align_(\left).fixedWidth_(80),
-							nil,
-
-							[ StaticText().string_("Send OSC").align_(\right), a: \right],
-							[ broadcastChk = CheckBox().fixedWidth_(15), a: \right],
-
-							[ StaticText().string_("Hz").align_(\right), a: \right],
-							[ updateBx = NumberBox().fixedWidth_(nBoxWidth), a: \right],
-
-							[ StaticText().string_("Plot").align_(\right), a: \right],
-							[ plotChk = CheckBox().fixedWidth_(15), a: \right],
-
-						).margins_(2)
-					).maxHeight_(45),
-				).margins_(2),
-				Button().states_([["+"]]).action_({this.addCtl()})
-			).margins_(4).spacing_(3)
-		).onClose_({ this.free });
-
-		msgTxt.action_({|txt|
-			broadcastTag = (txt.value.asSymbol);
-		});
-
-		broadcastChk.action_({|chk| broadcasting = chk.value.asBoolean });
-		plotChk.action_({|chk| chk.value.asBoolean.if({plotter.start},{plotter.stop}) }).value_(1);
-
-		updateBx.action_({ |bx|
-			broadcastRate = bx.value;
-			broadcastWaittime = broadcastRate.reciprocal;
-		}).value_(broadcastRate);
-
-		win.front;
-	}*/
 
 	addPlotter { |plotLength=75, refeshRate=24|
 		var view;
 		plotter = ControlPlotter( busnum, 1, plotLength, refeshRate).start;
 		view = plotter.mon.plotter.parent.view;
-		mixView.layout.add( view.minHeight_(view.bounds.height) );
-
+		view.fixedHeight_(225);
+		// mixView.layout.add( view.minHeight_(view.bounds.height) );
+		mixView.layout.insert( view.minHeight_(view.bounds.height), 0 );
+		//mixView.layout.setAlignment(0, \top);
 		{0.4.wait; this.updatePlotterBounds;}.fork(AppClock);
 		plotterAdded = true;
 	}
@@ -394,7 +359,7 @@ ControlMixer {
 ControlMixMaster {
 	// copyArgs
 	var broadcastTags, broadcastNetAddr, broadcastRate, server;
-	var <win, <mixers, mixWidth = 320;
+	var <win, <mixers;
 
 	*new { |broadcastTags="/myControlVal", broadcastNetAddr, broadcastRate=15, server|
 		^super.newCopyArgs(broadcastTags, broadcastNetAddr, broadcastRate, server).init
@@ -437,7 +402,7 @@ ControlMixMaster {
 
 	makeWin {
 
-		win = Window("Broadcast Controls", Rect(0,0,mixWidth,100)).layout_(
+		win = Window("Broadcast Controls", Rect(Window.screenBounds.width / 2, Window.screenBounds.height, 100, 100), scroll: true).layout_(
 			HLayout().margins_(2).spacing_(2)
 		).onClose_({ this.free });
 

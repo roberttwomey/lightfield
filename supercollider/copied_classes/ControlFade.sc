@@ -95,40 +95,51 @@ ControlFade {
 		}
 	}
 
+	// for static values
+	value_ { |val, thisFadeTime|
+		val !? {
+			switch( mixSynth.ctlSrcDex,
+				// static > static
+				0, { mixSynth.staticLag_(thisFadeTime ?? fadeTime).staticVal_(val) },
+				// lfo > static
+				1, { mixSynth.staticLag_(0).staticVal_(val) }
+			);
+			this.changed(\staticVal, val);
+			this.source_('static', thisFadeTime);
+		}
+	}
+
 	// add a scale/offset to the mixed output signal
-	scale_ {|mul| mixSynth.scale_(mul) }
-	offset_ {|add| mixSynth.offset_(add) }
-	amp_ {|ampScalar| mixSynth.amp_(ampScalar) }
+	scale_ {|mul| mixSynth.scale_(mul); this.changed(\scale, mul) }
+	scale { ^mixSynth.scale }
+	offset_ {|add| mixSynth.offset_(add); this.changed(\offset, add) }
+	offset {^mixSynth.offset }
+	amp_ {|mul| mixSynth.amp_(mul); this.changed(\amp, mul) }
+	amp {^mixSynth.amp }
 
 	freq_ { |freq, thisFadeTime| freq !? {
 		lfoSynths[mixSynth.lfoDex].lag_(thisFadeTime ?? fadeTime).freq_(freq);
+		this.changed(\freq, freq)
 	}}
 	low_ { |low, thisFadeTime| low !? {
 		lfoSynths[mixSynth.lfoDex].lag_(thisFadeTime ?? fadeTime).low_(low);
+		this.changed(\low, low)
 	}}
 	high_ { |high, thisFadeTime| high !? {
 		lfoSynths[mixSynth.lfoDex].lag_(thisFadeTime ?? fadeTime).high_(high);
+		this.changed(\high, high)
 	}}
-
-	freq { ^lfoSynths[mixSynth.lfoDex].freq }
-	low { ^lfoSynths[mixSynth.lfoDex].low }
-	high { ^lfoSynths[mixSynth.lfoDex].high }
 
 	// for updating both high and low
 	lfoBounds_ { |low, high, thisFadeTime|
-		var lfoSynth = lfoSynths[mixSynth.lfoDex];
-		lfoSynth.lag_(thisFadeTime ?? fadeTime);
-		low !? {lfoSynth.low_(low)};
-		high !? {lfoSynth.high_(high)};
+		this.low_(low, thisFadeTime);
+		this.high_(high, thisFadeTime);
 	}
 
 	// for updating more than one param
 	lfoParams_ { |freq, low, high, thisFadeTime|
-		var lfoSynth = lfoSynths[mixSynth.lfoDex];
-		lfoSynth.lag_(thisFadeTime ?? fadeTime);
-		freq !? {lfoSynth.freq_(freq)};
-		low !? {lfoSynth.low_(low)};
-		high !? {lfoSynth.high_(high)};
+		this.freq_(freq, thisFadeTime);
+		this.lfoBounds_(low, high, thisFadeTime);
 	}
 
 	// set the lfo, new or individual params
@@ -191,6 +202,7 @@ ControlFade {
 							}
 						);
 						server.sync;
+						this.changed(\lfo, ugen.asSymbol);
 					}
 				);
 				// (thisFadeTime ?? fadeTime).wait?
@@ -200,25 +212,25 @@ ControlFade {
 		},{ warn("Ugen not found in list of available LFO types. Ugen required for new LFO")});
 	}
 
-	// for static values
-	value_ { |val, thisFadeTime|
-		val !? {
-			switch( mixSynth.ctlSrcDex,
-				// static > static
-				0, { mixSynth.staticLag_(thisFadeTime ?? fadeTime).staticVal_(val) },
-				// lfo > static
-				1, { mixSynth.staticLag_(0).staticVal_(val) }
-			);
-			this.changed(\staticVal, val);
-			this.source_('static', thisFadeTime);
-		}
+	freq { ^lfoSynths[mixSynth.lfoDex].freq }
+	low { ^lfoSynths[mixSynth.lfoDex].low }
+	high { ^lfoSynths[mixSynth.lfoDex].high }
+
+	// get the current lfo
+	lfo {
+		^if( mixSynth.ctlSrcDex == 0 )
+		{ 'static' }
+		{ curLfoUgens[ mixSynth.lfoDex ] }
 	}
+
+	value { ^mixSynth.staticVal }
 
 	// toggle between the Lfos
 	toggleLfo { |thisFadeTime|
 		var nextLfoDex;
 		nextLfoDex = mixSynth.lfoDex + 1 % 2; // wrap btwn 0 & 1
 		mixSynth.lfoLag_(thisFadeTime ?? fadeTime).lfoDex_(nextLfoDex);
+		this.changed(\lfo, curLfoUgens[ nextLfoDex ]);
 	}
 
 	// toggle between the static and lfo sources
@@ -234,14 +246,16 @@ ControlFade {
 		{(which == 'static') or: (which == 0)}{
 			mixSynth.ctlFade_(thisFadeTime ?? fadeTime).ctlSrcDex_(0);
 			this.changed(\ctlSrcDex, 0);
+			this.changed(\lfo, 'static');
 		}
 		{(which == 'lfo') or: (which == 1)}{
 			mixSynth.ctlFade_(thisFadeTime ?? fadeTime).ctlSrcDex_(1);
 			this.changed(\ctlSrcDex, 1);
+			this.changed(\lfo, curLfoUgens[ mixSynth.lfoDex ]);
 		};
 	}
 
-	plot { |plotLength = 100, updateRate = 15|
+	plot { |plotLength = 75, updateRate = 15|
 		plotter = ControlPlotter(busnum, plotLength: plotLength, refresh_rate: updateRate).start;
 	}
 
