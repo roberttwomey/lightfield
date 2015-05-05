@@ -3,6 +3,8 @@ SerialPort.listDevices
 // Connect arduino to Computer
 a = ArduinoGRBL("/dev/tty.usbserial-A94JRL5D", 115200)
 
+a = ArduinoGRBL("/dev/tty.AdafruitEZ-Link418c-SPP", 115200)
+
 // home the first time around
 a.home
 // be ready if it wigs out:
@@ -12,7 +14,7 @@ a.unlock
 // set the homeing pulloff the first time around
 a.settings
 // pulloff should be less than the distance from the limit switch to the pulley
-a.send("$27=65")
+a.send("$27=52")
 
 // Turn on Rover
 // Connect to Rover_AP. pwd: roverrover
@@ -48,7 +50,7 @@ a.unlock
 // MachineX/Y:	after homing and pulling off, MachineX/Y machine coordinates (usually negative)
 // lengthA/B:	after homing and pulling off, lengthA and lengthB are the distance from the pulley to the middle Rover's width (where the cables would intersect if they extended)
 // camOffset:	offset from the end of the cable at the rover to the camera's center
-r.rigDimensions_(motorSeparation: 66, machineX: -135, machineY: -135, lengthA: 72.5, lengthB: 72.5) //, camOffset: 1.5 );
+r.rigDimensions_(motorSeparation: 56.125, machineX: -148, machineY: -148, lengthA: 62.25, lengthB: 61.5) //, camOffset: 1.5 );
 
 
 // check the state
@@ -65,7 +67,7 @@ a.state
 // captureSpanY: height of the capture plane
 // insetY: vertical offset from the rig's pulley height to the 0,0 camera capture position
 // nCols, nRows: number of rows and columns of subimages to capture
-r.captureDimensions_(captureSpanX: 30, captureSpanY: 20, insetY: 10, nCols: 5, nRows: 3 );
+r.captureDimensions_(captureSpanX: 32, captureSpanY: 30, insetY: 8, nCols: 22, nRows: 22 );
 
 
 // set Rover to capture in 1 of 3 ways:
@@ -75,7 +77,7 @@ r.captureDimensions_(captureSpanX: 30, captureSpanY: 20, insetY: 10, nCols: 5, n
 // 	rowsFirst, leftToRight, topDown, wrap,	<< bools to determine grid order
 //	displayPath << bool to show the resultant path order
 
-r.gridCapture( rowsFirst: true, leftToRight: true, topDown: true, wrap: true, displayPath: true )
+r.gridCapture( rowsFirst: true, leftToRight: true, topDown: false, wrap: true, displayPath: true )
 
 
 /*
@@ -131,7 +133,7 @@ r.customPathCapture( pointArray: p, displayPath: true)
 //	travelTimeOut,	<< time to wait to timeout in case anything goes wrong waiting for GRBL state to report "Idle"
 //	stateCheckRate	<< number of times GRBL state is queried per second when using auto-advance
 
-r.initCapture( autoAdvance: true, waitToSettle: 0.5, waitAfterPhoto: 1.0, travelTimeOut: 30, stateCheckRate: 5, writePosData: true, fileName: "test1")
+r.initCapture( autoAdvance: true, waitToSettle: 0.5, waitAfterPhoto: 1.5, travelTimeOut: 30, stateCheckRate: 5, writePosData: true, fileName: "dome")
 
 
 // TODO set this in RoverDriver class
@@ -143,6 +145,8 @@ a.feed_(500)
 // go to the location of the first capture point
 r.goToFirstCapturePoint
 
+a.unlock
+a.reset
 
 // logon to rover and check status of camera service
 // in terminal:
@@ -172,6 +176,8 @@ n.sendMsg("/camera", "exit")
 //"rsync -avz pi@rover.local:/home/pi/lfimages/* /Volumes/Work/Projects/lightfield/data/".unixCmd
 d = "rtest3"
 ("rsync -avz pi@rover.local:/home/pi/lfimages/* /Volumes/Work/Projects/lightfield/"++d++"/").unixCmd
+
+r.writeDataToFile(fileName:"dome")
 
 // for setting up the contact sheet, it's useful to read the data file:
 r.readDataFile( r.dataDir ++ "test1.txt", postResults: true )
@@ -227,8 +233,8 @@ a.send("$27=65")
 // get status as it moves
 x = Routine.run({ inf.do{a.state; 0.2.wait} })
 x.stop
-
-a.goTo_(0,0)
+a.feed_(500)
+a.goTo_(100,1000)
 
 r.captureTask.isPlaying
 

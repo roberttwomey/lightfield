@@ -1,4 +1,4 @@
-n = NetAddr("rover.local", 9000)
+/n = NetAddr("rover.local", 9000)
 
 // using raspifastcamd
 n.sendMsg("/camera", "start")

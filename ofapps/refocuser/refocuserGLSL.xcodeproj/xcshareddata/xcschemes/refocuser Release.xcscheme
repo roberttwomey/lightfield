@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "E4B69B5A0A3A1756003C02F2"
-               BuildableName = "lightfieldGLSL.app"
-               BlueprintName = "lightfieldGLSL"
-               ReferencedContainer = "container:lightfieldGLSL.xcodeproj">
+               BuildableName = "refocuserGLSL.app"
+               BlueprintName = "refocuserGLSL"
+               ReferencedContainer = "container:refocuserGLSL.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E4B69B5A0A3A1756003C02F2"
-            BuildableName = "lightfieldGLSL.app"
-            BlueprintName = "lightfieldGLSL"
-            ReferencedContainer = "container:lightfieldGLSL.xcodeproj">
+            BuildableName = "refocuserGLSL.app"
+            BlueprintName = "refocuserGLSL"
+            ReferencedContainer = "container:refocuserGLSL.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </TestAction>
@@ -53,9 +53,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E4B69B5A0A3A1756003C02F2"
-            BuildableName = "lightfieldGLSL.app"
-            BlueprintName = "lightfieldGLSL"
-            ReferencedContainer = "container:lightfieldGLSL.xcodeproj">
+            BuildableName = "refocuserGLSL.app"
+            BlueprintName = "refocuserGLSL"
+            ReferencedContainer = "container:refocuserGLSL.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E4B69B5A0A3A1756003C02F2"
-            BuildableName = "lightfieldGLSL.app"
-            BlueprintName = "lightfieldGLSL"
-            ReferencedContainer = "container:lightfieldGLSL.xcodeproj">
+            BuildableName = "refocuserGLSL.app"
+            BlueprintName = "refocuserGLSL"
+            ReferencedContainer = "container:refocuserGLSL.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
