@@ -2,11 +2,12 @@ ControlMixer {
 	// copyArga
 	var <broadcastTag, <broadcastAddr, <broadcastRate, <server, loadCond, colorShift;
 
-	var <busnum, ratePeriodSpec, <oscTag, <ctlFades, <ctlViews, outVal;
+	var <busnum, <oscTag, <ctlFades, <ctlViews, outVal;
+	var <ratePeriodSpec, <sclSpec, <offsSpec;
 	var <mixView, msgTxt, broadcastChk, plotChk, updateBx, outValTxt;
-	var nBoxWidth = 30, validLFOs, <plotter, <ctlLayout, plotterAdded = false;
+	var <nBoxWidth = 30, <validLFOs, <plotter, <ctlLayout, plotterAdded = false;
 	var broadcastBus, broadcastWaittime, broadcastTag, pollTask, broadcasting=false;
-	var baseColor, idColor, mixColor, colorStep;
+	var baseColor, idColor, <mixColor, colorStep;
 
 	*new { | broadcastTag="/myMessage", broadcastNetAddr, broadcastRate=15, server, loadCond, colorShift=0.03 |
 		^super.newCopyArgs( broadcastTag, broadcastNetAddr, broadcastRate, server, loadCond, colorShift ).init;
@@ -22,6 +23,7 @@ ControlMixer {
 		ctlViews = [];
 		server = server ?? Server.default;
 		this.prDefineColors;
+
 		server.waitForBoot({
 			busnum = server.controlBusAllocator.alloc(1);
 			postf("Creating ControlMixer to output to %\n", busnum);
@@ -34,6 +36,8 @@ ControlMixer {
 			].collect(_.asSymbol);
 
 			ratePeriodSpec = ControlSpec(15.reciprocal, 15, 2.5, default: 3);
+			sclSpec = ControlSpec(0, 2, 'lin', default: 1);
+			offsSpec = ControlSpec(-1, 1, 'lin', default: 0);
 
 			pollTask = Task({
 				inf.do{
@@ -53,30 +57,158 @@ ControlMixer {
 			pollTask.play;
 
 			this.makeView;
-
+			this.addPlotter;
 			this.addCtl;
+			{0.4.wait; this.updatePlotterBounds;}.fork(AppClock);
 
 			loadCond !? {loadCond.test_(true).signal};
 		});
 	}
 
-	addCtl { |min= -1, max=1, finishCond|
+	addCtl { |finishCond|
+		var ctl, completeFunc, faderView, loadCond = Condition();
+		completeFunc = { loadCond.test_(true).signal };
 
-		var ctl, view, sclSpec, offsSpec, updateOffset;
-		var minBx, maxBx, rateBx, rateSl, rateTxt, periodChk, mixBx;
-		var valBx, mixKnb, sigPUp, rmvBut, sclBx, sclKnb, offsBx, offsKnb, completeFunc;
-
-		sclSpec = ControlSpec(0, 2, 'lin', default: 1);
-		// offsSpec = ControlSpec(max.neg, max, 'lin', default: 0);
-		offsSpec = ControlSpec(-1, 1, 'lin', default: 0);
-
-		completeFunc = finishCond.notNil.if({ {finishCond.test_(true).signal} },{ {} });
-
+		fork({
 		ctl = ControlFade(fadeTime: 0.0, initVal: 0, busnum: busnum, server: server, onComplete: completeFunc);
+		loadCond.wait; loadCond.test_(false);
 
 		ctlFades = ctlFades.add(ctl);
 
-		view = View().background_(mixColor).maxHeight_(205)
+		// create the view for this controlFade
+		faderView = ControlMixFaderView(this, ctl, finishCond: loadCond);
+		loadCond.wait;
+
+		ctlLayout.add( faderView.view );
+		ctlViews = ctlViews.add( faderView.view );
+
+		finishCond !? {finishCond.test_(true).signal};
+		}, AppClock);
+	}
+
+	removeCtlFader { |ctl|
+		// var vHeight = view.bounds.height;
+
+		ctl.release(0.3, freeBus: false); // leave the bus running if others are writing to it
+
+		block{ |break| ctlFades.do{ |cFade, i|
+			if(cFade === ctl){
+				ctlFades.removeAt(i); "removing a ctl".postln;
+				ctlViews.removeAt(i); "removed ctl view".postln;
+				break.()
+			}
+		}};
+	}
+
+	makeView {
+		mixView = View().layout_(
+			VLayout(
+				ctlLayout = VLayout(
+					[ View().background_(idColor).layout_(
+						VLayout(
+							HLayout(
+								[ msgTxt = TextField().string_(broadcastTag.asString).minWidth_(80), a: \left],
+								[ outValTxt = StaticText().string_("broadcast").background_(Color.gray.alpha_(0.25))
+									.align_(\left).fixedWidth_(55), a: \right],
+							),
+							HLayout(
+								[ StaticText().string_("Send OSC").align_(\right), a: \right],
+								[ broadcastChk = CheckBox().fixedWidth_(15), a: \right],
+
+								[ StaticText().string_("Hz").align_(\right), a: \right],
+								[ updateBx = NumberBox().fixedWidth_(nBoxWidth), a: \right],
+
+								[ StaticText().string_("Plot").align_(\right), a: \right],
+								[ plotChk = CheckBox().fixedWidth_(15), a: \right],
+							)
+						).margins_(2)
+					).maxHeight_(66),
+
+					a: \top ]
+				).margins_(2),
+				[ Button().states_([["+"]]).action_({this.addCtl()}), a: \top ],
+				nil
+			).margins_(4).spacing_(3)
+		).maxWidth_(290);
+
+		msgTxt.action_({ |txt|
+			broadcastTag = (txt.value.asSymbol);
+		});
+
+		broadcastChk.action_({|chk| broadcasting = chk.value.asBoolean });
+		plotChk.action_({|chk| chk.value.asBoolean.if({plotter.start},{plotter.stop}) }).value_(1);
+
+		updateBx.action_({ |bx|
+			broadcastRate = bx.value;
+			broadcastWaittime = broadcastRate.reciprocal;
+		}).value_(broadcastRate);
+
+	}
+
+
+	addPlotter { |plotLength=75, refeshRate=24|
+		var view;
+		plotter = ControlPlotter( busnum, 1, plotLength, refeshRate).start;
+		view = plotter.mon.plotter.parent.view;
+		view.fixedHeight_(225);
+		// mixView.layout.add( view.minHeight_(view.bounds.height) );
+		mixView.layout.insert( view.minHeight_(view.bounds.height), 0 );
+		//mixView.layout.setAlignment(0, \top);
+		// {0.4.wait; this.updatePlotterBounds;}.fork(AppClock);
+		plotterAdded = true;
+	}
+
+	updatePlotterBounds {
+		var minbound, maxbound, range;
+		minbound = ctlFades.collect({ |ctl| ctl.low }).minItem;
+		maxbound = ctlFades.collect({ |ctl| ctl.high }).maxItem;
+		range = maxbound - minbound;
+		plotter.bounds_( minbound - (range * 0.25), maxbound + (range * 0.25) );
+	}
+
+	free {
+		ctlFades.do(_.free);
+		broadcastBus.free;
+		pollTask !? { pollTask.stop.clock.clear };
+	}
+
+	prDefineColors {
+		baseColor = Color.hsv(
+			// Color.newHex("BA690B").asHSV;
+			// Color.newHex("2C4770").asHSV;
+			0.60049019607843, 0.60714285714286, 0.43921568627451, 1 );
+
+		idColor = Color.hsv(
+			*baseColor.asHSV.put( 0, (baseColor.asHSV[0] + colorShift).wrap(0,1) )
+		);
+
+		mixColor = Color.hsv(
+			*idColor.asHSV
+			.put(3, 0.8)
+			.put(2, idColor.asHSV[2] * 1.35)
+			//.put(2, (baseColor.asHSV[2] * 1.4).clip(0,1))
+		);
+	}
+
+}
+
+ControlMixFaderView {
+	// copyArgs
+	var mixer, ctl, <min, <max, finishCond;
+	var <view, completeFunc, nBoxWidth;
+	// gui
+	var minBx, maxBx, rateBx, rateSl, rateTxt, periodChk, mixBx;
+	var valBx, mixKnb, sigPUp, rmvBut, sclBx, sclKnb, offsBx, offsKnb;
+
+	*new{ | mixer, controlFade, min= -1, max=1, finishCond|
+		^super.newCopyArgs(mixer, controlFade, min, max, finishCond).init;
+	}
+
+	init {
+		ctl.addDependant(this);
+		nBoxWidth = mixer.nBoxWidth;
+
+		view = View().background_(mixer.mixColor).maxHeight_(205)
 		.layout_(
 			VLayout(
 				HLayout(
@@ -138,38 +270,27 @@ ControlMixer {
 			).margins_(4).spacing_(2)
 		);
 
-		ctlLayout.add( view );
-		ctlViews = ctlViews.add(view);
-
-		// TODO: move this out, make ctl arg or make a class for each control
-		updateOffset = {
-			var range;
-			range = ctl.high - ctl.low;
-			offsSpec.minval_(range.half.neg);
-			offsSpec.maxval_(range.half);
-		};
-
 		// define the actions
 
 		minBx.action_({ |bx|
 			ctl.low_(bx.value);
 			max = bx.value;
-			this.updatePlotterBounds;
+			mixer.updatePlotterBounds;
 			// updateOffset.();
 		}).value_(min);
 
 		maxBx.action_({ |bx|
 			ctl.high_(bx.value);
 			max = bx.value;
-			this.updatePlotterBounds;
+			mixer.updatePlotterBounds;
 			// updateOffset.();
 		}).value_(max);
 
-		sigPUp.items_(validLFOs).action_({|sl|
+		sigPUp.items_(mixer.validLFOs).action_({|sl|
 			if( sl.item.asSymbol != 'static' )
 			{
 				var rateHz;
-				rateHz = ratePeriodSpec.map(rateSl.value).reciprocal;
+				rateHz = mixer.ratePeriodSpec.map(rateSl.value).reciprocal;
 				ctl.lfo_( sl.item.asSymbol, rateHz, minBx.value, maxBx.value)
 
 			}
@@ -181,12 +302,12 @@ ControlMixer {
 		rateSl.action_({ |sl|
 			var rateSec, rateHz;
 
-			rateSec = ratePeriodSpec.map(sl.value);
-			rateHz = ratePeriodSpec.map(sl.value).reciprocal;
+			rateSec = mixer.ratePeriodSpec.map(sl.value);
+			rateHz = mixer.ratePeriodSpec.map(sl.value).reciprocal;
 
 			ctl.freq_( rateHz );
 			rateBx.value_( periodChk.value.asBoolean.if({rateSec},{rateHz}) );
-		}).value_(ratePeriodSpec.unmap(ratePeriodSpec.default));
+		}).value_(mixer.ratePeriodSpec.unmap(mixer.ratePeriodSpec.default));
 
 		rateBx.action_({ |bx|
 			var rateSec, rateHz;
@@ -201,8 +322,8 @@ ControlMixer {
 			);
 			ctl.freq_( rateHz );
 
-			rateSl.value_( ratePeriodSpec.unmap(rateSec) );
-		}).value_(ratePeriodSpec.default).clipLo_(0.0);
+			rateSl.value_( mixer.ratePeriodSpec.unmap(rateSec) );
+		}).value_( mixer.ratePeriodSpec.default ).clipLo_(0.0);
 
 		periodChk.action_({ |chk|
 			var bool, curRateBx;
@@ -214,41 +335,30 @@ ControlMixer {
 
 		offsBx.action_({|bx|
 			ctl.offset_(bx.value);
-			offsKnb.value_(offsSpec.unmap(bx.value));
-		}).value_(offsSpec.default);
+			offsKnb.value_(mixer.offsSpec.unmap(bx.value));
+		}).value_(mixer.offsSpec.default);
 
 		offsKnb.action_({|knb|
-			var val = offsSpec.map(knb.value);
+			var val = mixer.offsSpec.map(knb.value);
 			ctl.offset_(val);
 			offsBx.value_(val);
-		}).value_(offsSpec.unmap(offsSpec.default));
+		}).value_(mixer.offsSpec.unmap(mixer.offsSpec.default));
 
 		sclBx.action_({|bx|
 			ctl.scale_(bx.value);
-			sclKnb.value_(sclSpec.unmap(bx.value));
+			sclKnb.value_(mixer.sclSpec.unmap(bx.value));
 
-		}).value_(sclSpec.default);
+		}).value_(mixer.sclSpec.default);
 
-		sclKnb.action_({|knb| var val = sclSpec.map(knb.value);
+		sclKnb.action_({|knb| var val = mixer.sclSpec.map(knb.value);
 			ctl.scale_(val);
 			sclBx.value_(val);
-		}).value_(sclSpec.unmap(sclSpec.default));
+		}).value_(mixer.sclSpec.unmap(mixer.sclSpec.default));
 
-
-		plotterAdded.not.if{ this.addPlotter };
 
 		rmvBut.action_({
-			var vHeight = view.bounds.height;
-			ctl.release(0.3, freeBus: false); // leave the bus running if others are writing to it
-
-			block{ |break| ctlFades.do{ |cFade, i|
-				if(cFade === ctl){
-					ctlFades.removeAt(i); "removing a ctl".postln;
-					ctlViews.removeAt(i); "removed ctl view".postln;
-					break.()
-				}
-			}};
-
+			ctl.removeDependant(this);
+			mixer.removeCtlFader(ctl);
 			fork({
 				view.remove;
 				0.1.wait;
@@ -262,104 +372,50 @@ ControlMixer {
 			ctl.amp_(val); mixBx.value_(val)
 		}).value_(1);
 
+		finishCond.test_(true).signal;
 	}
 
-	makeView {
-		mixView = View().layout_(
-			VLayout(
-				ctlLayout = VLayout(
-					[ View().background_(idColor).layout_(
-						VLayout(
-							HLayout(
-								[ msgTxt = TextField().string_(broadcastTag.asString).minWidth_(80), a: \left],
-								[ outValTxt = StaticText().string_("broadcast").background_(Color.gray.alpha_(0.25))
-									.align_(\left).fixedWidth_(55), a: \right],
-							),
-							HLayout(
-								[ StaticText().string_("Send OSC").align_(\right), a: \right],
-								[ broadcastChk = CheckBox().fixedWidth_(15), a: \right],
+	updateOffset {
+		var range;
+		range = ctl.high - ctl.low;
+		mixer.offsSpec.minval_(range.half.neg);
+		mixer.offsSpec.maxval_(range.half);
+	}
 
-								[ StaticText().string_("Hz").align_(\right), a: \right],
-								[ updateBx = NumberBox().fixedWidth_(nBoxWidth), a: \right],
+	// var minBx, maxBx, rateBx, rateSl, rateTxt, periodChk, mixBx;
+	// var valBx, mixKnb, sigPUp, rmvBut, sclBx, sclKnb, offsBx, offsKnb;
+	update { | who, what ... args |
+		// we're only paying attention to one thing, but just in case we check to see what it is
+		if( who == ctl, {
+			defer { // defer for AppClock to handle all the gui updates
+				switch ( what,
 
-								[ StaticText().string_("Plot").align_(\right), a: \right],
-								[ plotChk = CheckBox().fixedWidth_(15), a: \right],
-							)
-						).margins_(2)
-					).maxHeight_(66),
-
-					a: \top ]
-				).margins_(2),
-				[ Button().states_([["+"]]).action_({this.addCtl()}), a: \top ],
-				nil
-			).margins_(4).spacing_(3)
-		).maxWidth_(290);
-
-		msgTxt.action_({ |txt|
-			broadcastTag = (txt.value.asSymbol);
+					\staticVal, { "static val".postln; valBx.value_(args[0]) },
+					\lfo, { "lfo".postln;
+						sigPUp.value_( mixer.validLFOs.indexOf(args[0].asSymbol) );
+					},
+					\freq, {
+						var val;
+						"freq".postln;
+						val = periodChk.value.asBoolean.if({ args[0].reciprocal },{ args[0] });
+						rateBx.value_(val);
+						rateSl.value_( mixer.ratePeriodSpec.unmap( args[0].reciprocal ) )
+					},
+					\low, { minBx.value_(args[0]) },
+					\high, { maxBx.value_(args[0]) },
+					\scale, { sclBx.value_(args[0]); sclKnb.value_(mixer.sclSpec.unmap(args[0])) },
+					\offset, { offsBx.value_(args[0]); offsKnb.value_(mixer.offsSpec.unmap(args[0])) },
+					\amp, { mixBx.value_(args[0]); mixKnb.value_(args[0].sqrt) }
+				)
+			}
 		});
-
-		broadcastChk.action_({|chk| broadcasting = chk.value.asBoolean });
-		plotChk.action_({|chk| chk.value.asBoolean.if({plotter.start},{plotter.stop}) }).value_(1);
-
-		updateBx.action_({ |bx|
-			broadcastRate = bx.value;
-			broadcastWaittime = broadcastRate.reciprocal;
-		}).value_(broadcastRate);
-
 	}
-
-
-	addPlotter { |plotLength=75, refeshRate=24|
-		var view;
-		plotter = ControlPlotter( busnum, 1, plotLength, refeshRate).start;
-		view = plotter.mon.plotter.parent.view;
-		view.fixedHeight_(225);
-		// mixView.layout.add( view.minHeight_(view.bounds.height) );
-		mixView.layout.insert( view.minHeight_(view.bounds.height), 0 );
-		//mixView.layout.setAlignment(0, \top);
-		{0.4.wait; this.updatePlotterBounds;}.fork(AppClock);
-		plotterAdded = true;
-	}
-
-	updatePlotterBounds {
-		var minbound, maxbound, range;
-		minbound = ctlFades.collect({ |ctl| ctl.low }).minItem;
-		maxbound = ctlFades.collect({ |ctl| ctl.high }).maxItem;
-		range = maxbound - minbound;
-		plotter.bounds_( minbound - (range * 0.25), maxbound + (range * 0.25) );
-	}
-
-	free {
-		ctlFades.do(_.free);
-		broadcastBus.free;
-		pollTask !? { pollTask.stop.clock.clear };
-	}
-
-	prDefineColors {
-		baseColor = Color.hsv(
-			// Color.newHex("BA690B").asHSV;
-			// Color.newHex("2C4770").asHSV;
-			0.60049019607843, 0.60714285714286, 0.43921568627451, 1 );
-
-		idColor = Color.hsv(
-			*baseColor.asHSV.put( 0, (baseColor.asHSV[0] + colorShift).wrap(0,1) )
-		);
-
-		mixColor = Color.hsv(
-			*idColor.asHSV
-			.put(3, 0.8)
-			.put(2, idColor.asHSV[2] * 1.35)
-			//.put(2, (baseColor.asHSV[2] * 1.4).clip(0,1))
-		);
-	}
-
 }
 
 ControlMixMaster {
 	// copyArgs
 	var broadcastTags, broadcastNetAddr, broadcastRate, server;
-	var <win, <mixers;
+	var <win, <mixers, <lastUpdated;
 
 	*new { |broadcastTags="/myControlVal", broadcastNetAddr, broadcastRate=15, server|
 		^super.newCopyArgs(broadcastTags, broadcastNetAddr, broadcastRate, server).init
@@ -503,6 +559,9 @@ ControlMixMaster {
 
 		faderStates.do{ |fDict, fDex|
 
+			"\tUpdating Control".postln;
+			fDict.keysValuesDo({|k,v| [k,v].postln;});
+
 			ctlFade = mixer.ctlFades[fDex];
 
 			// static or lfo?
@@ -557,7 +616,8 @@ ControlMixMaster {
 
 							this.prRecallCtlFaderState( mixer, faderStates );
 
-							recalled =true
+							recalled =true;
+							lastUpdated = key;
 						};
 					};
 
@@ -573,13 +633,13 @@ ControlMixMaster {
 	}
 
 
-	// updatePreset {
-	// 	lastUpdated.notNil.if({
-	// 		this.storePreset( lastRecalledSynthDex, lastUpdated, true );
-	// 		},{
-	// 			"last updated key is not known".warn
-	// 	});
-	// }
+	updatePreset {
+		lastUpdated.notNil.if({
+			this.storePreset( lastUpdated, true );
+			},{
+				"last updated key is not known".warn
+		});
+	}
 
 
 	removePreset { |key|

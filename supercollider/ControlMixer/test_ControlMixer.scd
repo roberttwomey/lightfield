@@ -10,11 +10,15 @@ c.storePreset( \first )
 c.storePreset( \second )
 c.storePreset( \third )
 c.storePreset( \fourth )
+c.storePreset( \fifth )
+c.storePreset( \sixth )
 
 c.recallPreset( \first )
 c.recallPreset( \second )
 c.recallPreset( \third )
 c.recallPreset( \fourth )
+c.recallPreset( \fifth )
+c.recallPreset( \sixth )
 
 
 c.removePreset( \first )
