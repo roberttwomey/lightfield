@@ -4,9 +4,9 @@ ControlMixer {
 
 	var <busnum, <oscTag, <ctlFades, <ctlViews, outVal;
 	var <ratePeriodSpec, <sclSpec, <offsSpec;
-	var <mixView, msgTxt, broadcastChk, plotChk, updateBx, outValTxt;
-	var <nBoxWidth = 30, <validLFOs, <plotter, <ctlLayout, plotterAdded = false;
-	var broadcastBus, broadcastWaittime, broadcastTag, pollTask, broadcasting=false;
+	var <mixView, msgTxt, <broadcastChk, plotChk, updateBx, outValTxt;
+	var <nBoxWidth = 35, <nBoxHeight = 15, <validLFOs, <plotter, <ctlLayout, plotterAdded = false;
+	var broadcastBus, broadcastWaittime, broadcastTag, pollTask, <>broadcasting=false;
 	var baseColor, idColor, <mixColor, colorStep;
 
 	*new { | broadcastTag="/myMessage", broadcastNetAddr, broadcastRate=15, server, loadCond, colorShift=0.03 |
@@ -45,11 +45,7 @@ ControlMixer {
 						outVal = val;
 						defer{ outValTxt.string_(val.round(0.001)) };
 					});
-
-					broadcasting.if{
-						broadcastAddr.sendMsg(broadcastTag, outVal)
-					};
-
+					broadcasting.if{ broadcastAddr.sendMsg(broadcastTag, outVal) };
 					broadcastWaittime.wait
 				}
 			});
@@ -112,11 +108,11 @@ ControlMixer {
 									.align_(\left).fixedWidth_(55), a: \right],
 							),
 							HLayout(
-								[ StaticText().string_("Send OSC").align_(\right), a: \right],
+								[ StaticText().string_("OSC").align_(\right), a: \right],
 								[ broadcastChk = CheckBox().fixedWidth_(15), a: \right],
 
 								[ StaticText().string_("Hz").align_(\right), a: \right],
-								[ updateBx = NumberBox().fixedWidth_(nBoxWidth), a: \right],
+								[ updateBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight), a: \right],
 
 								[ StaticText().string_("Plot").align_(\right), a: \right],
 								[ plotChk = CheckBox().fixedWidth_(15), a: \right],
@@ -195,7 +191,7 @@ ControlMixer {
 ControlMixFaderView {
 	// copyArgs
 	var mixer, ctl, <min, <max, finishCond;
-	var <view, completeFunc, nBoxWidth;
+	var <view, completeFunc, nBoxWidth, nBoxHeight;
 	// gui
 	var minBx, maxBx, rateBx, rateSl, rateTxt, periodChk, mixBx;
 	var valBx, mixKnb, sigPUp, rmvBut, sclBx, sclKnb, offsBx, offsKnb;
@@ -207,6 +203,7 @@ ControlMixFaderView {
 	init {
 		ctl.addDependant(this);
 		nBoxWidth = mixer.nBoxWidth;
+		nBoxHeight = mixer.nBoxHeight;
 
 		view = View().background_(mixer.mixColor).maxHeight_(205)
 		.layout_(
@@ -222,22 +219,22 @@ ControlMixFaderView {
 				HLayout(
 					[ VLayout(
 						StaticText().string_("min"),
-						minBx = NumberBox().fixedWidth_(nBoxWidth)
+						minBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight)
 					).spacing_(0), a: \left ],
 					[ VLayout(
 						StaticText().string_("max"),
-						maxBx = NumberBox().fixedWidth_(nBoxWidth)
+						maxBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight)
 					).spacing_(0), a: \left ],
 					nil,
 					[ VLayout(
 						StaticText().string_("StaticVal").align_(\left),
-						valBx = NumberBox().fixedWidth_(nBoxWidth*1.2)
+						valBx = NumberBox().fixedWidth_(nBoxWidth*1.2).fixedHeight_(nBoxHeight)
 					).spacing_(5), a: \right ],
 				),
 				HLayout(
 					[ VLayout(
 						rateTxt = StaticText().string_("Rate(sec)"),
-						rateBx = NumberBox().fixedWidth_(nBoxWidth*1.5),
+						rateBx = NumberBox().fixedWidth_(nBoxWidth*1.5).fixedHeight_(nBoxHeight),
 					).spacing_(0), a: \left ],
 					[ VLayout(
 						StaticText().string_("period").align_(\center),
@@ -249,20 +246,20 @@ ControlMixFaderView {
 				HLayout(
 					VLayout(
 						StaticText().string_("scale").align_(\center),
-						sclBx = NumberBox().fixedWidth_(nBoxWidth),
+						sclBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight),
 					).spacing_(0),
 					sclKnb = Knob().mode_(\vert).centered_(true),
 					VLayout(
 						StaticText().string_("offset").align_(\center),
-						offsBx = NumberBox().fixedWidth_(nBoxWidth),
+						offsBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight),
 					).spacing_(0),
 					offsKnb = Knob().mode_(\vert).centered_(true),
 				),
 				HLayout(
 					nil,
 					[VLayout(
-						StaticText().string_("mix").align_(\right).fixedWidth_(nBoxWidth),
-						mixBx = NumberBox().fixedWidth_(nBoxWidth).maxWidth_(50),
+						StaticText().string_("mix").align_(\right).fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight),
+						mixBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight).maxWidth_(50),
 					).spacing_(0), a: \center],
 					[ mixKnb = Knob().mode_(\vert), a: \center],
 					nil
@@ -390,13 +387,12 @@ ControlMixFaderView {
 			defer { // defer for AppClock to handle all the gui updates
 				switch ( what,
 
-					\staticVal, { "static val".postln; valBx.value_(args[0]) },
-					\lfo, { "lfo".postln;
+					\staticVal, {valBx.value_(args[0]) },
+					\lfo, {
 						sigPUp.value_( mixer.validLFOs.indexOf(args[0].asSymbol) );
 					},
 					\freq, {
 						var val;
-						"freq".postln;
 						val = periodChk.value.asBoolean.if({ args[0].reciprocal },{ args[0] });
 						rateBx.value_(val);
 						rateSl.value_( mixer.ratePeriodSpec.unmap( args[0].reciprocal ) )
@@ -415,7 +411,7 @@ ControlMixFaderView {
 ControlMixMaster {
 	// copyArgs
 	var broadcastTags, broadcastNetAddr, broadcastRate, server;
-	var <win, <mixers, <lastUpdated;
+	var <win, <mixers, <lastUpdated, <presetWin;
 
 	*new { |broadcastTags="/myControlVal", broadcastNetAddr, broadcastRate=15, server|
 		^super.newCopyArgs(broadcastTags, broadcastNetAddr, broadcastRate, server).init
@@ -458,7 +454,7 @@ ControlMixMaster {
 
 	makeWin {
 
-		win = Window("Broadcast Controls", Rect(Window.screenBounds.width / 2, Window.screenBounds.height, 100, 100), scroll: true).layout_(
+		win = Window("Broadcast Controls", Rect(Window.screenBounds.width / 4, Window.screenBounds.height, 100, 100), scroll: true).layout_(
 			HLayout().margins_(2).spacing_(2)
 		).onClose_({ this.free });
 
@@ -478,6 +474,10 @@ ControlMixMaster {
 	archive { ^Archive.global[\roverPresets] }
 	presets { ^Archive.global[\roverPresets] }
 	listPresets { ^this.presets.keys.asArray.sort.do(_.postln) }
+
+	*archive { ^Archive.global[\roverPresets] }
+	*presets { ^Archive.global[\roverPresets] }
+	*listPresets { ^this.class.presets.keys.asArray.sort.do(_.postln) }
 
 	backupPreset {
 		format( "cp %% %%%",
@@ -585,6 +585,7 @@ ControlMixMaster {
 		block { |break|
 
 			p = this.archive[key] ?? {"Preset not found".error; break.()};
+			("recalling " ++ key).postln;
 
 			p[\mixers].keysValuesDo({ |ptag, faderStates|
 				var recalled=false;
@@ -634,16 +635,66 @@ ControlMixMaster {
 
 
 	updatePreset {
-		lastUpdated.notNil.if({
-			this.storePreset( lastUpdated, true );
-			},{
-				"last updated key is not known".warn
-		});
+		lastUpdated.notNil.if(
+			{ this.storePreset( lastUpdated, true ) },
+			{ "last updated key is not known".warn }
+		);
 	}
 
 
 	removePreset { |key|
 		Archive.global[\roverPresets][key] ?? { format("preset % not found!", key).error };
 		Archive.global[\roverPresets].removeAt(key)
+	}
+
+	presetGUI { |numCol=2|
+		var presetsClumped, ftBox, varBox, msg_Txt, presetLayouts, maxRows;
+		maxRows = (this.presets.size / numCol).ceil.asInt;
+
+		presetsClumped = this.presets.keys.asArray.sort.clump(maxRows);
+		presetsClumped.do(_.postln);
+
+		presetLayouts = presetsClumped.collect({ |presetGroup|
+			VLayout(
+				*presetGroup.extend(maxRows,nil).collect({ |name, i|
+					var lay;
+					name.notNil.if({
+						lay = HLayout(
+							[ Button().states_([[name]])
+								.action_({
+
+									this.recallPreset(name.asSymbol);
+									msg_Txt.string_(format("% recalled.", name)).stringColor_(Color.black);
+							}), a: \top]
+						)
+					},{
+						nil
+					})
+				})
+			)
+		});
+
+		presetWin = Window("Presets", Rect(0,0,100, 100)).view.layout_(
+			VLayout(
+				[ Button().states_([["Send OSC", Color.white, Color.blue],["Stop OSC", Color.white, Color.gray]]).action_({ |but|
+					switch( but.value,
+						0, { mixers.do({|mxr| mxr.broadcasting = false; mxr.broadcastChk.value_(0) }) },
+						1, { mixers.do({|mxr| mxr.broadcasting = true; mxr.broadcastChk.value_(1) }) }
+					)
+				}).maxWidth_(70).fixedHeight_(35), a: \right],
+				HLayout(
+					nil,
+					StaticText().string_("Variance").align_(\right).fixedHeight_(25),
+					varBox = NumberBox().value_(0.0).maxWidth_(35).fixedHeight_(25),
+					StaticText().string_("Fade Time").align_(\right).fixedHeight_(25),
+					ftBox = NumberBox().value_(1.0).maxWidth_(35).fixedHeight_(25)
+				),
+				HLayout(
+					msg_Txt = StaticText().string_("Select a preset to update.").fixedHeight_(35),
+					Button().states_([["Update Preset", Color.black, Color.gray]]).action_({this.updatePreset}).fixedWidth_(95)
+				),
+				HLayout( *presetLayouts )
+			)
+		).front;
 	}
 }
