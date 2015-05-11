@@ -10,20 +10,30 @@ c.storePreset( \first )
 c.storePreset( \second )
 c.storePreset( \third )
 c.storePreset( \fourth )
+c.storePreset( \fifth )
+c.storePreset( \sixth )
 
 c.recallPreset( \first )
 c.recallPreset( \second )
 c.recallPreset( \third )
 c.recallPreset( \fourth )
+c.recallPreset( \fifth )
+c.recallPreset( \sixth )
 
 
 c.removePreset( \first )
+
+c.presetGUI(3)
 
 c.presets[\first].mixers.keys
 c.presets[\first].mixers['/ycount'].size
 
 (
-c.presets[\first].mixers.keysValuesDo({|k,v| k.postln; v.do({|ctlFadeStates, i| i.postln; ctlFadeStates.keysValuesDo({|k,v| [k,v].postln }) }); "".postln; });
+ControlMixMaster.archive[\first].mixers.keysValuesDo({|k,v| k.postln; v.do({|ctlFadeStates, i| i.postln; ctlFadeStates.keysValuesDo({|k,v| [k,v].postln }) }); "".postln; });
+nil
+)
+(
+ControlMixMaster.archive[\fifth].mixers.keysValuesDo({|k,v| k.postln; v.do({|ctlFadeStates, i| i.postln; ctlFadeStates.keysValuesDo({|k,v| [k,v].postln }) }); "".postln; });
 nil
 )
 
