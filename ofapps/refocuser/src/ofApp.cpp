@@ -2,23 +2,31 @@
 
 
 //--------------------------------------------------------------
+// main program
+//--------------------------------------------------------------
+
 void ofApp::setup(){
 
     ofEnableAlphaBlending();
 //    loadXMLSettings("./textures/dark_trees_calib.xml");
 //    loadXMLSettings("./textures/yellowcliff_sm.xml");
-    loadXMLSettings("./textures/cliffside.xml");
-
+//    loadXMLSettings("./textures/cliffside.xml");
+    loadXMLSettings("./textures/tunnel_sm.xml");
+//loadXMLSettings("./textures/mike1_sm.xml");
+    //    loadXMLSettings("./textures/mike3_sm.xml");
+  
     loadLFImage();
 
     graphicsSetup();
-
-    // OSC - listen on the given port
+	    // OSC - listen on the given port
     cout << "listening for osc messages on port " << port << "\n";
     receiver.setup(port);
+    
+    snapcount = 0;
 }
 
 //--------------------------------------------------------------
+
 void ofApp::update(){
 
     // TODO: why is this here?
@@ -103,12 +111,12 @@ void ofApp::draw(){
         ofDrawBitmapString("ap_loc:  \t"+ofToString(xstart)+" "+ofToString(ystart) +" ("+ofToString(xstart + ystart * xsubimages)+")", 0, 30);
         ofDrawBitmapString("ap_size: \t"+ofToString(xcount)+" "+ofToString(ycount), 0, 45);
         ofDrawBitmapString("zoom:    \t"+ofToString(zoom), 0, 60);
-//        cout << bDebug << bShowThumbnail << endl;
     }
 }
 
+
 //--------------------------------------------------------------
-// settings
+// setup
 //--------------------------------------------------------------
 
 void ofApp::loadXMLSettings(string settingsfile) {
@@ -209,7 +217,7 @@ void ofApp::graphicsSetup() {
 
     // setup refocus shader
     //  shader.load("test.vert", "test.frag");
-    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "refocus.frag");
+    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus.frag");
     shader.linkProgram();
     
 
@@ -235,14 +243,21 @@ void ofApp::graphicsSetup() {
 
 }
 
+
 //--------------------------------------------------------------
+//  keyboard interaction / osc control
+//--------------------------------------------------------------
+
 void ofApp::keyPressed(int key){
     //    cout << bShowThumbnail << " " << bHideCursor << " " << bDebug << endl;
+    if(key=='s') {
+        doSnapshot();
+    }
     if(key=='f')
         ofToggleFullscreen();
     if(key=='b') {
         // zoom
-        zoom = ofMap(mouseX, 0, ofGetWindowWidth(), 1.0, 0.01);
+        zoom = ofMap(mouseX, 0, ofGetWindowWidth(), 4.0, 0.01);
     }
     if(key=='z') {
         // parallax
@@ -422,3 +437,51 @@ void ofApp::process_OSC(ofxOscMessage m) {
         }
 
 }
+
+
+//--------------------------------------------------------------
+// snapshot
+//--------------------------------------------------------------
+
+void ofApp::doSnapshot() {
+    string timestamp, imgfilename, paramfilename;
+    
+    // save time-stamped image to data folder
+    timestamp = "./snapshots/"+ofGetTimestampString("%Y%m%d%H%M%S") + "_" + ofToString(snapcount, 4, '0');
+    imgfilename = timestamp + ".jpg";
+    paramfilename = timestamp + ".txt";
+    
+    // save fbo to file
+    // from http://forum.openframeworks.cc/t/ofxfenster-addon-to-handle-multiple-windows-rewrite/6499/61
+    int w = fbo.getWidth();
+    int h = fbo.getHeight();
+    unsigned char* pixels = new unsigned char[w*h*3];  ;
+    ofImage screenGrab;
+    screenGrab.allocate(w,h,OF_IMAGE_COLOR);
+    screenGrab.setUseTexture(false);
+    
+    //copy the pixels from FBO to the pixel array; then set the normal ofImage from those pixels; and use the save method of ofImage
+    fbo.begin();
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glReadPixels(0, 0, fbo.getWidth(), fbo.getHeight(), GL_RGB, GL_UNSIGNED_BYTE, pixels);
+    screenGrab.setFromPixels(pixels, fbo.getWidth(), fbo.getHeight(), OF_IMAGE_COLOR);
+    screenGrab.saveImage(imgfilename, OF_IMAGE_QUALITY_BEST);
+    fbo.end();
+    ofLog(OF_LOG_VERBOSE, "[DiskOut]  saved frame " + imgfilename );
+    
+    // save refocusing parameters to companion text file
+    ofFile file(paramfilename, ofFile::WriteOnly);
+    
+    // add additional parameters below
+    file << lfimage_filename << endl;
+    file << synScale << endl;
+    file << xoffset << "," << yoffset << endl;
+    file << xstart << "," << ystart << endl;
+    file << xcount << "," << ycount << endl;
+    file << zoom << endl;
+    
+    file.close();
+    
+    snapcount++;
+}
+

@@ -376,8 +376,18 @@ def warpAvg(src, params, R_avg, C_avg):
     
     # generate thumbnail
     acq_w, acq_h = acq_grid
-    thumb_w = max_texture_size / acq_w * num_textures
-    thumb_h = thumb_w * img_h / img_w
+    
+    if acq_w > acq_h:
+        thumb_w = max_texture_size / acq_w * num_textures
+        thumb_h = thumb_w * img_h / img_w
+    else:
+        thumb_h = max_texture_size / acq_h * num_textures
+        thumb_w = thumb_h * img_w / img_h
+    
+    # thumb_w = max_texture_size / acq_w * num_textures
+    # thumb_h = thumb_w * img_h / img_w
+
+    #print thumb_w, thumb_h
     
     thumb_img = cv2.resize(src_img_warp, (thumb_w, thumb_h))
     thumb_file = os.path.join(thumbpath, fname+ext.lower())
@@ -395,11 +405,18 @@ def generate_contact_sheet(files, reorder = None):
     thumb_file = os.path.join(thumbpath, thumbstr)
     thumb_img = cv2.imread(thumb_file)
     thumb_h, thumb_w, thumb_chan = thumb_img.shape
+    print thumb_img.shape
     # print thumbstr
     
-    max_texture_w = max_texture_size
-    max_texture_h = thumb_h * grid_h
-
+    if grid_w > grid_h:
+        max_texture_w = max_texture_size
+        max_texture_h = thumb_h * grid_h
+    else:
+        max_texture_h = max_texture_size
+        max_texture_w = thumb_w * grid_w
+        
+    print max_texture_w, max_texture_h
+    
     print "generating contact sheet...",
 
     part_w = grid_w/num_textures

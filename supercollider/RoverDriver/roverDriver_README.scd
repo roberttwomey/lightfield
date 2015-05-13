@@ -1,4 +1,5 @@
 SerialPort.listDevices
+SerialPort.closeAll
 
 // Connect arduino to Computer
 a = ArduinoGRBL("/dev/tty.usbserial-A94JRL5D", 115200)
@@ -7,14 +8,13 @@ a = ArduinoGRBL("/dev/tty.AdafruitEZ-Link418c-SPP", 115200)
 
 // home the first time around
 a.home
-// be ready if it wigs out:
 a.reset
 a.unlock
 
 // set the homeing pulloff the first time around
 a.settings
 // pulloff should be less than the distance from the limit switch to the pulley
-a.send("$27=52")
+a.send("$27=60")
 
 // Turn on Rover
 // Connect to Rover_AP. pwd: roverrover
@@ -50,11 +50,12 @@ a.unlock
 // MachineX/Y:	after homing and pulling off, MachineX/Y machine coordinates (usually negative)
 // lengthA/B:	after homing and pulling off, lengthA and lengthB are the distance from the pulley to the middle Rover's width (where the cables would intersect if they extended)
 // camOffset:	offset from the end of the cable at the rover to the camera's center
-r.rigDimensions_(motorSeparation: 56.125, machineX: -148, machineY: -148, lengthA: 62.25, lengthB: 61.5) //, camOffset: 1.5 );
+r.rigDimensions_(motorSeparation: 87, machineX: -140, machineY: -140, lengthA: 87, lengthB: 87) //, camOffset: 1.5 );
 
 
 // check the state
 a.state
+
 // the world position (first two numbers after Idle) should be the length mentioned above (pulley>Roverhole), eg:
 // [ Idle, [ 72.499, 72.499, 0 ], [ -135.001, -135.001, 0 ] ]
 
@@ -67,7 +68,7 @@ a.state
 // captureSpanY: height of the capture plane
 // insetY: vertical offset from the rig's pulley height to the 0,0 camera capture position
 // nCols, nRows: number of rows and columns of subimages to capture
-r.captureDimensions_(captureSpanX: 32, captureSpanY: 30, insetY: 8, nCols: 22, nRows: 22 );
+r.captureDimensions_(captureSpanX: 20, captureSpanY: 30, insetY: 30, nCols: 20, nRows: 30 );
 
 
 // set Rover to capture in 1 of 3 ways:
@@ -77,7 +78,7 @@ r.captureDimensions_(captureSpanX: 32, captureSpanY: 30, insetY: 8, nCols: 22, n
 // 	rowsFirst, leftToRight, topDown, wrap,	<< bools to determine grid order
 //	displayPath << bool to show the resultant path order
 
-r.gridCapture( rowsFirst: true, leftToRight: true, topDown: false, wrap: true, displayPath: true )
+r.gridCapture( rowsFirst: true, leftToRight: true, topDown: true, wrap: true, displayPath: true )
 
 
 /*
@@ -133,7 +134,7 @@ r.customPathCapture( pointArray: p, displayPath: true)
 //	travelTimeOut,	<< time to wait to timeout in case anything goes wrong waiting for GRBL state to report "Idle"
 //	stateCheckRate	<< number of times GRBL state is queried per second when using auto-advance
 
-r.initCapture( autoAdvance: true, waitToSettle: 0.5, waitAfterPhoto: 1.5, travelTimeOut: 30, stateCheckRate: 5, writePosData: true, fileName: "dome")
+r.initCapture( autoAdvance: true, waitToSettle: 1.2, waitAfterPhoto: 1.5, travelTimeOut: 30, stateCheckRate: 5, writePosData: true, fileName: "dome")
 
 
 // TODO set this in RoverDriver class
@@ -142,8 +143,21 @@ a.feed_(500)
 // a.send("G0F500")
 
 
+r.reset
 // go to the location of the first capture point
 r.goToFirstCapturePoint
+r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/TL.jpg")
+
+r.goTo_(20, 0)
+r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/TR.jpg")
+
+r.goTo_(20, 30)
+r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/BR.jpg")
+
+r.goTo_(0, 30)
+r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/BL.jpg")
+
+r.goTopulloffHome
 
 a.unlock
 a.reset
@@ -154,6 +168,9 @@ a.reset
 // screen -ls
 // also empty out lfimages directory:
 // rm -r ~/lfimages/*
+
+//
+r.goToFirstCapturePoint
 
 // ROVE
 r.run  // or r.play
@@ -167,6 +184,7 @@ r.reset
 // a.goTo_(68.5, 68.5)
 // return to the location Rover is after pulloff (to check no slippage)
 r.goTopulloffHome
+
 
 n.sendMsg("/camera", "stop")
 
