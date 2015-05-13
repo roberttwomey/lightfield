@@ -231,7 +231,7 @@ RoverDriver {
 				// camAddr.sendMsg("/camera", "snap"); "\tSNAP".postln;
 
 				// take photo with raspistill, custom file-naming:
-				camParams = format("-t 1 -o /home/pi/lfimages/frame_%.jpg", i);
+				camParams = format("-t 1 -o /home/pi/lfimages/frame_%04d.jpg", i);
 				camAddr.sendMsg("/camera", "paramsnap", camParams);
 
 				// log it for the dataFile
