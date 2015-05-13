@@ -9,7 +9,7 @@ ControlMixer {
 	var broadcastBus, broadcastWaittime, broadcastTag, pollTask, <>broadcasting=false;
 	var baseColor, idColor, <mixColor, colorStep;
 
-	*new { | broadcastTag="/myMessage", broadcastNetAddr, broadcastRate=15, server, loadCond, colorShift=0.03 |
+	*new { | broadcastTag="/myMessage", broadcastNetAddr, broadcastRate=30, server, loadCond, colorShift=0.03 |
 		^super.newCopyArgs( broadcastTag, broadcastNetAddr, broadcastRate, server, loadCond, colorShift ).init;
 	}
 
@@ -35,7 +35,7 @@ ControlMixer {
 				'static', SinOsc, LFPar, LFTri, LFCub, LFDNoise0, LFDNoise1, LFDNoise3
 			].collect(_.asSymbol);
 
-			ratePeriodSpec = ControlSpec(15.reciprocal, 15, 2.5, default: 3);
+			ratePeriodSpec = ControlSpec(45.reciprocal, 15, 2.5, default: 3);
 			sclSpec = ControlSpec(0, 2, 'lin', default: 1);
 			offsSpec = ControlSpec(-1, 1, 'lin', default: 0);
 
@@ -196,7 +196,7 @@ ControlMixFaderView {
 	var minBx, maxBx, rateBx, rateSl, rateTxt, periodChk, mixBx;
 	var valBx, mixKnb, sigPUp, rmvBut, sclBx, sclKnb, offsBx, offsKnb;
 
-	*new{ | mixer, controlFade, min= -1, max=1, finishCond|
+	*new{ | mixer, controlFade, min= 0, max=1, finishCond|
 		^super.newCopyArgs(mixer, controlFade, min, max, finishCond).init;
 	}
 
@@ -413,7 +413,7 @@ ControlMixMaster {
 	var broadcastTags, broadcastNetAddr, broadcastRate, server;
 	var <win, <mixers, <lastUpdated, <presetWin;
 
-	*new { |broadcastTags="/myControlVal", broadcastNetAddr, broadcastRate=15, server|
+	*new { |broadcastTags="/myControlVal", broadcastNetAddr, broadcastRate=30, server|
 		^super.newCopyArgs(broadcastTags, broadcastNetAddr, broadcastRate, server).init
 	}
 
