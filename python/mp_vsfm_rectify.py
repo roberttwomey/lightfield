@@ -50,7 +50,7 @@ def readImageFilenames(dir_name):
     return dir_list
     
     
-def readCamerasV2File(camerasfile):
+def readCamerasV2File(camerasfile, cameraloc_img):
     global datapath
     
     infile = open(camerasfile, 'r')
@@ -138,12 +138,13 @@ def readCamerasV2File(camerasfile):
     xcents.append(avgxcenter)
     ycents.append(avgycenter)
     scatter(xcents, ycents)
-    savefig(os.path.join(datapath, 'cameras.png'))
+    savefig(cameraloc_img)
     # show()
 
     xcents = np.array(xcents)
     ycents = np.array(ycents)
     
+    print "Read {0} cameras".format(numcams)
     print "========"
     print "average camera rotation:", avg_R
     print "range", (xcents.max()-xcents.min()), (ycents.max() - ycents.min())
@@ -396,8 +397,8 @@ def warpAvg(src, params, R_avg, C_avg):
     # return (warp_file, thumb_file)
                
 
-def generate_contact_sheet(files, reorder = None):
-    global thumbpath, max_texture_size, grid_h, grid_w, num_textures, contactimg_file
+def generate_contact_sheet(files, reorder = None, skip = []):
+    global thumbpath, max_texture_size, grid_h, grid_w, num_textures, contactimg_file, thumb_w, thumb_h
     
     # generate tiled image
     # thumbstr = "image{0:04d}_eq.jpg"
@@ -432,8 +433,8 @@ def generate_contact_sheet(files, reorder = None):
               if reorder != None:
                   #print num
                   num = reorder[num]
-              if num < len(files):
-                  thumbstr = os.path.basename(files[num])
+              if num not in skip:                  
+                  thumbstr = "frame_{0:04d}.jpg".format(num)
                   thumb_file = os.path.join(thumbpath, thumbstr)              
                   # print thumb_file
                   if os.path.exists(thumb_file):
@@ -444,21 +445,31 @@ def generate_contact_sheet(files, reorder = None):
                       # print x,y, thumb_w ,thumb_h
                       # print contact_img.shape
                       contact_img[y:(y+thumb_h), x:(x+thumb_w)] = thumb_img
+              else:
+                  print "skipping {0} in contact sheet".format(num)
 
         print "writing contact image", contact_img.shape, "to",
-        # fname, ext = os.path.splitext(contactimg_file)
-        # contactimg_file = fname+str(n)+ext
+        
+        if num_textures > 1:
+            fname, ext = os.path.splitext(contactimg_file)
+            contactimg_file = fname+str(n)+ext
         print contactimg_file
         cv2.imwrite(contactimg_file, contact_img)
-          
-                   
-def write_camera_positions(camerapos, image_files, camresults, reorder = None):
-    # save camera positions
+
+
+def write_xml_scene(camerapos, contactimg_file, image_files, camresults, reorder = None, skip = []):
+    """ write refocuser scene descriptor file for use by oF refocusing app
+    """ 
+    global thumb_w, thumb_h, grid_w, grid_h
+       
     count = 0
     positions = []
-    for src in image_files:
-        # src_fname = os.path.basename(src)[:-7]+".jpg"
-        src_fname = os.path.basename(src)
+    
+        
+    # for src in image_files:
+    #     src_fname = os.path.basename(src)
+    for i in range(grid_w * grid_h):
+        src_fname = "frame_{0:04d}.jpg".format(i)
         if src_fname in camresults.keys():
             C_src = camresults[src_fname][2]
             xpos = C_avg[0]-C_src[0]
@@ -466,27 +477,72 @@ def write_camera_positions(camerapos, image_files, camresults, reorder = None):
             positions.append((xpos, ypos))
             count = count + 1
             # print xpos,ypos
+        else:
+            positions.append((-1, -1))
+            count = count + 1
 
     out_f = file(camerapos, 'w')
+    out_f.write("<!-- lightfield data -->\n")
+    out_f.write("<texturefile>./textures/{0}</texturefile>\n".format(os.path.basename(contactimg_file)))
+    out_f.write("\n")
+    out_f.write("<subimagewidth>{0}</subimagewidth>\n".format(thumb_w))
+    out_f.write("<subimageheight>{0}</subimageheight>\n".format(thumb_h))
+    out_f.write("\n")
+    out_f.write("<numxsubimages>{0}</numxsubimages>\n".format(grid_w))
+    out_f.write("<numysubimages>{0}</numysubimages>\n".format(grid_h))
+    out_f.write("\n")
+    out_f.write("<!-- refocusing parameters -->\n")
+    out_f.write("<minscale>-200</minscale>\n")
+    out_f.write("<maxscale>10</maxscale>\n")
+    out_f.write("\n")    
+    out_f.write("<!-- initial state of refocuser -->\n")
+    out_f.write("<xstart>0</xstart>\n")
+    out_f.write("<ystart>0</ystart>\n")
+    out_f.write("<xcount>{0}</xcount>\n".format(grid_w))
+    out_f.write("<ycount>{0}</ycount>\n".format(grid_h))
+    out_f.write("<scale>0</scale>\n")
+    out_f.write("<zoom>1.0</zoom>\n")
+    out_f.write("\n")
+    out_f.write("<!-- debug information (text, mouse, thumbnail) -->\n")
+    out_f.write("<drawthumbnail>1</drawthumbnail>\n")
+    out_f.write("<hidecursor>1</hidecursor>\n")
+    out_f.write("<debug>1</debug>\n")
+    out_f.write("\n")
+        
+    out_f.write("<!-- camera positions -->\n")
     out_f.write("<cameras>\n")
-    for i in range(count):
-        num = i
-        if reorder != None:
-            num = reorder[i]
-        xpos, ypos = positions[num]
-        out_f.write("\t<cam>\n\t\t<x>{0}</x>\n\t\t<y>{1}</y>\n\t</cam>>\n".format(xpos, ypos))
-    out_f.write("</cameras>")
+    for i in range(grid_w * grid_h):
+        if i not in skip:
+            num = i
+            if reorder != None:
+                num = reorder[i]
+            xpos, ypos = positions[num]
+            # print num
+            out_f.write("\t<cam>\n\t\t<x>{0}</x>\n\t\t<y>{1}</y>\n\t</cam>\n".format(xpos, ypos))
+        else:
+            print "skipping {0} in camera positions".format(i)
+            num = i-1
+            if reorder != None:
+                num = reorder[i]
+            xpos, ypos = positions[num]
+            # print num
+            out_f.write("\t<cam>\n\t\t<x>{0}</x>\n\t\t<y>{1}</y>\n\t</cam>\n".format(xpos, ypos))
 
+    out_f.write("</cameras>")
+    
+    
 if __name__ == '__main__':
-    global datapath, featurepath, warpedpath, undistortpath, thumbpath, max_texture_size, acq_grid, num_textures, contactimg_file
+    global datapath, featurepath, warpedpath, undistortpath, thumbpath, max_texture_size, acq_grid, num_textures, contactimg_file, grid_w, grid_h
 
     # Define command line argument interface
-    parser = argparse.ArgumentParser(description='apply Visual SFM quaternions to a folder of lightfield images')
+    parser = argparse.ArgumentParser(description='apply Visual SFM quaternions to a folder of lightfield images', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
     parser.add_argument('datapath', help='path to lightfield data')
     parser.add_argument('grid', help='acquisition grid as WxH')
-    parser.add_argument('reorder', help='order of acquisition (normal, wrap)')
-    parser.add_argument('camerapos', help='output file for list of camera positions')
-    parser.add_argument('contactimg', help='output file for contact sheet image')
+    parser.add_argument('--reorder', default=None, help='reorder images to match order of acquisition (wrap)')
+    parser.add_argument('--skip', default=[], help='indices of images to skip')
+    parser.add_argument('--numtextures', default=1, type=int, help='number of output textures')
+    parser.add_argument('--maxtexturesize', default=16384, type=int, help='maximum pixel dimension of output texture')
     parser.add_argument('files', nargs='*', help='glob of input files')
     
     args = parser.parse_args()
@@ -497,7 +553,10 @@ if __name__ == '__main__':
     imagedir = os.path.join(args.datapath, 'original')  
 
     gridstr = args.grid     # grid layout
-    order = args.reorder    # arugment order
+    order = args.reorder    # reorder images
+    skip = [i for i in args.skip.split(',')] #.split(',')        # skip certain images
+    num_textures = args.numtextures
+    max_texture_size = args.maxtexturesize
     
     # directory of undistorted images
     undistortpath = os.path.join(args.datapath, 'undistorted') 
@@ -507,10 +566,12 @@ if __name__ == '__main__':
     
     
     # output paths to save the results
+    scene_name = os.path.basename(args.datapath)
+    
     warpedpath = os.path.join(args.datapath, 'warped')    
     thumbpath = os.path.join(args.datapath, 'thumbs')
-    camerapos = os.path.join(args.datapath, args.camerapos)
-    contactimg_file = os.path.join(args.datapath, args.contactimg)
+    camerapos = os.path.join(args.datapath, scene_name+'.xml')
+    contactimg_file = os.path.join(args.datapath, scene_name+'_tex.jpg')
 
     # create folders as necessary
     if not os.path.exists(warpedpath):
@@ -520,7 +581,6 @@ if __name__ == '__main__':
         os.makedirs(thumbpath)
     
     # read image filenames
-    #image_files = readImageFilenames(imagedir)
     image_files = args.files
     
     # grid
@@ -530,15 +590,14 @@ if __name__ == '__main__':
     
     print "grid dimensions", grid_w, "x", grid_h
     
-    max_texture_size = 16384
-    num_textures = 1
+    # max_texture_size = 32768
+    
+    # num_textures = 1
     acq_grid = (grid_w, grid_h)
-
     
     # read Cameras V2 file (results from VSFM)    
-    camresults, R_avg, C_avg = readCamerasV2File(camerasfile)
-    
-    # print camresults.keys()
+    cameraloc_img = os.path.join(args.datapath, scene_name+'_cameras.png')
+    camresults, R_avg, C_avg = readCamerasV2File(camerasfile, cameraloc_img)
     
     # rectify images
     results = mp_warp(image_files, camresults, R_avg, C_avg, 8)
@@ -556,10 +615,11 @@ if __name__ == '__main__':
 
         #print reorder
         # make contact sheet
-        generate_contact_sheet(image_files, reorder)
-
+        generate_contact_sheet(image_files, reorder, skip)
+        
+        # print reorder
         # export camera center coordinates    
-        write_camera_positions(camerapos, image_files, camresults, reorder)
+        write_xml_scene(camerapos, contactimg_file, image_files, camresults, reorder, skip)
 
     else:
         
@@ -567,5 +627,5 @@ if __name__ == '__main__':
         generate_contact_sheet(image_files)#reorder)
 
         # export camera center coordinates    
-        write_camera_positions(camerapos, image_files, camresults)#, reorder)
+        write_xml_scene(camerapos, contactimg_file, image_files, camresults)#, reorder)
         
