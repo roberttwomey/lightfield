@@ -17,16 +17,15 @@ public:
     void loadXMLSettings(string settingsfile);
     void loadLFImage();
     void graphicsSetup();
-    
-    void doSnapshot();
-    
+
     void process_OSC(ofxOscMessage m);
     void keyPressed  (int key);
 
     ofxOscReceiver receiver;
     int port;
 
-    ofImage lfplane;
+    //ofImage lfplane;
+    ofTexture lfplane;
     ofFbo campos_tex;
 
     ofDirectory dir;
@@ -36,12 +35,12 @@ public:
     ofVideoPlayer 		fingerMovie;
     ofVideoGrabber 		vidGrabber;
 
-    ofFbo fbo;
+    ofFbo       fbo;
     ofFbo       maskFbo;
     ofShader    shader;
 
     string lfimage_filename;
-    
+
     float sourceWidth, sourceHeight;
     float synScale;
     float zoom;
@@ -52,10 +51,6 @@ public:
 
     float offsets[MAX_OFFSETS];
 
-    // snapshot
-    int snapcount;
-    
-    // onscreen display
     bool bShowThumbnail;
     bool bHideCursor;
     bool bDebug;

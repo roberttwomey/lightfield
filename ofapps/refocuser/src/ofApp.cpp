@@ -2,31 +2,24 @@
 
 
 //--------------------------------------------------------------
-// main program
-//--------------------------------------------------------------
-
 void ofApp::setup(){
 
     ofEnableAlphaBlending();
+//    loadXMLSettings("./textures/carkeek.xml");
 //    loadXMLSettings("./textures/dark_trees_calib.xml");
 //    loadXMLSettings("./textures/yellowcliff_sm.xml");
-//    loadXMLSettings("./textures/cliffside.xml");
-    loadXMLSettings("./textures/tunnel_sm.xml");
-//loadXMLSettings("./textures/mike1_sm.xml");
-    //    loadXMLSettings("./textures/mike3_sm.xml");
-  
+    loadXMLSettings("./textures/cliffside.xml");
+
     loadLFImage();
 
     graphicsSetup();
-	    // OSC - listen on the given port
+
+    // OSC - listen on the given port
     cout << "listening for osc messages on port " << port << "\n";
     receiver.setup(port);
-    
-    snapcount = 0;
 }
 
 //--------------------------------------------------------------
-
 void ofApp::update(){
 
     // TODO: why is this here?
@@ -47,6 +40,7 @@ void ofApp::update(){
     shader.setUniform1f("fscale", synScale);
 
     // zoom / pan
+    //TODO: why does zoom slow the shader so badly?
     shader.setUniform1f("zoom", zoom);
     shader.setUniform2f("roll", xoffset, yoffset);
 
@@ -105,18 +99,19 @@ void ofApp::draw(){
     if(bDebug == true) {
         // display text about refocusing
         ofSetColor(255);
-        ofTranslate(10, ofGetHeight()-75);
-        ofDrawBitmapString("scale:   \t"+ofToString(synScale), 0, 0);
-        ofDrawBitmapString("roll:    \t"+ofToString(xoffset)+" "+ofToString(yoffset), 0, 15);
-        ofDrawBitmapString("ap_loc:  \t"+ofToString(xstart)+" "+ofToString(ystart) +" ("+ofToString(xstart + ystart * xsubimages)+")", 0, 30);
-        ofDrawBitmapString("ap_size: \t"+ofToString(xcount)+" "+ofToString(ycount), 0, 45);
-        ofDrawBitmapString("zoom:    \t"+ofToString(zoom), 0, 60);
+        ofTranslate(10, ofGetHeight()-90);
+        ofDrawBitmapString("scale:    \t"+ofToString(synScale), 0, 0);
+        ofDrawBitmapString("roll:     \t"+ofToString(xoffset)+" "+ofToString(yoffset), 0, 15);
+        ofDrawBitmapString("ap_loc:   \t"+ofToString(xstart)+" "+ofToString(ystart) +" ("+ofToString(xstart + ystart * xsubimages)+")", 0, 30);
+        ofDrawBitmapString("ap_size:  \t"+ofToString(xcount)+" "+ofToString(ycount), 0, 45);
+        ofDrawBitmapString("zoom:     \t"+ofToString(zoom), 0, 60);
+        ofDrawBitmapString("framerate:\t"+ofToString(ofGetFrameRate()), 0, 75);
+//        cout << bDebug << bShowThumbnail << endl;
     }
 }
 
-
 //--------------------------------------------------------------
-// setup
+// settings
 //--------------------------------------------------------------
 
 void ofApp::loadXMLSettings(string settingsfile) {
@@ -167,11 +162,12 @@ void ofApp::loadXMLSettings(string settingsfile) {
         xml.popTag();
     }
     xml.popTag();
-    
+
 }
 
 void ofApp::loadLFImage() {
-    lfplane.loadImage(lfimage_filename);
+    //lfplane.loadImage(lfimage_filename);
+    ofLoadImage(lfplane, lfimage_filename);
 
     sourceWidth=lfplane.getWidth();
     sourceHeight=lfplane.getHeight();
@@ -197,67 +193,59 @@ void ofApp::graphicsSetup() {
 
     // load camera positions into texture
     int numCams = xsubimages * ysubimages;
-    
+
     // make array of float pixels with camera position information
     float * pos = new float[numCams*3];
     for (int x = 0; x < xsubimages; x++){
         for (int y = 0; y < ysubimages; y++){
             int i = x + (y * xsubimages);
-            
+
             pos[i*3 + 0] = offsets[i*2];
             pos[i*3 + 1] = offsets[i*2+1]; //y*offset;
             pos[i*3 + 2] = 0.0;
         }
     }
-    
+
     campos_tex.allocate(xsubimages, ysubimages, GL_RGB32F);
     campos_tex.getTextureReference().loadData(pos, xsubimages, ysubimages, GL_RGB);
     delete pos;
-    
+
 
     // setup refocus shader
     //  shader.load("test.vert", "test.frag");
-    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus.frag");
+    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "refocus.frag");
     shader.linkProgram();
-    
+
 
     shader.begin();
-    
+
     // camera images
     shader.setUniformTexture("lftex", lfplane, 1);
-    
     shader.setUniform2f("resolution", subwidth, subheight);
     shader.setUniform2i("subimages", xsubimages, ysubimages);
-    
+
     shader.setUniformTexture("campos_tex", campos_tex, 2);
     shader.end();
 
-  
-    //    GLint maxTextureSize;
-    //    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-    //    std::cout <<"Max texture size: " << maxTextureSize << std::endl;
-    
+
+        GLint maxTextureSize;
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+        std::cout <<"Max texture size: " << maxTextureSize << std::endl;
+
     //        GLint v_maj;
     //    glGetIntegerv(GL_MAJOR_VERSION, &v_maj);
     //        std::cout <<"gl major version: " << v_maj << std::endl;
 
 }
 
-
 //--------------------------------------------------------------
-//  keyboard interaction / osc control
-//--------------------------------------------------------------
-
 void ofApp::keyPressed(int key){
     //    cout << bShowThumbnail << " " << bHideCursor << " " << bDebug << endl;
-    if(key=='s') {
-        doSnapshot();
-    }
     if(key=='f')
         ofToggleFullscreen();
     if(key=='b') {
         // zoom
-        zoom = ofMap(mouseX, 0, ofGetWindowWidth(), 4.0, 0.01);
+        zoom = ofMap(mouseX, 0, ofGetWindowWidth(), 1.0, 0.01);
     }
     if(key=='z') {
         // parallax
@@ -275,8 +263,8 @@ void ofApp::keyPressed(int key){
     }
     if(key == 'v') {
         // offsets
-        xoffset = ofMap(mouseX, 0, ofGetWindowWidth(), -subwidth, subwidth);
-        yoffset = ofMap(mouseY, 0, ofGetWindowHeight(), -subheight, subheight);
+        xoffset = ofMap(mouseX, 0, ofGetWindowWidth(), -1, 1);
+        yoffset = ofMap(mouseY, 0, ofGetWindowHeight(), -1, 1);
     }
     if(key == 'c')
         // focus
@@ -305,17 +293,18 @@ void ofApp::keyPressed(int key){
 
 void ofApp::process_OSC(ofxOscMessage m) {
 
-    if( m.getAddress() == "/lf/focus" ){
-        synScale = ofMap(m.getArgAsFloat(0), 0.0, 1.0, minScale, maxScale);
+    if( m.getAddress() == "/focus" ){
+        synScale = m.getArgAsFloat(0);
     }
-    else if( m.getAddress() == "/lf/xStart" ){
+
+    else if( m.getAddress() == "/xstart" ){
         int startRequested, constrainByRange, xAvail;
 
         startRequested = m.getArgAsInt32(0);
         if ( m.getNumArgs() == 2 ){
             constrainByRange = m.getArgAsInt32(1);
         } else {
-            constrainByRange = 0; // default to unconstrained
+            constrainByRange = 1; // default to constrained
         };
         xAvail = xsubimages - xstart;
 
@@ -332,14 +321,14 @@ void ofApp::process_OSC(ofxOscMessage m) {
         }
     }
 
-    else if(m.getAddress() == "/lf/yStart"){
+    else if(m.getAddress() == "/ystart"){
         int startRequested, constrainByRange, yAvail;
 
         startRequested = m.getArgAsInt32(0);
         if ( m.getNumArgs() == 2 ){
             constrainByRange = m.getArgAsInt32(1);
         } else {
-            constrainByRange = 0; // default to unconstrained
+            constrainByRange = 1; // default to constrained
         };
         yAvail = ysubimages - ystart;
 
@@ -356,14 +345,14 @@ void ofApp::process_OSC(ofxOscMessage m) {
         }
     }
 
-    else if(m.getAddress() == "/lf/xRange"){
+    else if(m.getAddress() == "/xcount"){
         int rangeRequested, constrainByXStart, xAvail;
 
         rangeRequested = m.getArgAsInt32(0);
         if ( m.getNumArgs() == 2 ){
             constrainByXStart = m.getArgAsInt32(1);
         } else {
-            constrainByXStart = 0; // default to unconstrained
+            constrainByXStart = 1; // default to constrained
         };
         xAvail = xsubimages - xstart;
 
@@ -382,14 +371,14 @@ void ofApp::process_OSC(ofxOscMessage m) {
         }
     }
 
-    else if(m.getAddress() == "/lf/yRange"){
+    else if(m.getAddress() == "/ycount"){
         int rangeRequested, constrainByYStart, yAvail;
 
         rangeRequested = m.getArgAsInt32(0);
         if ( m.getNumArgs() == 2 ){
             constrainByYStart = m.getArgAsInt32(1);
         } else {
-            constrainByYStart = 0; // default to unconstrained
+            constrainByYStart = 1; // default to constrained
         };
         yAvail = ysubimages - ystart;
 
@@ -406,6 +395,18 @@ void ofApp::process_OSC(ofxOscMessage m) {
             ystart = max( ystart - yshift, 0);
             ycount = ysubimages - ystart;
         }
+    }
+
+    else if(m.getAddress() == "/xscroll"){
+        xoffset = m.getArgAsFloat(0);
+    }
+
+    else if(m.getAddress() == "/yscroll"){
+        yoffset = m.getArgAsFloat(0);
+    }
+
+    else if(m.getAddress() == "/zoom"){
+        zoom = m.getArgAsFloat(0);
     }
 
     else {
@@ -436,52 +437,5 @@ void ofApp::process_OSC(ofxOscMessage m) {
         cout << msg_string << endl;
         }
 
+
 }
-
-
-//--------------------------------------------------------------
-// snapshot
-//--------------------------------------------------------------
-
-void ofApp::doSnapshot() {
-    string timestamp, imgfilename, paramfilename;
-    
-    // save time-stamped image to data folder
-    timestamp = "./snapshots/"+ofGetTimestampString("%Y%m%d%H%M%S") + "_" + ofToString(snapcount, 4, '0');
-    imgfilename = timestamp + ".jpg";
-    paramfilename = timestamp + ".txt";
-    
-    // save fbo to file
-    // from http://forum.openframeworks.cc/t/ofxfenster-addon-to-handle-multiple-windows-rewrite/6499/61
-    int w = fbo.getWidth();
-    int h = fbo.getHeight();
-    unsigned char* pixels = new unsigned char[w*h*3];  ;
-    ofImage screenGrab;
-    screenGrab.allocate(w,h,OF_IMAGE_COLOR);
-    screenGrab.setUseTexture(false);
-    
-    //copy the pixels from FBO to the pixel array; then set the normal ofImage from those pixels; and use the save method of ofImage
-    fbo.begin();
-    glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glReadPixels(0, 0, fbo.getWidth(), fbo.getHeight(), GL_RGB, GL_UNSIGNED_BYTE, pixels);
-    screenGrab.setFromPixels(pixels, fbo.getWidth(), fbo.getHeight(), OF_IMAGE_COLOR);
-    screenGrab.saveImage(imgfilename, OF_IMAGE_QUALITY_BEST);
-    fbo.end();
-    ofLog(OF_LOG_VERBOSE, "[DiskOut]  saved frame " + imgfilename );
-    
-    // save refocusing parameters to companion text file
-    ofFile file(paramfilename, ofFile::WriteOnly);
-    
-    // add additional parameters below
-    file << lfimage_filename << endl;
-    file << synScale << endl;
-    file << xoffset << "," << yoffset << endl;
-    file << xstart << "," << ystart << endl;
-    file << xcount << "," << ycount << endl;
-    file << zoom << endl;
-    
-    file.close();
-    
-    snapcount++;
-}
-

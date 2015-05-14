@@ -112,8 +112,8 @@
 		84FF4C7B1AE9BC7E00A205CE /* ofxOscSender.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxOscSender.cpp; sourceTree = "<group>"; };
 		84FF4C7C1AE9BC7E00A205CE /* ofxOscSender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxOscSender.h; sourceTree = "<group>"; };
 		BBAB23BE13894E4700AA2426 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = ../../../libs/glut/lib/osx/GLUT.framework; sourceTree = "<group>"; };
-		E27EF4091AF906A800010377 /* refocus_150.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = refocus_150.frag; path = bin/data/shaders/refocus_150.frag; sourceTree = SOURCE_ROOT; };
-		E27EF4121AF9549F00010377 /* refocus.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = refocus.frag; path = bin/data/shaders/refocus.frag; sourceTree = SOURCE_ROOT; };
+		E27EF4091AF906A800010377 /* refocus_150.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = refocus_150.frag; path = bin/data/refocus_150.frag; sourceTree = SOURCE_ROOT; };
+		E27EF4121AF9549F00010377 /* refocus.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = refocus.frag; path = bin/data/refocus.frag; sourceTree = SOURCE_ROOT; };
 		E2A1A1941AE9538F003A7ABC /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxml.cpp; sourceTree = "<group>"; };
 		E2A1A1951AE9538F003A7ABC /* tinyxml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tinyxml.h; sourceTree = "<group>"; };
 		E2A1A1961AE9538F003A7ABC /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxmlerror.cpp; sourceTree = "<group>"; };
