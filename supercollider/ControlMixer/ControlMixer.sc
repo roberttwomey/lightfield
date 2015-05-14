@@ -2,9 +2,9 @@ ControlMixer {
 	// copyArga
 	var <broadcastTag, <broadcastAddr, <broadcastRate, <server, loadCond, colorShift;
 
-	var <busnum, <oscTag, <ctlFades, <ctlViews, outVal;
+	var <busnum, <oscTag, <ctlFades, <ctlViews, <>oscEnabled = true, outVal;
 	var <ratePeriodSpec, <sclSpec, <offsSpec;
-	var <mixView, msgTxt, <broadcastChk, plotChk, updateBx, outValTxt;
+	var <mixView, msgTxt, <broadcastChk, <plotChk, updateBx, outValTxt;
 	var <nBoxWidth = 35, <nBoxHeight = 15, <validLFOs, <plotter, <ctlLayout, plotterAdded = false;
 	var broadcastBus, broadcastWaittime, broadcastTag, pollTask, <>broadcasting=false;
 	var baseColor, idColor, <mixColor, colorStep;
@@ -45,7 +45,7 @@ ControlMixer {
 						outVal = val;
 						defer{ outValTxt.string_(val.round(0.001)) };
 					});
-					broadcasting.if{ broadcastAddr.sendMsg(broadcastTag, outVal) };
+					(oscEnabled and: broadcasting).if{ broadcastAddr.sendMsg(broadcastTag, outVal) };
 					broadcastWaittime.wait
 				}
 			});
@@ -60,6 +60,10 @@ ControlMixer {
 			loadCond !? {loadCond.test_(true).signal};
 		});
 	}
+
+	// pause/run all the controlFaders
+	pause { ctlFades.do(_.pause) }
+	run { ctlFades.do(_.run) }
 
 	addCtl { |finishCond|
 		var ctl, completeFunc, faderView, loadCond = Condition();
@@ -141,6 +145,11 @@ ControlMixer {
 
 	}
 
+	broadcastRate_ { |rateHz|
+		broadcastRate = rateHz;
+		broadcastWaittime = broadcastRate.reciprocal;
+		updateBx.value_(broadcastRate);
+	}
 
 	addPlotter { |plotLength=75, refeshRate=24|
 		var view;
@@ -461,6 +470,12 @@ ControlMixMaster {
 		win.front;
 	}
 
+	// pause/run all the mixers' controlFaders
+	pause { mixers.do(_.pause) }
+	run { mixers.do(_.run) }
+
+	broadcastRate_{ |rateHz| mixers.do(_.broadcastRate_(rateHz)) }
+
 	free {
 		mixers.do(_.free);
 	}
@@ -676,12 +691,37 @@ ControlMixMaster {
 
 		presetWin = Window("Presets", Rect(0,0,100, 100)).view.layout_(
 			VLayout(
-				[ Button().states_([["Send OSC", Color.white, Color.blue],["Stop OSC", Color.white, Color.gray]]).action_({ |but|
-					switch( but.value,
-						0, { mixers.do({|mxr| mxr.broadcasting = false; mxr.broadcastChk.value_(0) }) },
-						1, { mixers.do({|mxr| mxr.broadcasting = true; mxr.broadcastChk.value_(1) }) }
-					)
-				}).maxWidth_(70).fixedHeight_(35), a: \right],
+				HLayout(
+					[ Button().states_([["Send OSC", Color.white, Color.blue],["Stop OSC", Color.white, Color.gray]]).action_({ |but|
+						switch( but.value,
+							0, { mixers.do(_.oscEnabled_(false)) },
+							1, { mixers.do(_.oscEnabled_(true)) }
+						)
+					}).maxWidth_(70).fixedHeight_(25).value_(1), a: \left],
+					VLayout(
+						[ StaticText().string_("Rate"), a: \left],
+						[ NumberBox().action_({ |bx| mixers.do(_.broadcastRate_(bx.value))}).value_(30).maxWidth_(35), a: \left]
+					).margins_(2),
+					VLayout(
+						[ StaticText().string_("Plot").maxWidth_(25), a: \left],
+						[ CheckBox().action_({ |bx| mixers.do({ |mxr|
+							bx.value.asBoolean.if({
+								mxr.plotChk.value.asBoolean.if{mxr.plotter.start}
+							},{ mxr.plotter.stop }
+							);
+						});
+						}).value_(true).maxWidth_(25), a: \left]
+					).margins_(2),
+					[ Button().states_([["Pause Signals", Color.white, Color.gray],["Resume Controls", Color.black, Color.yellow]]).action_({ |but|
+						switch( but.value,
+							1, { mixers.do(_.pause) },
+							0, { mixers.do(_.run) }
+						)
+					}).maxWidth_(110).fixedHeight_(25), a: \left
+				],
+
+				),
+
 				HLayout(
 					nil,
 					StaticText().string_("Variance").align_(\right).fixedHeight_(25),

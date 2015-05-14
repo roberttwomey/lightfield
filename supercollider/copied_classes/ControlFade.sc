@@ -5,7 +5,7 @@ ControlFade {
 	classvar <lfoUgens, <lfoDefs, <mixDef;
 	var <busnum, <controlBus, <lfoBus, <>fadeTime, <lfoSynths, <mixSynth;
 	var <plotter, server, <curLfoUgens;
-	var broadcasting = false, broadcastTask, broadcastTag, broadcastWaittime;
+	var broadcasting = false, broadcastTask, broadcastTag, broadcastWaittime, isPaused = false;
 
 	*new { |fadeTime=0.1, initVal=0, busnum, server, onComplete|
 		^super.new.init(fadeTime, initVal, busnum, server, onComplete);
@@ -299,6 +299,9 @@ ControlFade {
 	broadcastRate_{  |hz| broadcastWaittime = hz.reciprocal }
 
 	stopBroadcast { broadcastTask !? {broadcastTask.stop} }
+
+	pause { mixSynth.pause; lfoSynths.do(_.pause); isPaused = true; }
+	run { mixSynth.run; lfoSynths.do(_.run); isPaused = false; }
 
 	// fade to zero then free
 	release { |thisFadeTime, freeBus=true|
