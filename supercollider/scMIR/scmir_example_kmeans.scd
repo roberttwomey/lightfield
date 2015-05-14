@@ -66,6 +66,8 @@ SynthDef(\grains2,{|out,buf,pos,dur=0.5,rate=5,offset=1,gate=1,pch=1,amp=1|
 //-run analysis function [path,auto-segment]
 
 // auto-segment
+~data = ~load.("/Users/admin/src/rover/data/AUDIO/discovery_cliffside_clip.WAV")
+~data = ~load.("/Users/admin/Documents/Rover/recordings/scmir_test_files/STE-010_curbside1.wav", true)
 ~data = ~load.("/Users/admin/Documents/Rover/recordings/scmir_test_files/STE-010_curbside1.wav", true)
 ~data = ~load.("/Users/admin/Documents/Rover/recordings/scmir_test_files/STE-015_curbside2.wav", true)
 ~data = ~load.("/Users/admin/Documents/Rover/recordings/scmir_test_files/STE-023_walkinggull.wav", true)
