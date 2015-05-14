@@ -1,4 +1,6 @@
 (
+s.waitForBoot({
+
 //-simple granular synth[substitute Impulse for GaussTrig if you don't have GaussTrig]
 
 
@@ -17,7 +19,7 @@ SynthDef(\grains2,{|out,buf,pos,dur=0.5,rate=5,offset=1,gate=1,pch=1,amp=1|
 	Out.ar(out,son*Env.asr.kr(2,gate))
 }).add;
 
-
+"here".postln;
 
 ~load = {|path,auto_segment=true|
 	var name,event=(),buffer,analysis,frames,beatdata,segments;
@@ -56,8 +58,9 @@ SynthDef(\grains2,{|out,buf,pos,dur=0.5,rate=5,offset=1,gate=1,pch=1,amp=1|
 			event.frames = analysis.featuredata.clump(n);
 	"Processing Finished...analysis ready for use.".postln;
 	event;}
-}
-
+};
+	"ding".postln;
+})
 )
 
 
@@ -65,7 +68,9 @@ SynthDef(\grains2,{|out,buf,pos,dur=0.5,rate=5,offset=1,gate=1,pch=1,amp=1|
 
 //-run analysis function [path,auto-segment]
 
+// 1.
 // auto-segment
+~data = ~load.("/Volumes/Work/Sounds/housemachine/02/STE-001.wav", true)
 ~data = ~load.("/Users/admin/Documents/Rover/recordings/scmir_test_files/STE-010_curbside1.wav", true)
 ~data = ~load.("/Users/admin/Documents/Rover/recordings/scmir_test_files/STE-015_curbside2.wav", true)
 ~data = ~load.("/Users/admin/Documents/Rover/recordings/scmir_test_files/STE-023_walkinggull.wav", true)
@@ -83,17 +88,23 @@ SynthDef(\grains2,{|out,buf,pos,dur=0.5,rate=5,offset=1,gate=1,pch=1,amp=1|
 
 ~data.analysis.numfeatures * ~data.analysis.numframes) == ~data.analysis.featuredata.size
 
+// kind of fun
 ~data.analysis.plotSelfSimilarity(1,3,1)
 ~data.analysis.featureinfo
 ~data.analysis.analysispath
 ~data.analysis.sourcepath
 
+
 // clustering
-~vectors = ~data.analysis.featuredata.clump(~data.analysis.numfeatures)
+//2. define vectors
+(
+~vectors = ~data.analysis.featuredata.clump(~data.analysis.numfeatures);
 ~numClusters = 9;
-k = KMeansMod(~numClusters)
-~vectors.do{|vec, i| k.add(vec) }
-k.update
+k = KMeansMod(~numClusters);
+~vectors.do{|vec, i| k.add(vec) };
+)
+// then... recenter the centroids
+// k.update
 k.reset.update // make sure centroids aren't too heavily weighted toward first entries
 k.data
 k.centroids.size
