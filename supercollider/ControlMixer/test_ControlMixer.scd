@@ -1,6 +1,5 @@
 // test file for ControlMixer
-c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount"], NetAddr("192.168.0.102", 12345) )
-c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("192.168.0.102", 12345) )
+c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount"], NetAddr("ubuntu.local", 12345) )
 c = ControlMixMaster( ["focus", "xstart", "ystart"], NetAddr("localhost", 57120) )
 
 // c = ControlMixer( "/focus", NetAddr("localhost", 57120) );
@@ -13,7 +12,8 @@ c.storePreset( \third )
 c.storePreset( \fourth )
 c.storePreset( \fifth )
 c.storePreset( \sixth )
-c.storePreset( \basement )
+
+c.storePreset(\myFirst)
 
 c.recallPreset( \first )
 c.recallPreset( \second )
@@ -22,6 +22,7 @@ c.recallPreset( \fourth )
 c.recallPreset( \fifth )
 c.recallPreset( \sixth )
 
+c.recallPreset(\myFirst)
 
 c.removePreset( \first )
 
