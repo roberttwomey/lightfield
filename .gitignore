@@ -4,6 +4,7 @@ software
 documentation
 bin
 build
+obj
 .DS_Store
 .AppleDouble
 Thumbs.DB
