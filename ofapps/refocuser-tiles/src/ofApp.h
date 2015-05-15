@@ -7,6 +7,8 @@
 #define MAX_SUBIMAGES 600
 #define MAX_OFFSETS 1200
 
+#define MAX_LF_TILES 4
+
 class ofApp : public ofBaseApp{
 public:
 
@@ -17,29 +19,27 @@ public:
     void loadXMLSettings(string settingsfile);
     void loadLFImage();
     void graphicsSetup();
-
+    
+    void doSnapshot();
+    
     void process_OSC(ofxOscMessage m);
     void keyPressed  (int key);
 
     ofxOscReceiver receiver;
     int port;
 
-    //ofImage lfplane;
-    ofTexture lfplane1, lfplane2, lfplane3, lfplane4;
-    ofFbo campos_tex;
 
+    ofTexture lfplanes[MAX_LF_TILES];
+    string lffilenames[MAX_LF_TILES];
+    int numlftiles;
+    ofFbo campos_tex;
+    ofFbo subimg_corner_tex;
+    
     ofDirectory dir;
 
-    ofImage     logoImg;
-    ofImage     multimaskImg;
-    ofVideoPlayer 		fingerMovie;
-    ofVideoGrabber 		vidGrabber;
-
-    ofFbo       fbo;
-    ofFbo       maskFbo;
-    ofShader    shader;
-
-    string lfimage_filename;
+    ofFbo fbo;
+    ofFbo maskFbo;
+    ofShader shader;
 
     float sourceWidth, sourceHeight;
     float synScale;
@@ -51,6 +51,10 @@ public:
 
     float offsets[MAX_OFFSETS];
 
+    // snapshot
+    int snapcount;
+    
+    // onscreen display
     bool bShowThumbnail;
     bool bHideCursor;
     bool bDebug;
