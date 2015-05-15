@@ -2,19 +2,20 @@ SerialPort.listDevices
 SerialPort.closeAll
 
 // Connect arduino to Computer
-a = ArduinoGRBL("/dev/tty.usbserial-A94JRL5D", 115200)
+a = ArduinoGRBL("/dev/tty.usbserial-A9I19RNV", 115200)
 
 a = ArduinoGRBL("/dev/tty.AdafruitEZ-Link418c-SPP", 115200)
-
-// home the first time around
-a.home
-a.reset
-a.unlock
 
 // set the homeing pulloff the first time around
 a.settings
 // pulloff should be less than the distance from the limit switch to the pulley
-a.send("$27=60")
+a.send("$27=41")
+
+// home the first time around
+// confirm pulloff first
+a.home
+a.reset
+a.unlock
 
 // Turn on Rover
 // Connect to Rover_AP. pwd: roverrover
@@ -23,7 +24,9 @@ a.send("$27=60")
 // args:
 //	anArduinoGRBL, << an instance of ArduinoGRBL that is driving the rig
 //	cameraNetAddr, << a NetAddr for the pi snapping photos
+//r = RoverDriver(a, NetAddr("localhost", 9000)); // testing
 r = RoverDriver(a, NetAddr("rover.local", 9000));
+
 
 
 /*
@@ -40,6 +43,9 @@ a.state
 // unlock if needed
 a.unlock
 
+a.port
+.putAll("?")
+
 
 // set up rig dimensions: dimensions of the motor suspension, sets the arduino world offset from the machine coordinate space
 // motorSep = 66
@@ -50,7 +56,7 @@ a.unlock
 // MachineX/Y:	after homing and pulling off, MachineX/Y machine coordinates (usually negative)
 // lengthA/B:	after homing and pulling off, lengthA and lengthB are the distance from the pulley to the middle Rover's width (where the cables would intersect if they extended)
 // camOffset:	offset from the end of the cable at the rover to the camera's center
-r.rigDimensions_(motorSeparation: 87, machineX: -140, machineY: -140, lengthA: 87, lengthB: 87) //, camOffset: 1.5 );
+r.rigDimensions_(motorSeparation: 39.25, machineX: -159, machineY: -159, lengthA: 51.75, lengthB: 52) //, camOffset: 1.5 );
 
 
 // check the state
@@ -68,7 +74,7 @@ a.state
 // captureSpanY: height of the capture plane
 // insetY: vertical offset from the rig's pulley height to the 0,0 camera capture position
 // nCols, nRows: number of rows and columns of subimages to capture
-r.captureDimensions_(captureSpanX: 20, captureSpanY: 30, insetY: 30, nCols: 20, nRows: 30 );
+r.captureDimensions_(captureSpanX: 20, captureSpanY: 30, insetY: 10, nCols: 20, nRows: 30 );
 
 
 // set Rover to capture in 1 of 3 ways:
@@ -137,26 +143,32 @@ r.customPathCapture( pointArray: p, displayPath: true)
 r.initCapture( autoAdvance: true, waitToSettle: 1.2, waitAfterPhoto: 1.5, travelTimeOut: 30, stateCheckRate: 5, writePosData: true, fileName: "dome")
 
 
-// TODO set this in RoverDriver class
 // set GRBL's feed rate if not set already
-a.feed_(500)
+r.feed_(500)
 // a.send("G0F500")
 
-
-r.reset
-// go to the location of the first capture point
-r.goToFirstCapturePoint
+r.goToTopLeft
 r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/TL.jpg")
 
-r.goTo_(20, 0)
+r.goToTopRight
 r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/TR.jpg")
 
-r.goTo_(20, 30)
-r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/BR.jpg")
-
-r.goTo_(0, 30)
+r.goToBottomLeft
 r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/BL.jpg")
 
+r.goToBottomRight
+r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/BL.jpg")
+
+// more anchor points in middle of capture area - centered on sides/top/bottom
+r.goToTop
+r.goToRight
+r.goToLeft
+r.goToBottom
+
+// go to the location of the first capture point
+r.goToFirstCapturePoint
+
+// check aligment by returning to your pulloff point
 r.goTopulloffHome
 
 a.unlock
@@ -258,3 +270,23 @@ r.captureTask.isPlaying
 
 a.mode == "Idle"
 
+// GUI layout
+Rover Setup
+home	reset	unlock	feed []	pulloff []
+state [v]postState
+
+Rig Dimensions [?]
+motor span []	machineX [] machineY[] lenA [] lenB [] [APPLY]
+
+Capture Dimensions [?]
+spanX []	spanY []	insetY [] nCols [] nRows [] [APPLY]
+
+Sample Capture Extents
+[ ][ ][ ]		[pulloff home]
+[ ]   [ ]
+[ ][ ][ ] [SNAP]
+
+GridCapture
+[v]auto-advance	settleTime []	waitAfterPhoto [] dataFileName []
+
+[ROVE] Time Remaining [pause][reset]

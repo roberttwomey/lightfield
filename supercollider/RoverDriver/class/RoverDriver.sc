@@ -248,7 +248,10 @@ RoverDriver {
 				waitAfterPhoto.wait;
 			};
 
-			writePosData.if{ this.writeDataToFile( dataDirectory, fileName ) };
+			writePosData.if{
+
+				this.writeDataToFile( dataDirectory, fileName )
+			};
 			"Capture Finished!".postln;
 		});
 	}
@@ -260,7 +263,7 @@ RoverDriver {
 		dataDir = if( dataDirectory.isNil,
 			{ dataDir ?? "~/Desktop/".standardizePath },
 			{ File.exists(dataDirectory).not.if(
-				{	warn("specified data directory doesn't exist, writing to desktop.");
+				{	warn("Specified data directory doesn't exist, writing to desktop.");
 					"~/Desktop/".standardizePath;
 				},{ dataDirectory }
 			)
@@ -269,7 +272,7 @@ RoverDriver {
 		(dataDir.last == $/).not.if{dataDir = dataDir ++ "/"};
 
 		name = fileName !? { fileName.contains(".txt").if({ fileName }, {fileName ++ ".txt"}) };
-		name ?? { name = Date.getDate.stamp ++ ".txt" };
+		name ?? { name = "RoverCaptureData_" ++ Date.getDate.stamp ++ ".txt" };
 
 		dataFile !? {dataFile.close};  // close any formerly open files
 		dataFile = File(dataDir++name,"w");
@@ -309,7 +312,17 @@ RoverDriver {
 	// return to the location Rover is after pulloff (to check no slippage)
 	goTopulloffHome { arduino.goTo_(pulloffHome.x, pulloffHome.y) }
 
-	goToFirstCapturePoint {this.goTo_( camPts[0].x * xStep, camPts[0].y * yStep ); }
+	goToFirstCapturePoint { this.goTo_( camPts[0].x * xStep, camPts[0].y * yStep ); }
+	goToTopLeft		{ this.goTo_(0,0) }
+	goToTopRight	{ this.goTo_(spanX,0) }
+	goToBottomLeft	{ this.goTo_(0,spanY) }
+	goToBottomRight	{ this.goTo_(spanX, spanY) }
+	goToTop			{ this.goTo_(spanX/2,0) }
+	goToRight		{ this.goTo_(spanX,spanY/2) }
+	goToLeft		{ this.goTo_(0,spanY/2) }
+	goToBottom		{ this.goTo_(spanX/2,spanY) }
+
+	feed_ {|rate| arduino.feed_(rate) }
 
 	prCreateHandshakeResponder {
 		handshakeResponder = OSCdef(\cameraHandshake, {
