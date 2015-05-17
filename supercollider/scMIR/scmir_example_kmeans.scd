@@ -71,6 +71,7 @@ SynthDef(\grains2,{|out,buf,pos,dur=0.5,rate=5,offset=1,gate=1,pch=1,amp=1|
 // 1.
 // auto-segment
 ~data = ~load.("/Volumes/Work/Sounds/housemachine/02/STE-001.wav", true)
+~data = ~load.("/Users/admin/src/rover/data/AUDIO/discovery_cliffside_clip.WAV", true)
 ~data = ~load.("/Users/admin/Documents/Rover/recordings/scmir_test_files/STE-010_curbside1.wav", true)
 ~data = ~load.("/Users/admin/Documents/Rover/recordings/scmir_test_files/STE-015_curbside2.wav", true)
 ~data = ~load.("/Users/admin/Documents/Rover/recordings/scmir_test_files/STE-023_walkinggull.wav", true)
@@ -86,7 +87,7 @@ SynthDef(\grains2,{|out,buf,pos,dur=0.5,rate=5,offset=1,gate=1,pch=1,amp=1|
 ~data.analysis.featuredata
 ~data.analysis.featuredata.size
 
-~data.analysis.numfeatures * ~data.analysis.numframes) == ~data.analysis.featuredata.size
+~data.analysis.numfeatures * ~data.analysis.numframes == ~data.analysis.featuredata.size
 
 // kind of fun
 ~data.analysis.plotSelfSimilarity(1,3,1)
@@ -98,8 +99,8 @@ SynthDef(\grains2,{|out,buf,pos,dur=0.5,rate=5,offset=1,gate=1,pch=1,amp=1|
 // clustering
 //2. define vectors
 (
-~vectors = ~data.analysis.featuredata.clump(~data.analysis.numfeatures);
-~numClusters = 9;
+~vectors = ~data.analysis.featuredata.clump( ~data.analysis.numfeatures );
+~numClusters = 4;
 k = KMeansMod(~numClusters);
 ~vectors.do{|vec, i| k.add(vec) };
 )
@@ -112,11 +113,76 @@ k.assignments
 // what do our cluster densities look like?
 ~numClusters.do{|index| postf("cluster %: %\n", index, k.assignments.occurrencesOf(index)) }
 
+// these should be the same
 k.assignments.size
 ~data.beatdata.size
 
+// each frame's distance from it's assigned centroid
+k.cenDistances
+
+// each cluster's frames, ordered from nearest to furthest from centroid
+~gatherFramesByDistance = {
+	var framesByCluster;
+	framesByCluster = ~numClusters.collect{List()};
+
+	k.cenDistances.do{|dist, i|
+		// Create an dict for each frame, associating it with its
+		// distance from its assigned centroid, for later sorting
+		// Put each of these frame dicts into its cluster group.
+		framesByCluster[k.assignments[i]].add(
+			().f_(~data.beatdata[i]).d_(dist)
+		);
+	};
+
+	// sort by each frame's distance from the centroid, ordered nearest to furthest
+	framesByCluster.collect{ |dataDictsArr|
+		dataDictsArr.sortBy(\d).collect{|dict| dict.f }
+	};
+}
+
+~framesByDistance =  ~gatherFramesByDistance.()
+
+// spread controls the probablitity distribution
+//	probability -> 'shift' value as spread -> 0
+//	practical vals to still cluster around 'shift' are ~0.5 max
+//	beyond that it's pretty much uniform random
+//	spread of 0.001 pretty much converges on 'shift'
+~chooseClusterFrame = { |clusterID, spread = 0.1, shift = 0|
+	var ptr, index, clusterFrames;
+	ptr = shift.gaussian(spread);
+	ptr = ptr.fold(0,1); // keep in range at cost of slightly altering distro
+
+	clusterFrames = ~framesByDistance[clusterID];
+
+	// translate this normalized pointer position
+	// into an index into the clustered frames
+	index = (clusterFrames.size * ptr).round;
+	clusterFrames[index]
+}
+
+// test
+~chooseClusterFrame.(2, 0.1, 0.5)
+
+// test more
+(
+var sampleSize = 500;
+var spread = 0.5;
+var center = 0.0;
+var clusterIndex = 1;
+var uniqueVals = [];
+// x = ~sampleSize.collect{~chooseClusterFrame.(2, 0.1, 0.5)}
+x = sampleSize.collect{~chooseClusterFrame.(clusterIndex, spread, center)};
+
+// based on the above distribution, how many unique frames were chosen?
+x.do{|val| uniqueVals.includes(val).not.if{ uniqueVals = uniqueVals.add(val) } };
+postf("of % samples, used % unique frames from a set of %\n", sampleSize, uniqueVals.size, ~framesByDistance[clusterIndex].size);
+nil
+)
 
 
+~framesByDistance[2][60]
+
+500.collect({0.gaussian(0.1)}).plot(discrete: true)
 
 /////////////////////////////////////////////////////
 //  PLOTTING

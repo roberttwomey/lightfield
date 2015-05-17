@@ -49,9 +49,8 @@ a = ScatterView2(w, Rect(10,10, 450, 450), k.data, [0, 8].asSpec);
 
 // w = Window.new("Centroids", Rect(40,40, 500, 500)).front;
 // a = ScatterView2(w, Rect(10,10, 450, 450), k.centroids, [0, 8].asSpec);
-
-
 )
+
 // If you notice that the result of the above is too strongly affected by the first few data points
 // (which define the initialisations for the centroids), you can .reset and recalculate:
 (

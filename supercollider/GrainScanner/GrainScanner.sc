@@ -118,22 +118,11 @@ GrainScanner {
 		buffers.do(_.free)
 	}
 
-	// move to a new "moment", and scan over spanSec time with the moment at centerSec
-	scanRange{ | centerSec, spanSec, syncBufs=true |
-		var span, moment;
-
-		span = spanSec / bufDur; // the span of time of the scanning window
-		moment = centerSec / bufDur;
-
-		synths.do({|me|
-			me.start_(moment - span.half)
-			.end_(moment + span.half)
-		});
-		// sync up the instances, by resetting to start position
-		syncBufs.if{ synths.do(_.t_posReset_(1)) };
-	}
-
+	// ~~~~~~~~~~~~~~~~~
+	/* grain controls */
+	// ~~~~~~~~~~~~~~~~~
 	grnDur_ {|dur| synths.do(_.grainDur_(dur)); this.changed(\grnDur, dur); }
+
 	grnRate_ {|rateHz| synths.do(_.grainRate_(rateHz)); this.changed(\grnRate, rateHz); }
 
 	// gaussian trigger: 0 = regular at grainRate, 1 = random around grainRate
@@ -153,6 +142,31 @@ GrainScanner {
 	syncLoop { |pntrRate|
 		pntrRate !? { synths.do(_.posRate_(pntrRate)) };
 		synths.do(_.t_posReset_(1));
+	}
+
+	// ~~~~~~~~~~~~~~~~~
+	/* scan controls */
+	// ~~~~~~~~~~~~~~~~~
+
+	// move to a new "moment" and loop over spanSec seconds
+	// window centered at centerSec
+	scanRange{ | centerSec, spanSec, syncBufs=true |
+		var span, moment;
+
+		span = spanSec / bufDur; // the span of time of the scanning window
+		moment = centerSec / bufDur;
+
+		synths.do({|me|
+			me.start_(moment - span.half)
+			.end_(moment + span.half)
+		});
+		// sync up the instances, by resetting to start position
+		syncBufs.if{ synths.do(_.t_posReset_(1)) };
+	}
+
+	// direct control over pointer location
+	setPointer { | distFromCentroid = 0, grainSize = 2 |
+		cluster
 	}
 
 	gui { view = GrainScannerView(this); }
@@ -410,5 +424,7 @@ i.scanRange(rand(g.bufDur), 5)
 q = 4.collect{GrainScanner(0, g.buffers)}
 q.do(_.gui)
 q.do(_.free)
+
+Need to incorporate multiple pointer locations based on clustered frames in stochastic granulation, with distance from centroid controlled by GuasTrig or something similar.
 
 */
