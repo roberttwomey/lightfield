@@ -101,6 +101,9 @@ GrainScanner {
 		}
 	}
 
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	/* grain controls */
+
 	play { |fadeInTime|
 		fadeInTime !? {synths.do(_.fadein_(fadeInTime))};
 		"playing".postln;
@@ -113,14 +116,6 @@ GrainScanner {
 			synth.isPlaying.not.if({"synth isn't playing".warn},{synth.gate_(0)}) });
 	}
 
-	free {
-		group.freeAll;
-		buffers.do(_.free)
-	}
-
-	// ~~~~~~~~~~~~~~~~~
-	/* grain controls */
-	// ~~~~~~~~~~~~~~~~~
 	grnDur_ {|dur| synths.do(_.grainDur_(dur)); this.changed(\grnDur, dur); }
 
 	grnRate_ {|rateHz| synths.do(_.grainRate_(rateHz)); this.changed(\grnRate, rateHz); }
@@ -144,9 +139,9 @@ GrainScanner {
 		synths.do(_.t_posReset_(1));
 	}
 
-	// ~~~~~~~~~~~~~~~~~
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	/* scan controls */
-	// ~~~~~~~~~~~~~~~~~
+
 
 	// move to a new "moment" and loop over spanSec seconds
 	// window centered at centerSec
@@ -164,12 +159,20 @@ GrainScanner {
 		syncBufs.if{ synths.do(_.t_posReset_(1)) };
 	}
 
-	// direct control over pointer location
-	setPointer { | distFromCentroid = 0, grainSize = 2 |
-		cluster
-	}
+	// // direct control over pointer location
+	// setPointer { | distFromCentroid = 0, grainSize = 2 |
+	// 	cluster
+	// }
+
 
 	gui { view = GrainScannerView(this); }
+
+
+	free {
+		group.freeAll;
+		buffers.do(_.free)
+	}
+
 
 	loadSynthLib {
 		grnSynthDef = CtkSynthDef(\grainJ, {
