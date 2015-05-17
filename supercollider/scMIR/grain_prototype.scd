@@ -7,7 +7,7 @@
 	start=0, end=1,		// bounds of grain position in sound file
 	grainRand = 0,		// gaussian trigger: 0 = regular at grainRate, 1 = random around grainRate
 	grainRate = 10, grainDur = 0.04,
-	posDisp = 0.01,	// position dispersion of the pointer, in seconds
+	posDisp = 0.01,		// position dispersion of the pointer, as a percentage of file length
 	pitch=1,
 	auxmix=0, amp=1,
 	fadein = 2, fadeout = 2,
@@ -49,7 +49,6 @@
 	pos_hi = posDisp * 0.5;
 
 	// add randomness to position pointer, make sure it remains within limits
-
 	pos = pos + TRand.ar(pos_lo, pos_hi, trig);
 	pos = pos.wrap(start , end);
 
@@ -143,3 +142,11 @@ t_posReset = 0,		// reset the phasor position with a trigger
 gate = 1;			// gate to start and release the synth
 
 [x,y].do(_.free)
+
+grnDur
+grnRate
+grnRand
+pntrDisp
+pntrRate
+reset/sync
+new moment

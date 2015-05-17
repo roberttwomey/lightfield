@@ -9,7 +9,7 @@ a = ArduinoGRBL("/dev/tty.AdafruitEZ-Link418c-SPP", 115200)
 // set the homeing pulloff the first time around
 a.settings
 // pulloff should be less than the distance from the limit switch to the pulley
-a.send("$27=41")
+a.send("$27=49.5")
 
 // home the first time around
 // confirm pulloff first
@@ -56,7 +56,7 @@ a.port
 // MachineX/Y:	after homing and pulling off, MachineX/Y machine coordinates (usually negative)
 // lengthA/B:	after homing and pulling off, lengthA and lengthB are the distance from the pulley to the middle Rover's width (where the cables would intersect if they extended)
 // camOffset:	offset from the end of the cable at the rover to the camera's center
-r.rigDimensions_(motorSeparation: 39.25, machineX: -159, machineY: -159, lengthA: 51.75, lengthB: 52) //, camOffset: 1.5 );
+r.rigDimensions_(motorSeparation: 49.25, machineX: -150.5, machineY: -150.5, lengthA: 61, lengthB: 61) //, camOffset: 1.5 );
 
 
 // check the state
@@ -74,7 +74,7 @@ a.state
 // captureSpanY: height of the capture plane
 // insetY: vertical offset from the rig's pulley height to the 0,0 camera capture position
 // nCols, nRows: number of rows and columns of subimages to capture
-r.captureDimensions_(captureSpanX: 20, captureSpanY: 30, insetY: 10, nCols: 20, nRows: 30 );
+r.captureDimensions_(captureSpanX: 25, captureSpanY: 30, insetY: 15, nCols: 20, nRows: 30 );
 
 
 // set Rover to capture in 1 of 3 ways:
@@ -140,11 +140,12 @@ r.customPathCapture( pointArray: p, displayPath: true)
 //	travelTimeOut,	<< time to wait to timeout in case anything goes wrong waiting for GRBL state to report "Idle"
 //	stateCheckRate	<< number of times GRBL state is queried per second when using auto-advance
 
-r.initCapture( autoAdvance: true, waitToSettle: 1.2, waitAfterPhoto: 1.5, travelTimeOut: 30, stateCheckRate: 5, writePosData: true, fileName: "dome")
+r.initCapture( autoAdvance: true, waitToSettle: 1.1, waitAfterPhoto: 1.2, travelTimeOut: 30, stateCheckRate: 5, writePosData: true, fileName: "night_again")
 
 
 // set GRBL's feed rate if not set already
 r.feed_(500)
+r.feed_(350)
 // a.send("G0F500")
 
 r.goToTopLeft
