@@ -11,6 +11,10 @@ RoverDriver {
 	var rigDimDefined = false, capDimDefined = false;
 	var <dataFile, <captureData, <dataDir;
 
+	// raspstill camera parameters
+	var <>sharpen = 25, <>meter = "average", <>whiteBalance = "auto";
+	var <>shutter; // specified in microseconds, max 6000000 (6s)
+
 	*new { |anArduinoGRBL, cameraNetAddr|
 		^super.newCopyArgs( anArduinoGRBL, cameraNetAddr );
 	}
@@ -230,8 +234,11 @@ RoverDriver {
 				// take the photo with raspicamfastd
 				// camAddr.sendMsg("/camera", "snap"); "\tSNAP".postln;
 
-				// take photo with raspistill, custom file-naming:
-				camParams = format("-t 1 -o /home/pi/lfimages/frame_%04d.jpg", i);
+				// take photo with raspistill, custom file-naming, params settable externally, see top of this class for defaults/setters:
+				camParams = format(
+					"-t 1 -o /home/pi/lfimages/frame_%.jpg  -n -sh % -mm % -awb %",
+					i.asString.padLeft(4, "0"), sharpen, meter, whiteBalance );
+				shutter !? { camParams = camParams ++ format(" -ss %", shutter) }; // add shutter control if specified
 				camAddr.sendMsg("/camera", "paramsnap", camParams);
 
 				// log it for the dataFile
@@ -248,9 +255,23 @@ RoverDriver {
 				waitAfterPhoto.wait;
 			};
 
-			writePosData.if{ this.writeDataToFile( dataDirectory, fileName ) };
+			writePosData.if{
+
+				this.writeDataToFile( dataDirectory, fileName )
+			};
 			"Capture Finished!".postln;
 		});
+	}
+
+	// take a test shot with the current camera exposure settings
+	testShot { |fileName|
+		var camParams, fName;
+		fName = fileName ?? {Date.getDate.rawSeconds};
+		camParams = format(
+			"-t 1 -o /home/pi/lfimages/_testShot_%.jpg  -n -sh % -mm % -awb %",
+			fName, sharpen, meter, whiteBalance );
+		shutter !? { camParams = camParams ++ format(" -ss %", shutter) }; // add shutter control if specified
+		camAddr.sendMsg("/camera", "paramsnap", camParams);
 	}
 
 	writeDataToFile { |dataDirectory, fileName|
@@ -260,7 +281,7 @@ RoverDriver {
 		dataDir = if( dataDirectory.isNil,
 			{ dataDir ?? "~/Desktop/".standardizePath },
 			{ File.exists(dataDirectory).not.if(
-				{	warn("specified data directory doesn't exist, writing to desktop.");
+				{	warn("Specified data directory doesn't exist, writing to desktop.");
 					"~/Desktop/".standardizePath;
 				},{ dataDirectory }
 			)
@@ -269,7 +290,7 @@ RoverDriver {
 		(dataDir.last == $/).not.if{dataDir = dataDir ++ "/"};
 
 		name = fileName !? { fileName.contains(".txt").if({ fileName }, {fileName ++ ".txt"}) };
-		name ?? { name = Date.getDate.stamp ++ ".txt" };
+		name ?? { name = "RoverCaptureData_" ++ Date.getDate.stamp ++ ".txt" };
 
 		dataFile !? {dataFile.close};  // close any formerly open files
 		dataFile = File(dataDir++name,"w");
@@ -309,7 +330,17 @@ RoverDriver {
 	// return to the location Rover is after pulloff (to check no slippage)
 	goTopulloffHome { arduino.goTo_(pulloffHome.x, pulloffHome.y) }
 
-	goToFirstCapturePoint {this.goTo_( camPts[0].x * xStep, camPts[0].y * yStep ); }
+	goToFirstCapturePoint { this.goTo_( camPts[0].x * xStep, camPts[0].y * yStep ); }
+	goToTopLeft		{ this.goTo_(0,0) }
+	goToTopRight	{ this.goTo_(spanX,0) }
+	goToBottomLeft	{ this.goTo_(0,spanY) }
+	goToBottomRight	{ this.goTo_(spanX, spanY) }
+	goToTop			{ this.goTo_(spanX/2,0) }
+	goToRight		{ this.goTo_(spanX,spanY/2) }
+	goToLeft		{ this.goTo_(0,spanY/2) }
+	goToBottom		{ this.goTo_(spanX/2,spanY) }
+
+	feed_ {|rate| arduino.feed_(rate) }
 
 	prCreateHandshakeResponder {
 		handshakeResponder = OSCdef(\cameraHandshake, {

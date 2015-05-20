@@ -1,25 +1,23 @@
 // test file for ControlMixer
-<<<<<<< HEAD
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount"], NetAddr("localhost", 57120) )
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount"], NetAddr("192.168.0.102", 12345) )
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("192.168.0.102", 12345) )
-=======
-c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount"], NetAddr("ubuntu.local", 12345) )
->>>>>>> 816a75775d8f1d3b4b1a81563a733780345859b5
+c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("localhost", 12345) )
 c = ControlMixMaster( ["focus", "xstart", "ystart"], NetAddr("localhost", 57120) )
-
+c.
 // c = ControlMixer( "/focus", NetAddr("localhost", 57120) );
 // d = ControlMixer( "/test2", NetAddr("localhost", 57120) );
 
+// NetAddr("localhost", 12345).sendMsg("/")
 
+c.storePreset( \projTest, true )
 c.storePreset( \first )
 c.storePreset( \second )
 c.storePreset( \third )
 c.storePreset( \fourth )
 c.storePreset( \fifth )
 c.storePreset( \sixth )
-
-c.storePreset(\myFirst)
+c.storePreset( \basement )
 
 c.recallPreset( \first )
 c.recallPreset( \second )
@@ -27,8 +25,8 @@ c.recallPreset( \third )
 c.recallPreset( \fourth )
 c.recallPreset( \fifth )
 c.recallPreset( \sixth )
+c.recallPreset( \projTest )
 
-c.recallPreset(\myFirst)
 
 c.removePreset( \first )
 

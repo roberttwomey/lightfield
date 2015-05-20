@@ -236,7 +236,7 @@ void ofApp::graphicsSetup() {
     
 
     // setup refocus shader
-    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus_mirror.frag");
+    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus.frag");
     shader.linkProgram();
     
 

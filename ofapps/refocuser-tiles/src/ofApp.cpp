@@ -2,21 +2,33 @@
 
 
 //--------------------------------------------------------------
+// main program
+//--------------------------------------------------------------
+
 void ofApp::setup(){
 
     ofEnableAlphaBlending();
-    loadXMLSettings("./textures/carkeek_tile.xml");
-
+//    loadXMLSettings("./textures/dark_trees_calib.xml");
+//    loadXMLSettings("./textures/yellowcliff_sm.xml");
+//    loadXMLSettings("./textures/cliffside.xml");
+//    loadXMLSettings("./textures/tunnel_sm.xml");
+//        loadXMLSettings("./textures/bookcase.xml");
+//    loadXMLSettings("./textures/mike1_sm.xml");
+    loadXMLSettings("./textures/bookcase_tile.xml");
+    //    loadXMLSettings("./textures/mike3_sm.xml");
+  
     loadLFImage();
 
     graphicsSetup();
-
-    // OSC - listen on the given port
+	    // OSC - listen on the given port
     cout << "listening for osc messages on port " << port << "\n";
     receiver.setup(port);
+    
+    snapcount = 0;
 }
 
 //--------------------------------------------------------------
+
 void ofApp::update(){
 
     // TODO: why is this here?
@@ -29,6 +41,7 @@ void ofApp::update(){
 
     shader.begin();
 
+    // aperture
     shader.setUniform2i("ap_loc", xstart, ystart);
     shader.setUniform2i("ap_size", xcount, ycount);
 
@@ -45,7 +58,7 @@ void ofApp::update(){
 
     fbo.end();
 
-    ofSetWindowTitle( ofToString( ofGetFrameRate()));
+    ofSetWindowTitle( ofToString( ofGetFrameRate(), 2));
 
     // ~~~ OSC handling ~~~
 
@@ -67,8 +80,8 @@ void ofApp::draw(){
     ofBackground(ofColor::black);
 
     // thumbnail size
-    float tWidth = 160;//320;
-    float tHeight = 160/xsubimages * ysubimages; //90;//180;
+    float tWidth = 160;
+    float tHeight = 160/xsubimages * ysubimages;
 
     // fused image size
     float height = ofGetWindowHeight();
@@ -83,29 +96,36 @@ void ofApp::draw(){
     // draw thumbnail with indicator
     if(bShowThumbnail == true) {
         ofSetColor(255);
-        lfplane1.draw(5,5,tWidth,tHeight);
+        
+        // draw four separate textures
+        lfplanes[0].draw(5,5,tWidth/2,tHeight/2);
+        lfplanes[1].draw(5+tWidth/2,5,tWidth/2,tHeight/2);
+        lfplanes[2].draw(5,5+tHeight/2,tWidth/2,tHeight/2);
+        lfplanes[3].draw(5+tWidth/2,5+tHeight/2,tWidth/2,tHeight/2);
+        
         ofSetColor(255, 0, 0);
         ofNoFill();
-        float xunit = tWidth/xsubimages;//29.;
-        float yunit = tHeight/ysubimages;//20.0;
+        float xunit = tWidth/xsubimages;
+        float yunit = tHeight/ysubimages;
         ofRect(5+xstart*xunit, 5+ystart*yunit, xcount*xunit, ycount*yunit);
     }
 
     if(bDebug == true) {
         // display text about refocusing
         ofSetColor(255);
-        ofTranslate(10, ofGetHeight()-75);
-        ofDrawBitmapString("scale:   \t"+ofToString(synScale), 0, 0);
-        ofDrawBitmapString("roll:    \t"+ofToString(xoffset)+" "+ofToString(yoffset), 0, 15);
-        ofDrawBitmapString("ap_loc:  \t"+ofToString(xstart)+" "+ofToString(ystart) +" ("+ofToString(xstart + ystart * xsubimages)+")", 0, 30);
-        ofDrawBitmapString("ap_size: \t"+ofToString(xcount)+" "+ofToString(ycount), 0, 45);
-        ofDrawBitmapString("zoom:    \t"+ofToString(zoom), 0, 60);
-//        cout << bDebug << bShowThumbnail << endl;
+        ofTranslate(10, ofGetHeight()-90);
+        ofDrawBitmapString("scale:    \t"+ofToString(synScale), 0, 0);
+        ofDrawBitmapString("roll:     \t"+ofToString(xoffset)+" "+ofToString(yoffset), 0, 15);
+        ofDrawBitmapString("ap_loc:   \t"+ofToString(xstart)+" "+ofToString(ystart) +" ("+ofToString(xstart + ystart * xsubimages)+")", 0, 30);
+        ofDrawBitmapString("ap_size:  \t"+ofToString(xcount)+" "+ofToString(ycount), 0, 45);
+        ofDrawBitmapString("zoom:     \t"+ofToString(zoom), 0, 60);
+        ofDrawBitmapString("framerate:\t"+ofToString(ofGetFrameRate(), 2), 0, 75);
     }
 }
 
+
 //--------------------------------------------------------------
-// settings
+// setup
 //--------------------------------------------------------------
 
 void ofApp::loadXMLSettings(string settingsfile) {
@@ -114,8 +134,11 @@ void ofApp::loadXMLSettings(string settingsfile) {
     xml.loadFile(settingsfile);
 
     // lightfield images //
-    lfimage_filename = xml.getValue("texturefile", "nofile.jpg");
-
+    numlftiles = xml.getNumTags("texturefile");
+    for(int i=0; i < numlftiles; i++) {
+        lffilenames[i] = xml.getValue("texturefile", "nofile.jpg", i);
+    }
+    
     // image layout
     subwidth = xml.getValue("subimagewidth", 0);
     subheight = xml.getValue("subimageheight", 0);
@@ -156,35 +179,25 @@ void ofApp::loadXMLSettings(string settingsfile) {
         xml.popTag();
     }
     xml.popTag();
-
+    
 }
 
 void ofApp::loadLFImage() {
-    //lfplane.loadImage(lfimage_filename);
-//    cout << "loading texture1...";
-//    ofLoadImage(lfplane1, "./textures/tunnel_tex_lgt-0.jpg");
-//    cout << "done." << endl << "loading texture2...";
-//    ofLoadImage(lfplane2, "./textures/tunnel_tex_lgt-1.jpg");
-//    cout << "done." << endl << "loading texture3...";
-//    ofLoadImage(lfplane3, "./textures/tunnel_tex_lgt-2.jpg");
-//    cout << "done." << endl << "loading texture4...";
-//    ofLoadImage(lfplane4, "./textures/tunnel_tex_lgt-3.jpg");
-
-    cout << "loading texture1...";
-    ofLoadImage(lfplane1, "./textures/carkeek_tile-0.jpg");
-    cout << "done." << endl << "loading texture2...";
-    ofLoadImage(lfplane2, "./textures/carkeek_tile-1.jpg");
-    cout << "done." << endl << "loading texture3...";
-    ofLoadImage(lfplane3, "./textures/carkeek_tile-2.jpg");
-    cout << "done." << endl << "loading texture4...";
-    ofLoadImage(lfplane4, "./textures/carkeek_tile-3.jpg");
-
-    cout << "done loading textures" << endl;
+//    ofLoadImage(lfplane, lffilenames);
+//
 //    sourceWidth=lfplane.getWidth();
 //    sourceHeight=lfplane.getHeight();
 //
 //    cout << "LF Texture: " << sourceWidth << ", " << sourceHeight << endl;
-
+    
+    for(int i=0; i < numlftiles; i++) {
+        cout << "loading texture" << i << " from " << lffilenames[i] << "...";
+        ofLoadImage(lfplanes[i], lffilenames[i]);
+        cout << "done." << endl;
+    }
+    
+    cout << "done loading textures" << endl;
+    
 }
 
 void ofApp::graphicsSetup() {
@@ -204,63 +217,85 @@ void ofApp::graphicsSetup() {
 
     // load camera positions into texture
     int numCams = xsubimages * ysubimages;
-
+    
     // make array of float pixels with camera position information
     float * pos = new float[numCams*3];
     for (int x = 0; x < xsubimages; x++){
         for (int y = 0; y < ysubimages; y++){
             int i = x + (y * xsubimages);
-
+            
             pos[i*3 + 0] = offsets[i*2];
             pos[i*3 + 1] = offsets[i*2+1]; //y*offset;
             pos[i*3 + 2] = 0.0;
         }
     }
-
+    
     campos_tex.allocate(xsubimages, ysubimages, GL_RGB32F);
     campos_tex.getTextureReference().loadData(pos, xsubimages, ysubimages, GL_RGB);
     delete pos;
-
+        
+    // TODO: implement subimage corners as texture to optimize?
+    //    // make array of float pixels with camera position information
+//    unsigned char * corners = new unsigned char [numCams*3];
+//    for (int x = 0; x < xsubimages; x++){
+//        for (int y = 0; y < ysubimages; y++){
+//            int i = x + (y * xsubimages);
+//            
+//            corners[i*3 + 0] = x * subwidth;
+//            corners[i*3 + 1] = y * subheight;
+//            corners[i*3 + 2] = 0.0;
+//        }
+//    }
+//    
+//    subimg_corner_tex.allocate(xsubimages, ysubimages, GL_RGB32I);
+//    subimg_corner_tex.getTextureReference().loadData(corners, xsubimages, ysubimages, GL_RGB);
+//    delete corners;
+    
 
     // setup refocus shader
-    //  shader.load("test.vert", "test.frag");
-    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "refocus_tile.frag");
+    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus_tile.frag");
     shader.linkProgram();
-
-
+    
     shader.begin();
-
-    // camera images
-    shader.setUniformTexture("lftex1", lfplane1, 1);
-    shader.setUniformTexture("lftex2", lfplane2, 2);
-    shader.setUniformTexture("lftex3", lfplane3, 3);
-    shader.setUniformTexture("lftex4", lfplane4, 4);
-
+    
+    // camera images)
+    shader.setUniformTexture("lftex1", lfplanes[0], 1);
+    shader.setUniformTexture("lftex2", lfplanes[1], 2);
+    shader.setUniformTexture("lftex3", lfplanes[2], 3);
+    shader.setUniformTexture("lftex4", lfplanes[3], 4);
+    
     shader.setUniform2f("resolution", subwidth, subheight);
     shader.setUniform2i("subimages", xsubimages, ysubimages);
-
+    
     shader.setUniformTexture("campos_tex", campos_tex, 5);
     shader.end();
 
-
-//        GLint maxTextureSize;
-//        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-//        std::cout <<"Max texture size: " << maxTextureSize << std::endl;
-
+  
+    //    GLint maxTextureSize;
+    //    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+    //    std::cout <<"Max texture size: " << maxTextureSize << std::endl;
+    
     //        GLint v_maj;
     //    glGetIntegerv(GL_MAJOR_VERSION, &v_maj);
     //        std::cout <<"gl major version: " << v_maj << std::endl;
 
 }
 
+
 //--------------------------------------------------------------
+//  keyboard interaction / osc control
+//--------------------------------------------------------------
+
 void ofApp::keyPressed(int key){
     //    cout << bShowThumbnail << " " << bHideCursor << " " << bDebug << endl;
+    if(key=='s') {
+        doSnapshot();
+    }
     if(key=='f')
         ofToggleFullscreen();
     if(key=='b') {
         // zoom
-        zoom = ofMap(mouseX, 0, ofGetWindowWidth(), 1.0, 0.01);
+        zoom = ofMap(mouseX, 0, ofGetWindowWidth(), 4.0, 0.01);
     }
     if(key=='z') {
         // parallax
@@ -309,7 +344,7 @@ void ofApp::keyPressed(int key){
 void ofApp::process_OSC(ofxOscMessage m) {
 
     if( m.getAddress() == "/lf/focus" ){
-        synScale = m.getArgAsFloat(0);
+        synScale = ofMap(m.getArgAsFloat(0), 0.0, 1.0, minScale, maxScale);
     }
     else if( m.getAddress() == "/lf/xStart" ){
         int startRequested, constrainByRange, xAvail;
@@ -438,4 +473,54 @@ void ofApp::process_OSC(ofxOscMessage m) {
         // post the uknown message
         cout << msg_string << endl;
         }
+
 }
+
+
+//--------------------------------------------------------------
+// snapshot
+//--------------------------------------------------------------
+
+void ofApp::doSnapshot() {
+    string timestamp, imgfilename, paramfilename;
+    
+    // save time-stamped image to data folder
+    timestamp = "./snapshots/"+ofGetTimestampString("%Y%m%d%H%M%S") + "_" + ofToString(snapcount, 4, '0');
+    imgfilename = timestamp + ".jpg";
+    paramfilename = timestamp + ".txt";
+    
+    // save fbo to file
+    // from http://forum.openframeworks.cc/t/ofxfenster-addon-to-handle-multiple-windows-rewrite/6499/61
+    int w = fbo.getWidth();
+    int h = fbo.getHeight();
+    unsigned char* pixels = new unsigned char[w*h*3];  ;
+    ofImage screenGrab;
+    screenGrab.allocate(w,h,OF_IMAGE_COLOR);
+    screenGrab.setUseTexture(false);
+    
+    //copy the pixels from FBO to the pixel array; then set the normal ofImage from those pixels; and use the save method of ofImage
+    fbo.begin();
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glReadPixels(0, 0, fbo.getWidth(), fbo.getHeight(), GL_RGB, GL_UNSIGNED_BYTE, pixels);
+    screenGrab.setFromPixels(pixels, fbo.getWidth(), fbo.getHeight(), OF_IMAGE_COLOR);
+    screenGrab.saveImage(imgfilename, OF_IMAGE_QUALITY_BEST);
+    fbo.end();
+    ofLog(OF_LOG_VERBOSE, "[DiskOut]  saved frame " + imgfilename );
+    
+    // save refocusing parameters to companion text file
+    ofFile file(paramfilename, ofFile::WriteOnly);
+    
+    // add additional parameters below
+    for(int i=0; i < numlftiles; i++)
+        file << lffilenames[i] << endl;
+    file << synScale << endl;
+    file << xoffset << "," << yoffset << endl;
+    file << xstart << "," << ystart << endl;
+    file << xcount << "," << ycount << endl;
+    file << zoom << endl;
+    
+    file.close();
+    
+    snapcount++;
+}
+
