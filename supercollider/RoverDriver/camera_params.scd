@@ -14,7 +14,9 @@ r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/testThisMut
 r.camAddr.sendMsg( "/camera", "paramsnap", format("-t 1 -o /home/pi/lfimages/%.jpg -n", Date.getDate.rawSeconds) )
 
 
-r.camAddr.sendMsg( "/camera", "paramsnap", format("-t 1 -o /home/pi/lfimages/%.jpg -n -sh 50 -ex antishake -mm average", Date.getDate.rawSeconds) )
+r.camAddr.sendMsg( "/camera", "paramsnap", format("-t 1 -o /home/pi/lfimages/%.jpg -n -sh 25 -ex snow -mm average -awb sun -ss 1400", Date.getDate.rawSeconds) )
+
+r.camAddr.sendMsg( "/camera", "paramsnap", format("-t 1 -o /home/pi/lfimages/%.jpg -n -ex snow -mm average", Date.getDate.rawSeconds) )
 
 
 // SHARPNESS - useful!, -sh 50

@@ -6,7 +6,7 @@ ControlMixer {
 	var <ratePeriodSpec, <sclSpec, <offsSpec;
 	var <mixView, msgTxt, <broadcastChk, <plotChk, updateBx, outValTxt;
 	var <nBoxWidth = 35, <nBoxHeight = 15, <validLFOs, <plotter, <ctlLayout, plotterAdded = false;
-	var broadcastBus, broadcastWaittime, broadcastTag, pollTask, <>broadcasting=false;
+	var broadcastBus, broadcastWaittime, broadcastTag, pollTask, <broadcasting=true;
 	var baseColor, idColor, <mixColor, colorStep;
 
 	*new { | broadcastTag="/myMessage", broadcastNetAddr, broadcastRate=30, server, loadCond, colorShift=0.03 |
@@ -113,7 +113,7 @@ ControlMixer {
 							),
 							HLayout(
 								[ StaticText().string_("OSC").align_(\right), a: \right],
-								[ broadcastChk = CheckBox().fixedWidth_(15), a: \right],
+								[ broadcastChk = CheckBox().fixedWidth_(15).value_(broadcasting), a: \right],
 
 								[ StaticText().string_("Hz").align_(\right), a: \right],
 								[ updateBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight), a: \right],
@@ -149,6 +149,11 @@ ControlMixer {
 		broadcastRate = rateHz;
 		broadcastWaittime = broadcastRate.reciprocal;
 		updateBx.value_(broadcastRate);
+	}
+
+	broadcasting_ {|bool|
+		broadcasting = bool;
+		broadcastChk.value_(bool);
 	}
 
 	addPlotter { |plotLength=75, refeshRate=24|
@@ -372,10 +377,10 @@ ControlMixFaderView {
 			}, AppClock);
 		});
 
-		mixBx.action_({|bx| ctl.amp_(bx.value); mixKnb.value_(bx.value) }).value_(1);
+		mixBx.action_({|bx| ctl.amp_(bx.value); }).value_(1);
 		mixKnb.action_({|knb|
 			var val = knb.value.sqrt;  // power scaling
-			ctl.amp_(val); mixBx.value_(val)
+			ctl.amp_(val);
 		}).value_(1);
 
 		finishCond.test_(true).signal;
@@ -410,7 +415,7 @@ ControlMixFaderView {
 					\high, { maxBx.value_(args[0]) },
 					\scale, { sclBx.value_(args[0]); sclKnb.value_(mixer.sclSpec.unmap(args[0])) },
 					\offset, { offsBx.value_(args[0]); offsKnb.value_(mixer.offsSpec.unmap(args[0])) },
-					\amp, { mixBx.value_(args[0]); mixKnb.value_(args[0].sqrt) }
+					\amp, { mixBx.value_(args[0]); mixKnb.value_(args[0].squared) }
 				)
 			}
 		});
@@ -585,6 +590,7 @@ ControlMixMaster {
 				ctlFade.value_(fDict[\val])
 			}
 			{	// recall the lfo with bounds, etc...
+				"recalling LFO".postln;
 				ctlFade.lfo_(fDict[\signal], fDict[\freq], fDict[\min], fDict[\max])
 			};
 

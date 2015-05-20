@@ -9,7 +9,7 @@ a = ArduinoGRBL("/dev/tty.AdafruitEZ-Link418c-SPP", 115200)
 // set the homeing pulloff the first time around
 a.settings
 // pulloff should be less than the distance from the limit switch to the pulley
-a.send("$27=49.5")
+a.send("$27=57")
 
 // home the first time around
 // confirm pulloff first
@@ -43,6 +43,9 @@ a.state
 // unlock if needed
 a.unlock
 
+a.enableHardLimit_(false)
+a.enableHardLimit_(true)
+
 a.port
 .putAll("?")
 
@@ -56,7 +59,7 @@ a.port
 // MachineX/Y:	after homing and pulling off, MachineX/Y machine coordinates (usually negative)
 // lengthA/B:	after homing and pulling off, lengthA and lengthB are the distance from the pulley to the middle Rover's width (where the cables would intersect if they extended)
 // camOffset:	offset from the end of the cable at the rover to the camera's center
-r.rigDimensions_(motorSeparation: 49.25, machineX: -150.5, machineY: -150.5, lengthA: 61, lengthB: 61) //, camOffset: 1.5 );
+r.rigDimensions_(motorSeparation: 50.5, machineX: -143, machineY: -143, lengthA: 70, lengthB: 70) //, camOffset: 1.5 );
 
 
 // check the state
@@ -74,7 +77,7 @@ a.state
 // captureSpanY: height of the capture plane
 // insetY: vertical offset from the rig's pulley height to the 0,0 camera capture position
 // nCols, nRows: number of rows and columns of subimages to capture
-r.captureDimensions_(captureSpanX: 25, captureSpanY: 30, insetY: 15, nCols: 20, nRows: 30 );
+r.captureDimensions_(captureSpanX: 25, captureSpanY: 30, insetY: 8, nCols: 20, nRows: 30 );
 
 
 // set Rover to capture in 1 of 3 ways:
@@ -84,7 +87,7 @@ r.captureDimensions_(captureSpanX: 25, captureSpanY: 30, insetY: 15, nCols: 20, 
 // 	rowsFirst, leftToRight, topDown, wrap,	<< bools to determine grid order
 //	displayPath << bool to show the resultant path order
 
-r.gridCapture( rowsFirst: true, leftToRight: true, topDown: true, wrap: true, displayPath: true )
+r.gridCapture( rowsFirst: false, leftToRight: true, topDown: true, wrap: true, displayPath: true )
 
 
 /*
@@ -140,11 +143,11 @@ r.customPathCapture( pointArray: p, displayPath: true)
 //	travelTimeOut,	<< time to wait to timeout in case anything goes wrong waiting for GRBL state to report "Idle"
 //	stateCheckRate	<< number of times GRBL state is queried per second when using auto-advance
 
-r.initCapture( autoAdvance: true, waitToSettle: 1.1, waitAfterPhoto: 1.2, travelTimeOut: 30, stateCheckRate: 5, writePosData: true, fileName: "night_again")
+r.initCapture( autoAdvance: true, waitToSettle: 1.6, waitAfterPhoto: 1.1, travelTimeOut: 30, stateCheckRate: 5, writePosData: true, fileName: "seaset")
 
 
 // set GRBL's feed rate if not set already
-r.feed_(500)
+r.feed_(400)
 r.feed_(350)
 // a.send("G0F500")
 
@@ -154,11 +157,12 @@ r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/TL.jpg")
 r.goToTopRight
 r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/TR.jpg")
 
+r.goToBottomRight
+r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/BR.jpg")
+
 r.goToBottomLeft
 r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/BL.jpg")
 
-r.goToBottomRight
-r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/BL.jpg")
 
 // more anchor points in middle of capture area - centered on sides/top/bottom
 r.goToTop

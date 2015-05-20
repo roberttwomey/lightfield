@@ -2,12 +2,15 @@
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount"], NetAddr("localhost", 57120) )
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount"], NetAddr("192.168.0.102", 12345) )
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("192.168.0.102", 12345) )
+c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("localhost", 12345) )
 c = ControlMixMaster( ["focus", "xstart", "ystart"], NetAddr("localhost", 57120) )
-
+c.
 // c = ControlMixer( "/focus", NetAddr("localhost", 57120) );
 // d = ControlMixer( "/test2", NetAddr("localhost", 57120) );
 
+// NetAddr("localhost", 12345).sendMsg("/")
 
+c.storePreset( \projTest, true )
 c.storePreset( \first )
 c.storePreset( \second )
 c.storePreset( \third )
@@ -22,6 +25,7 @@ c.recallPreset( \third )
 c.recallPreset( \fourth )
 c.recallPreset( \fifth )
 c.recallPreset( \sixth )
+c.recallPreset( \projTest )
 
 
 c.removePreset( \first )
