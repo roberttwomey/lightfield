@@ -152,16 +152,20 @@ r.feed_(350)
 // a.send("G0F500")
 
 r.goToTopLeft
-r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/TL.jpg")
+r.testShot("TL")
+// r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/TL.jpg")
 
 r.goToTopRight
-r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/TR.jpg")
+r.testShot("TR")
+// r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/TR.jpg")
 
 r.goToBottomRight
-r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/BR.jpg")
+r.testShot("BR")
+// r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/BR.jpg")
 
 r.goToBottomLeft
-r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/BL.jpg")
+r.testShot("BL")
+// r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/BL.jpg")
 
 
 // more anchor points in middle of capture area - centered on sides/top/bottom

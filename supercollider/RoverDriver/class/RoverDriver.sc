@@ -11,6 +11,10 @@ RoverDriver {
 	var rigDimDefined = false, capDimDefined = false;
 	var <dataFile, <captureData, <dataDir;
 
+	// raspstill camera parameters
+	var <>sharpen = 25, <>meter = "average", <>whiteBalance = "auto";
+	var <>shutter; // specified in microseconds, max 6000000 (6s)
+
 	*new { |anArduinoGRBL, cameraNetAddr|
 		^super.newCopyArgs( anArduinoGRBL, cameraNetAddr );
 	}
@@ -230,8 +234,11 @@ RoverDriver {
 				// take the photo with raspicamfastd
 				// camAddr.sendMsg("/camera", "snap"); "\tSNAP".postln;
 
-				// take photo with raspistill, custom file-naming:
-				camParams = format("-t 1 -o /home/pi/lfimages/frame_%.jpg", i.asString.padLeft(4, "0"));
+				// take photo with raspistill, custom file-naming, params settable externally, see top of this class for defaults/setters:
+				camParams = format(
+					"-t 1 -o /home/pi/lfimages/frame_%.jpg  -n -sh % -mm % -awb %",
+					i.asString.padLeft(4, "0"), sharpen, meter, whiteBalance );
+				shutter !? { camParams = camParams ++ format(" -ss %", shutter) }; // add shutter control if specified
 				camAddr.sendMsg("/camera", "paramsnap", camParams);
 
 				// log it for the dataFile
@@ -254,6 +261,17 @@ RoverDriver {
 			};
 			"Capture Finished!".postln;
 		});
+	}
+
+	// take a test shot with the current camera exposure settings
+	testShot { |fileName|
+		var camParams, fName;
+		fName = fileName ?? {Date.getDate.rawSeconds};
+		camParams = format(
+			"-t 1 -o /home/pi/lfimages/_testShot_%.jpg  -n -sh % -mm % -awb %",
+			fName, sharpen, meter, whiteBalance );
+		shutter !? { camParams = camParams ++ format(" -ss %", shutter) }; // add shutter control if specified
+		camAddr.sendMsg("/camera", "paramsnap", camParams);
 	}
 
 	writeDataToFile { |dataDirectory, fileName|
