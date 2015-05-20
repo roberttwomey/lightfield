@@ -539,7 +539,7 @@ if __name__ == '__main__':
 
     parser.add_argument('datapath', help='path to lightfield data')
     parser.add_argument('grid', help='acquisition grid as WxH')
-    parser.add_argument('--reorder', default=None, help='reorder images to match order of acquisition (wrap)')
+    parser.add_argument('--reorder', default=None, help='reorder images to match order of acquisition (wrap, colsfirst)')
     parser.add_argument('--skip', default=[], help='indices of images to skip')
     parser.add_argument('--numtextures', default=1, type=int, help='number of output textures')
     parser.add_argument('--maxtexturesize', default=16384, type=int, help='maximum pixel dimension of output texture')
@@ -554,7 +554,11 @@ if __name__ == '__main__':
 
     gridstr = args.grid     # grid layout
     order = args.reorder    # reorder images
-    skip = [i for i in args.skip.split(',')] #.split(',')        # skip certain images
+    if len(args.skip) > 0:
+        skip = [i for i in args.skip.split(',')] #.split(',')        # skip certain images
+    else:
+        skip = []
+        
     num_textures = args.numtextures
     max_texture_size = args.maxtexturesize
     
@@ -566,7 +570,12 @@ if __name__ == '__main__':
     
     
     # output paths to save the results
-    scene_name = os.path.basename(args.datapath)
+    # if os.path.isdir(args.datapath):
+    #     scene_name = args.datapath.split('/')[-2]
+    # else:
+    #     scene_name = os.path.basename(args.datapath)
+    # print scene_name
+    scene_name = args.datapath.split('/')[-2]
     
     warpedpath = os.path.join(args.datapath, 'warped')    
     thumbpath = os.path.join(args.datapath, 'thumbs')
@@ -621,6 +630,64 @@ if __name__ == '__main__':
         # export camera center coordinates    
         write_xml_scene(camerapos, contactimg_file, image_files, camresults, reorder, skip)
 
+    elif order=='colsfirstwrap':
+        print "columns first, wrapped"
+
+        # reorder
+        reorder = []
+        for i in range(grid_w):
+            if i%2==0:
+                reorder += range(i, i+grid_h*grid_w, grid_w)
+            else:
+                reorder += range(i+(grid_h-1)*grid_w, i-1, -grid_w)
+                
+        print len(reorder)
+        
+        # print skip
+        for i in reorder:
+            fname = "frame_{0:04d}.jpg".format(i)
+            if fname not in camresults.keys():
+                skip = skip + [i]
+        
+        print skip
+        
+        # make contact sheet
+        generate_contact_sheet(image_files, reorder, skip)
+    
+        # print reorder
+        # export camera center coordinates    
+        write_xml_scene(camerapos, contactimg_file, image_files, camresults, reorder, skip)
+    
+    elif order=='verticalwrap':
+        
+        print "vertical wrap (top->bottom, bottom->top, etc, col at a time)"
+        
+        # reorder
+        reorder = np.zeros((grid_h, grid_w), dtype=int)
+        
+        for i in range(grid_w):
+            if i%2==0:
+                reorder[:,i] = range(i*grid_h, (i+1)*grid_h)
+            else:
+                reorder[:,i] = range((i+1)*grid_h-1, i*grid_h-1, -1)
+                
+        reorder = np.reshape(reorder, grid_h * grid_w)
+        
+        # print skip
+        for i in reorder:
+            fname = "frame_{0:04d}.jpg".format(i)
+            if fname not in camresults.keys():
+                skip = skip + [i]
+        
+        print skip
+        
+        # make contact sheet
+        generate_contact_sheet(image_files, reorder, skip)
+    
+        # print reorder
+        # export camera center coordinates    
+        write_xml_scene(camerapos, contactimg_file, image_files, camresults, reorder, skip)
+            
     else:
         
         # make contact sheet
