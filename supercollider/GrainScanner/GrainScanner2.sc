@@ -4,10 +4,10 @@ GrainScanner2 {
 	// copyArgs
 	var <outbus, bufferOrPath;
 	var server, <sf, <buffers, <group, <synths, <bufDur, <view, <bufferPath;
-	var <replyID;
+	var <grnResponder, <replyID;
 	var <grnDurSpec, <grnRateSpec, <grnRandSpec, <pntrRateSpec, <pntrDispSpec;
 	// cluster vars
-	var setClusterCnt = 0, <curCluster, <numFramesInCluster;
+	var setClusterCnt = 0, <curCluster, <numFramesInClusters, <numFramesInCluster, <numClusters, <clusterFramesByDist, <invalidClusters;
 
 	*new { |outbus=0, bufferOrPath|
 		^super.newCopyArgs( outbus, bufferOrPath ).init;
@@ -107,9 +107,10 @@ GrainScanner2 {
 	initSynths {
 		synths = buffers.collect{ |buf, i|
 			grnSynthDef.note(target: group)
-			.buffer_(buf).bufnum_(buf.bufnum).out_bus_(outbus+i)
+			.out_bus_(outbus+i).buffer_(buf)
 			.grainRate_(2).grainDur_(1.3)
-			.clusterSpread_(0.1), distFrmCen = 0, buffer, pos = 0, replyID = -1
+			.clusterSpread_(0.1).distFrmCen_(0).pos_(0).replyID_(this.replyID)
+			.gate_(1)
 		}
 	}
 
@@ -124,24 +125,23 @@ GrainScanner2 {
 	// dist: 0 > 1
 	// 0 center of the centroid
 	// 1 furthest distance from centroid in the cluster
-	distFrmCen_ { |dist| synths.do(_.distFrmCen_(spread)) }
+	distFrmCen_ { |dist| synths.do(_.distFrmCen_(dist)) }
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	/* grain controls */
 
 	play { |fadeInTime|
 		fadeInTime !? {synths.do(_.fadein_(fadeInTime))};
-		"playing".postln;
 		synths.do({|synth| synth.isPlaying.not.if({synth.play},{synth.gate_(1)}) });
 	}
 
 	release { |fadeOutTime|
 		fadeOutTime !? { synths.do(_.fadeout_(fadeOutTime)) };
 		synths.do({|synth|
-			synth.isPlaying.not.if({"synth isn't playing".warn},{synth.gate_(0)}) });
+			synth.isPlaying.not.if({"synth isn't playing, can't release".warn},{synth.gate_(0)}) });
 	}
 
-	grnDur_ {|dur| synths.do(_.grainDur_(dur)); this.changed(\grnDur, dur); }
+	grnDur_ { |dur| synths.do(_.grainDur_(dur)); this.changed(\grnDur, dur); }
 
 	grnRate_ {|rateHz| synths.do(_.grainRate_(rateHz)); this.changed(\grnRate, rateHz); }
 
@@ -151,8 +151,7 @@ GrainScanner2 {
 	// position dispersion of the pointer, in seconds
 	pntrDisp_ {|dispSecs| synths.do(_.posDisp_(dispSecs/bufDur)); this.changed(\pntrDisp, dispSecs); }
 	// speed of the grain position pointer in the buffer, 1 is realtime, 0.5 half-speed, etc
-	pntrRate_ {|rateScale| synths.do(_.posRate_(rateScale)); this.changed(\pntrRate, rateScale); }
-
+	// pntrRate_ {|rateScale| synths.do(_.posRate_(rateScale)); this.changed(\pntrRate, rateScale); }
 
 
 
@@ -172,7 +171,7 @@ GrainScanner2 {
 			// Create an dict for each frame, associating it with its
 			// distance from its assigned centroid, for later sorting
 			// Put each of these frame dicts into its cluster group.
-			framesByCluster[k.assignments[i]].add(
+			framesByCluster[kMeansData.assignments[i]].add(
 				().f_(mirFrames[i]).d_(dist)
 			);
 		};
@@ -257,8 +256,11 @@ GrainScanner2 {
 
 	loadSynthLib {
 		grnSynthDef = CtkSynthDef(\grainScanner2, {
-			arg grainRate = 2, grainDur=1.25, clusterSpread = 0.1, distFrmCen = 0, buffer, pos = 0, replyID = -1;
-			var trig, out, grain_dens, amp_scale;
+			arg grainRate = 2, grainDur=1.25, clusterSpread = 0.1, distFrmCen = 0, buffer, pos = 0, replyID = -1, fadein = 2, fadeout = 2, gate =1;
+			var env, trig, out, grain_dens, amp_scale;
+
+			// envelope for fading output in and out - re-triggerable
+			env = EnvGen.kr(Env([1,1,0],[fadein, fadeout], \sin, 1), gate, doneAction: 0);
 
 			// TODO: update with gausstrig
 			trig = Impulse.ar(grainRate);
@@ -270,6 +272,7 @@ GrainScanner2 {
 			// spread, distFrmCen, grainDur
 			SendReply.ar(trig, '/pointer', [clusterSpread, distFrmCen, grainDur], replyID);
 			out = GrainBufJ.ar(1, trig, grainDur, buffer, 1 , pos, 1, interp:1, grainAmp: amp_scale);
+			out = out * env;
 			Out.ar(0, Pan2.ar(out));
 		})
 	}
@@ -280,8 +283,8 @@ GrainScanner2View {
 	var scanner;
 	var <win, <controls;
 
-	*new {|aGrainScanner|
-		^super.newCopyArgs( aGrainScanner ).init;
+	*new {|aGrainScanner2|
+		^super.newCopyArgs( aGrainScanner2 ).init;
 	}
 
 	init {
@@ -329,17 +332,17 @@ GrainScanner2View {
 				.value_(scanner.grnRandSpec.unmap(scanner.grnRandSpec.default))
 			),
 
-			\pntrRate, ()
-			.numBox_( NumberBox()
-				.action_({ |bx|
-					scanner.pntrRate_(bx.value) })
-				.value_(scanner.pntrRateSpec.default)
-			)
-			.knob_(	Knob()
-				.action_({|knb|
-					scanner.pntrRate_(scanner.pntrRateSpec.map(knb.value)) })
-				.value_(scanner.pntrRateSpec.unmap(scanner.pntrRateSpec.default))
-			),
+			// \pntrRate, ()
+			// .numBox_( NumberBox()
+			// 	.action_({ |bx|
+			// 	scanner.pntrRate_(bx.value) })
+			// 	.value_(scanner.pntrRateSpec.default)
+			// )
+			// .knob_(	Knob()
+			// 	.action_({|knb|
+			// 	scanner.pntrRate_(scanner.pntrRateSpec.map(knb.value)) })
+			// 	.value_(scanner.pntrRateSpec.unmap(scanner.pntrRateSpec.default))
+			// ),
 
 			\pntrDisp, ()
 			.numBox_( NumberBox()
@@ -366,16 +369,17 @@ GrainScanner2View {
 			)
 			.txt_( StaticText().string_("Fade in/out") ),
 
-			// reset the pointer moment loop
-			\syncPntr, ()
-			.button_( Button().states_([[""]]).action_({ |but|
-				scanner.syncLoop }) )
-			.txt_( StaticText().string_("Sync pointer") ),
+			// // reset the pointer moment loop
+			// \syncPntr, ()
+			// .button_( Button().states_([[""]]).action_({ |but|
+			// scanner.syncLoop }) )
+			// .txt_( StaticText().string_("Sync pointer") ),
 
-			\newPos, ()
-			.button_( Button().states_([[""]]).action_({ |but|
-				scanner.scanRange(scanner.bufDur.rand, rrand(2.0, 6.0)) }) )
-			.txt_( StaticText().string_("New moment") ),
+			\newCluster, ()
+			.numBox_( NumberBox()
+				.action_({ |bx|
+				scanner.setCluster(bx.value.asInt) }) )
+			.txt_( StaticText().string_("New cluster") ),
 
 		]);
 	}
@@ -396,13 +400,18 @@ GrainScanner2View {
 						[controls[\pntrDisp].slider.orientation_(\vertical).minHeight_(150), a: \left],
 						[controls[\pntrDisp].numBox.fixedWidth_(35), a: \left],
 					),
-					VLayout( *[\newPos, \syncPntr, \fadeIO].collect({ |key|
+					VLayout(
 						HLayout(
-							[controls[key].button.fixedWidth_(35), a: \left],
-							[controls[key].txt.align_(\left), a: \left ]
-						)
-					}) ++ [nil, [StaticText().string_("pntr Dispersion").align_(\left), a: \bottom]]
-					), nil
+							[controls[\fadeIO].button.fixedWidth_(35), a: \left],
+							[controls[\fadeIO].txt.align_(\left), a: \left ]
+						),
+						HLayout(
+							[controls[\newCluster].numBox.fixedWidth_(35), a: \left],
+							[controls[\newCluster].txt.align_(\left), a: \left ]
+						),
+						nil,
+						[StaticText().string_("pntr Dispersion").align_(\left), a: \bottom]
+					),
 				),
 			)
 		)
