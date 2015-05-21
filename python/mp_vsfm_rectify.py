@@ -26,7 +26,7 @@ import multiprocessing
 import argparse
 import pickle
 from pylab import * 
-
+import re
         
 def readImageFilenames(dir_name):
     # read in image filenames
@@ -378,17 +378,19 @@ def warpAvg(src, params, R_avg, C_avg):
     # generate thumbnail
     acq_w, acq_h = acq_grid
     
-    if acq_w > acq_h:
-        thumb_w = max_texture_size / acq_w * num_textures
+    if acq_w*img_w > acq_h*img_h:
+        # kluge. should not be calculated this way with sqrt(
+        thumb_w = min(int(max_texture_size*sqrt(num_textures) / acq_w), img_w)
         thumb_h = thumb_w * img_h / img_w
     else:
-        thumb_h = max_texture_size / acq_h * num_textures
+        # kluge. should not be calculated this way with sqrt(
+        thumb_h = min(int(max_texture_size*sqrt(num_textures) / acq_h), img_h)
         thumb_w = thumb_h * img_w / img_h
     
     # thumb_w = max_texture_size / acq_w * num_textures
     # thumb_h = thumb_w * img_h / img_w
 
-    #print thumb_w, thumb_h
+    # print thumb_w, thumb_h
     
     thumb_img = cv2.resize(src_img_warp, (thumb_w, thumb_h))
     thumb_file = os.path.join(thumbpath, fname+ext.lower())
@@ -397,70 +399,136 @@ def warpAvg(src, params, R_avg, C_avg):
     # return (warp_file, thumb_file)
                
 
+def generate_full_res_textures(files, img_path, contactimg_file, reorder = None, skip = []):
+    """Generate full res textures, <= max_texture_dimension"""
+    global max_texture_size, grid_h, grid_w, num_textures, thumb_w, thumb_h, x_tiles, y_tiles, x_imgs_per_tile, y_imgs_per_tile
+    
+    print ""
+    print "Generating Textures:"
+    
+    print files[0]
+    file_str = os.path.basename(files[0])
+    img_str = re.sub('\d+', '{0:04d}_warp', file_str)
+    
+    cam_img = cv2.imread(os.path.join(img_path, img_str.format(0)))
+    img_h, img_w, img_chan = cam_img.shape
+    print "Input images are", cam_img.shape
+    
+    total_w = grid_w * img_w
+    total_h = grid_h * img_h
+    print "Full res texture is", total_w, "x", total_h
+    
+    tile_w = math.floor(float(max_texture_size) / float(img_w)) * img_w
+    tile_h = math.floor(float(max_texture_size) / float(img_h)) * img_h
+    print "Output textures are", tile_w, "x", tile_h
+    
+    x_imgs_per_tile = int(tile_w / img_w)
+    y_imgs_per_tile = int(tile_h / img_h)
+    print "Images per tile", tile_w, "x", tile_h
+    
+    x_tiles = int(math.ceil(total_w / tile_w))
+    y_tiles = int(math.ceil(total_h / tile_h))
+    print "Number of tiles", x_tiles, "x", y_tiles
+
+    output_files = []
+    
+    # iterate over textures
+    for ty in range(y_tiles):
+        for tx in range(x_tiles):
+            tilenum = tx + ty * x_tiles
+            print "generating tile", tilenum, "(", tx, ty,"):",
+            
+            tile_img = np.zeros((tile_h, tile_w, 3), np.uint8)
+            # print "tile res", tile_img.shape
+            
+            # iterate over images in current texture
+            for y_img in range(y_imgs_per_tile):
+                for x_img in range(x_imgs_per_tile):
+
+                    # position of current image/camera view
+                    cam_pos = (x_img + tx * x_imgs_per_tile, y_img + ty * y_imgs_per_tile)
+                    if cam_pos[0] < grid_w and cam_pos[1] < grid_h:
+
+                        # what is our image number
+                        num = cam_pos[0] + cam_pos[1] * grid_w
+                        
+                        # reorder according to acquisition
+                        if reorder != None:
+                          num = reorder[num]
+                          
+                        #print "Camera", cam_pos, "(image",num,")",
+                        sys.stdout.write(".")
+                        if num not in skip:                  
+                            this_img_str = img_str.format(num)
+                            img_file = os.path.join(img_path, this_img_str)              
+                            # print img_file
+
+                            if os.path.exists(img_file):
+                                img = cv2.imread(img_file)
+                                img_h, img_w, img_chan = img.shape
+                                # print img.shape
+                                x = x_img * img_w
+                                y = y_img * img_h
+                                tile_img[y:(y+img_h), x:(x+img_w)] = img
+                            else:
+                                print "*",
+                        else:
+                            print "skipping {0} in contact sheet".format(num)
+                        
+                        sys.stdout.flush()
+
+            base, ext = contactimg_file.split("tex")
+            this_texture_file = base + "tile-" +str(tilenum) + ext
+
+            print "writing contact image", tile_img.shape, "to", os.path.basename(this_texture_file)
+            cv2.imwrite(this_texture_file, tile_img)
+            
+            output_files.append(os.path.basename(this_texture_file))
+            print "done."
+
+    thumb_w = img_w
+    thumb_h = img_h
+    
+    return output_files
+    
 def generate_contact_sheet(files, reorder = None, skip = []):
     global thumbpath, max_texture_size, grid_h, grid_w, num_textures, contactimg_file, thumb_w, thumb_h
     
-    # generate tiled image
-    # thumbstr = "image{0:04d}_eq.jpg"
-    thumbstr = os.path.basename(files[0])
-    thumb_file = os.path.join(thumbpath, thumbstr)
-    thumb_img = cv2.imread(thumb_file)
-    thumb_h, thumb_w, thumb_chan = thumb_img.shape
-    print thumb_img.shape
-    # print thumbstr
-    
-    if grid_w > grid_h:
-        max_texture_w = max_texture_size
-        max_texture_h = thumb_h * grid_h
-    else:
-        max_texture_h = max_texture_size
-        max_texture_w = thumb_w * grid_w
-        
-    print max_texture_w, max_texture_h
-    
-    print "generating contact sheet...",
 
-    part_w = grid_w/num_textures
+    contact_img = np.zeros((tex_h, tex_w, 3), np.uint8)
+    print contact_img.shape
 
-    for n in range(num_textures):
-        
-        contact_img = np.zeros((max_texture_h, max_texture_w, 3), np.uint8)
-        print contact_img.shape
-        
-        for j in range(grid_h):
-          for i in range(part_w):
-              num = (n * part_w) + i + (j * grid_w)
-              if reorder != None:
-                  #print num
-                  num = reorder[num]
-              if num not in skip:                  
-                  thumbstr = "frame_{0:04d}.jpg".format(num)
-                  thumb_file = os.path.join(thumbpath, thumbstr)              
-                  # print thumb_file
-                  if os.path.exists(thumb_file):
-                      thumb_img = cv2.imread(thumb_file)
-                      thumb_h, thumb_w, thumb_chan = thumb_img.shape
-                      x = i * thumb_w
-                      y = j * thumb_h
-                      # print x,y, thumb_w ,thumb_h
-                      # print contact_img.shape
-                      contact_img[y:(y+thumb_h), x:(x+thumb_w)] = thumb_img
-              else:
-                  print "skipping {0} in contact sheet".format(num)
+    for j in range(grid_h):
+      for i in range(part_w):
+          num = (n * part_w) + i + (j * grid_w)
+          if reorder != None:
+              #print num
+              num = reorder[num]
+          if num not in skip:
+              thumbstr = "frame_{0:04d}.jpg".format(num)
+              thumb_file = os.path.join(thumbpath, thumbstr)
+              # print thumb_file
+              if os.path.exists(thumb_file):
+                  thumb_img = cv2.imread(thumb_file)
+                  thumb_h, thumb_w, thumb_chan = thumb_img.shape
+                  x = i * thumb_w
+                  y = j * thumb_h
+                  # print x,y, thumb_w ,thumb_h
+                  # print contact_img.shape
+                  contact_img[y:(y+thumb_h), x:(x+thumb_w)] = thumb_img
+          else:
+              print "skipping {0} in contact sheet".format(num)
 
-        print "writing contact image", contact_img.shape, "to",
-        
-        if num_textures > 1:
-            fname, ext = os.path.splitext(contactimg_file)
-            contactimg_file = fname+str(n)+ext
-        print contactimg_file
-        cv2.imwrite(contactimg_file, contact_img)
+    print "writing contact image", contact_img.shape, "to",
+
+    print this_contactimg_file
+    cv2.imwrite(this_contactimg_file, contact_img)
 
 
-def write_xml_scene(camerapos, contactimg_file, image_files, camresults, reorder = None, skip = []):
+def write_xml_scene(camerapos, texture_files, image_files, camresults, reorder = None, skip = [], do_inverty=False):
     """ write refocuser scene descriptor file for use by oF refocusing app
     """ 
-    global thumb_w, thumb_h, grid_w, grid_h
+    global thumb_w, thumb_h, grid_w, grid_h, x_tiles, y_tiles, x_imgs_per_tile, y_imgs_per_tile
        
     count = 0
     positions = []
@@ -481,15 +549,28 @@ def write_xml_scene(camerapos, contactimg_file, image_files, camresults, reorder
             positions.append((-1, -1))
             count = count + 1
 
+    print "Writing scene descriptor file", camerapos
     out_f = file(camerapos, 'w')
     out_f.write("<!-- lightfield data -->\n")
-    out_f.write("<texturefile>./textures/{0}</texturefile>\n".format(os.path.basename(contactimg_file)))
+    
+    for tf in texture_files:
+        out_f.write("<texturefile>./textures/{0}</texturefile>\n".format(os.path.basename(tf)))
     out_f.write("\n")
+    out_f.write("<!-- large textures -->\n")
+    out_f.write("<xnumtextures>{0}</xnumtextures>\n".format(x_tiles))
+    out_f.write("<ynumtextures>{0}</ynumtextures>\n".format(y_tiles))
+    out_f.write("\n")
+    out_f.write("<ximagespertex>{0}</ximagespertex>\n".format(x_imgs_per_tile))
+    out_f.write("<yimagespertex>{0}</yimagespertex>\n".format(y_imgs_per_tile))
+    out_f.write("\n")
+    out_f.write("\n")
+    out_f.write("<!--subimages -->\n")
     out_f.write("<subimagewidth>{0}</subimagewidth>\n".format(thumb_w))
     out_f.write("<subimageheight>{0}</subimageheight>\n".format(thumb_h))
     out_f.write("\n")
     out_f.write("<numxsubimages>{0}</numxsubimages>\n".format(grid_w))
     out_f.write("<numysubimages>{0}</numysubimages>\n".format(grid_h))
+    out_f.write("\n")
     out_f.write("\n")
     out_f.write("<!-- refocusing parameters -->\n")
     out_f.write("<minscale>-200</minscale>\n")
@@ -517,6 +598,8 @@ def write_xml_scene(camerapos, contactimg_file, image_files, camresults, reorder
             if reorder != None:
                 num = reorder[i]
             xpos, ypos = positions[num]
+            if do_inverty:
+                ypos = -ypos
             # print num
             out_f.write("\t<cam>\n\t\t<x>{0}</x>\n\t\t<y>{1}</y>\n\t</cam>\n".format(xpos, ypos))
         else:
@@ -525,6 +608,8 @@ def write_xml_scene(camerapos, contactimg_file, image_files, camresults, reorder
             if reorder != None:
                 num = reorder[i]
             xpos, ypos = positions[num]
+            if do_inverty:
+                ypos = -ypos
             # print num
             out_f.write("\t<cam>\n\t\t<x>{0}</x>\n\t\t<y>{1}</y>\n\t</cam>\n".format(xpos, ypos))
 
@@ -532,55 +617,64 @@ def write_xml_scene(camerapos, contactimg_file, image_files, camresults, reorder
     
     
 if __name__ == '__main__':
-    global datapath, featurepath, warpedpath, undistortpath, thumbpath, max_texture_size, acq_grid, num_textures, contactimg_file, grid_w, grid_h
+    global datapath, featurepath, warpedpath, undistortpath, thumbpath, max_texture_size, acq_grid, num_textures, contactimg_file, grid_w, grid_h, x_tiles, y_tiles, x_imgs_per_tile, y_imgs_per_tile
 
     # Define command line argument interface
     parser = argparse.ArgumentParser(description='apply Visual SFM quaternions to a folder of lightfield images', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument('datapath', help='path to lightfield data')
+    # parser.add_argument('datapath', help='path to lightfield data')
     parser.add_argument('grid', help='acquisition grid as WxH')
     parser.add_argument('--reorder', default=None, help='reorder images to match order of acquisition (wrap, colsfirst)')
     parser.add_argument('--skip', default=[], help='indices of images to skip')
+    parser.add_argument('--inverty', dest='doinverty', action='store_true', help='invert y coordinates (useful for some mirror shots)?')
+    parser.add_argument('--nowarp', dest='dowarp', action='store_false', help='skip warp/thumb generation?')
+    parser.add_argument('--fullres', dest='dofullres', action='store_true', help='generate full res textures?')
     parser.add_argument('--numtextures', default=1, type=int, help='number of output textures')
     parser.add_argument('--maxtexturesize', default=16384, type=int, help='maximum pixel dimension of output texture')
     parser.add_argument('files', nargs='*', help='glob of input files')
     
     args = parser.parse_args()
 
-    datapath = args.datapath
-
-    # directory of input images
-    imagedir = os.path.join(args.datapath, 'original')  
-
+    # runtime options
+    do_warp = args.dowarp
+    do_fullres = args.dofullres
+    do_inverty = args.doinverty
+    print "\n options"
+    print "do warp?", do_warp
+    print "do full res output?", do_fullres
+    print "invert y coordinates?", do_inverty
+    
     gridstr = args.grid     # grid layout
     order = args.reorder    # reorder images
     if len(args.skip) > 0:
         skip = [i for i in args.skip.split(',')] #.split(',')        # skip certain images
     else:
         skip = []
-        
     num_textures = args.numtextures
     max_texture_size = args.maxtexturesize
-    
-    # directory of undistorted images
-    undistortpath = os.path.join(args.datapath, 'undistorted') 
+
+
+    # file paths
+    # read image filenames
+    image_files = args.files
+    # root path of scene data
+    datapath = os.path.dirname(os.path.dirname(image_files[0]))
+    # path to original images
+    imagedir = os.path.join(datapath, 'original')  
+    # path to undistorted images
+    undistortpath = os.path.join(datapath, 'undistorted') 
 
     # results of N-view match from Visual SFM in windows
-    camerasfile = os.path.join(args.datapath, "results/results.nvm.cmvs/00/cameras_v2.txt") 
+    camerasfile = os.path.join(datapath, "results/results.nvm.cmvs/00/cameras_v2.txt") 
     
+    # name of this scene
+    scene_name = os.path.basename(datapath)#datapath.split('/')[-2]
     
-    # output paths to save the results
-    # if os.path.isdir(args.datapath):
-    #     scene_name = args.datapath.split('/')[-2]
-    # else:
-    #     scene_name = os.path.basename(args.datapath)
-    # print scene_name
-    scene_name = args.datapath.split('/')[-2]
+    warpedpath = os.path.join(datapath, 'warped')    
+    thumbpath = os.path.join(datapath, 'thumbs')
+    camerapos = os.path.join(datapath, scene_name+'.xml')
     
-    warpedpath = os.path.join(args.datapath, 'warped')    
-    thumbpath = os.path.join(args.datapath, 'thumbs')
-    camerapos = os.path.join(args.datapath, scene_name+'.xml')
-    contactimg_file = os.path.join(args.datapath, scene_name+'_tex.jpg')
+    contactimg_file = os.path.join(datapath, scene_name+'_tex.jpg')
 
     # create folders as necessary
     if not os.path.exists(warpedpath):
@@ -588,9 +682,6 @@ if __name__ == '__main__':
 
     if not os.path.exists(thumbpath):
         os.makedirs(thumbpath)
-    
-    # read image filenames
-    image_files = args.files
     
     # grid
     grid_w, grid_h = gridstr.split("x")
@@ -605,11 +696,12 @@ if __name__ == '__main__':
     acq_grid = (grid_w, grid_h)
     
     # read Cameras V2 file (results from VSFM)    
-    cameraloc_img = os.path.join(args.datapath, scene_name+'_cameras.png')
+    cameraloc_img = os.path.join(datapath, scene_name+'_cameras.png')
     camresults, R_avg, C_avg = readCamerasV2File(camerasfile, cameraloc_img)
     
     # rectify images
-    results = mp_warp(image_files, camresults, R_avg, C_avg, 8)
+    if do_warp:
+        results = mp_warp(image_files, camresults, R_avg, C_avg, 8)
     
     if order=='wrap':
         print "wrapping"
@@ -621,14 +713,6 @@ if __name__ == '__main__':
                 reorder += range(i*grid_w, (i+1)*grid_w)
             else:
                 reorder += range((i+1)*grid_w-1,i*grid_w-1, -1)
-
-        #print reorder
-        # make contact sheet
-        generate_contact_sheet(image_files, reorder, skip)
-        
-        # print reorder
-        # export camera center coordinates    
-        write_xml_scene(camerapos, contactimg_file, image_files, camresults, reorder, skip)
 
     elif order=='colsfirstwrap':
         print "columns first, wrapped"
@@ -651,12 +735,12 @@ if __name__ == '__main__':
         
         print skip
         
-        # make contact sheet
-        generate_contact_sheet(image_files, reorder, skip)
-    
-        # print reorder
-        # export camera center coordinates    
-        write_xml_scene(camerapos, contactimg_file, image_files, camresults, reorder, skip)
+        # # make contact sheet
+        # generate_contact_sheet(image_files, reorder, skip)
+        #
+        # # print reorder
+        # # export camera center coordinates
+        # write_xml_scene(camerapos, contactimg_file, image_files, camresults, reorder, skip)
     
     elif order=='verticalwrap':
         
@@ -681,18 +765,25 @@ if __name__ == '__main__':
         
         print skip
         
-        # make contact sheet
-        generate_contact_sheet(image_files, reorder, skip)
-    
-        # print reorder
-        # export camera center coordinates    
-        write_xml_scene(camerapos, contactimg_file, image_files, camresults, reorder, skip)
+        # # make contact sheet
+        # generate_contact_sheet(image_files, reorder, skip)
+        #
+        # # print reorder
+        # # export camera center coordinates
+        # write_xml_scene(camerapos, contactimg_file, image_files, camresults, reorder, skip)
             
     else:
         
-        # make contact sheet
-        generate_contact_sheet(image_files)#reorder)
+        reorder = None
+        
+    # make contact sheet        
+    if do_fullres:
+        texture_files = generate_full_res_textures(image_files, warpedpath, contactimg_file, reorder, skip)
+        base, ext = os.path.splitext(camerapos)
+        camerapos = base + "_tile" + ext
+    else:
+        texture_files = generate_contact_sheet(image_files, reorder, skip)
 
-        # export camera center coordinates    
-        write_xml_scene(camerapos, contactimg_file, image_files, camresults)#, reorder)
+    # export camera center coordinates    
+    write_xml_scene(camerapos, texture_files, image_files, camresults, reorder, skip, do_inverty)
         
