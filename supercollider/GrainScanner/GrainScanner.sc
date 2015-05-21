@@ -31,7 +31,7 @@ GrainScanner {
 				this.prepareBuffers(cond);
 				cond.wait;
 			}
-			// this assumes mutile channels of mono buffers from the same file path
+			// this assumes mutiple channels of mono buffers from the same file path
 			{ bufferOrPath.isKindOf(Array) }{
 				var test;
 				test = bufferOrPath.collect({|elem| elem.isKindOf(Buffer)}).includes(false);
@@ -97,7 +97,7 @@ GrainScanner {
 
 	initSynths {
 		synths = buffers.collect{|buf, i|
-			grnSynthDef.note(target: group).buffer_(buf).bufnum_(buf.bufnum).out_bus_(outbus+i).grainDur_(1.3)
+			grnSynthDef.note(target: group).buffer_(buf).bufnum_(buf.bufnum).outbus_(outbus+i).grainDur_(1.3)
 		}
 	}
 
@@ -175,11 +175,11 @@ GrainScanner {
 
 
 	loadSynthLib {
-		grnSynthDef = CtkSynthDef(\grainJ, {
+		grnSynthDef = CtkSynthDef(\grainScanner, {
 			arg
 			buffer, bufnum,
-			out_bus, 			// main out
-			out_bus_aux,		// outbus to reverb
+			outbus, 			// main out
+			outbus_aux,		// outbus to reverb
 			start=0, end=1,		// bounds of grain position in sound file
 			grainRand = 0,		// gaussian trigger: 0 = regular at grainRate, 1 = random around grainRate
 			grainRate = 10, grainDur = 0.04,
@@ -205,7 +205,7 @@ GrainScanner {
 
 			// calculate grain density
 			grain_dens = grainRate * grainDur;
-			amp_scale = grain_dens.reciprocal.clip(0, 1);
+			amp_scale = grain_dens.reciprocal.sqrt.clip(0, 1);
 
 			// gaussian trigger
 			// grainRand = 0 regular at grainRate
@@ -243,8 +243,8 @@ GrainScanner {
 			out = sig;
 
 			// send signals to outputs
-			Out.ar( out_bus,		out );
-			// Out.ar( out_bus_aux,	aux );
+			Out.ar( outbus,		out );
+			// Out.ar( outbus_aux,	aux );
 		})
 	}
 }
@@ -416,13 +416,13 @@ p = "/Users/admin/src/rover/data/AUDIO/discovery_cliffside_clip.WAV"
 g = GrainScanner(0, p)
 g.play
 g.gui
-g.scanRange(rand(g.bufDur), 5)
+g.scanRange(rand(g.bufDur), 1)
 g.free
 
 i = GrainScanner(0, g.buffers)
 i.play
 i.gui
-i.scanRange(rand(g.bufDur), 5)
+i.scanRange(rand(g.bufDur), 1)
 
 q = 4.collect{GrainScanner(0, g.buffers)}
 q.do(_.gui)
