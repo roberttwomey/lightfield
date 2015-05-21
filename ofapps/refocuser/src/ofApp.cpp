@@ -12,17 +12,17 @@ void ofApp::setup(){
 //    loadXMLSettings("./textures/yellowcliff_sm.xml");
 //    loadXMLSettings("./textures/cliffside.xml");
 //    loadXMLSettings("./textures/tunnel_sm.xml");
-//        loadXMLSettings("./textures/bookcase.xml");
-loadXMLSettings("./textures/mike1_sm.xml");
+        loadXMLSettings("./textures/mike1.xml");
+//loadXMLSettings("./textures/mike1_sm.xml");
     //    loadXMLSettings("./textures/mike3_sm.xml");
-  
+
     loadLFImage();
 
     graphicsSetup();
 	    // OSC - listen on the given port
     cout << "listening for osc messages on port " << port << "\n";
     receiver.setup(port);
-    
+
     snapcount = 0;
 }
 
@@ -168,7 +168,7 @@ void ofApp::loadXMLSettings(string settingsfile) {
         xml.popTag();
     }
     xml.popTag();
-    
+
 }
 
 void ofApp::loadLFImage() {
@@ -200,63 +200,63 @@ void ofApp::graphicsSetup() {
 
     // load camera positions into texture
     int numCams = xsubimages * ysubimages;
-    
+
     // make array of float pixels with camera position information
     float * pos = new float[numCams*3];
     for (int x = 0; x < xsubimages; x++){
         for (int y = 0; y < ysubimages; y++){
             int i = x + (y * xsubimages);
-            
+
             pos[i*3 + 0] = offsets[i*2];
             pos[i*3 + 1] = offsets[i*2+1]; //y*offset;
             pos[i*3 + 2] = 0.0;
         }
     }
-    
+
     campos_tex.allocate(xsubimages, ysubimages, GL_RGB32F);
     campos_tex.getTextureReference().loadData(pos, xsubimages, ysubimages, GL_RGB);
     delete pos;
-        
+
     // TODO: implement subimage corners as texture to optimize?
     //    // make array of float pixels with camera position information
 //    unsigned char * corners = new unsigned char [numCams*3];
 //    for (int x = 0; x < xsubimages; x++){
 //        for (int y = 0; y < ysubimages; y++){
 //            int i = x + (y * xsubimages);
-//            
+//
 //            corners[i*3 + 0] = x * subwidth;
 //            corners[i*3 + 1] = y * subheight;
 //            corners[i*3 + 2] = 0.0;
 //        }
 //    }
-//    
+//
 //    subimg_corner_tex.allocate(xsubimages, ysubimages, GL_RGB32I);
 //    subimg_corner_tex.getTextureReference().loadData(corners, xsubimages, ysubimages, GL_RGB);
 //    delete corners;
-    
+
 
     // setup refocus shader
-    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus.frag");
+    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus_150.frag");
     shader.linkProgram();
-    
+
 
     shader.begin();
-    
+
     // camera images
     shader.setUniformTexture("lftex", lfplane, 1);
-    
+
     shader.setUniform2f("resolution", subwidth, subheight);
     shader.setUniform2i("subimages", xsubimages, ysubimages);
-    
+
     shader.setUniformTexture("campos_tex", campos_tex, 2);
 //    shader.setUniformTexture("subimg_corner_tex", subimg_corner_tex, 3);
     shader.end();
 
-  
+
     //    GLint maxTextureSize;
     //    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
     //    std::cout <<"Max texture size: " << maxTextureSize << std::endl;
-    
+
     //        GLint v_maj;
     //    glGetIntegerv(GL_MAJOR_VERSION, &v_maj);
     //        std::cout <<"gl major version: " << v_maj << std::endl;
@@ -465,12 +465,12 @@ void ofApp::process_OSC(ofxOscMessage m) {
 
 void ofApp::doSnapshot() {
     string timestamp, imgfilename, paramfilename;
-    
+
     // save time-stamped image to data folder
     timestamp = "./snapshots/"+ofGetTimestampString("%Y%m%d%H%M%S") + "_" + ofToString(snapcount, 4, '0');
     imgfilename = timestamp + ".jpg";
     paramfilename = timestamp + ".txt";
-    
+
     // save fbo to file
     // from http://forum.openframeworks.cc/t/ofxfenster-addon-to-handle-multiple-windows-rewrite/6499/61
     int w = fbo.getWidth();
@@ -479,7 +479,7 @@ void ofApp::doSnapshot() {
     ofImage screenGrab;
     screenGrab.allocate(w,h,OF_IMAGE_COLOR);
     screenGrab.setUseTexture(false);
-    
+
     //copy the pixels from FBO to the pixel array; then set the normal ofImage from those pixels; and use the save method of ofImage
     fbo.begin();
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -488,10 +488,10 @@ void ofApp::doSnapshot() {
     screenGrab.saveImage(imgfilename, OF_IMAGE_QUALITY_BEST);
     fbo.end();
     ofLog(OF_LOG_VERBOSE, "[DiskOut]  saved frame " + imgfilename );
-    
+
     // save refocusing parameters to companion text file
     ofFile file(paramfilename, ofFile::WriteOnly);
-    
+
     // add additional parameters below
     file << lfimage_filename << endl;
     file << synScale << endl;
@@ -499,9 +499,9 @@ void ofApp::doSnapshot() {
     file << xstart << "," << ystart << endl;
     file << xcount << "," << ycount << endl;
     file << zoom << endl;
-    
+
     file.close();
-    
+
     snapcount++;
 }
 

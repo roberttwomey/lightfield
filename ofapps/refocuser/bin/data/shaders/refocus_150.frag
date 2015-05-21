@@ -1,44 +1,49 @@
 #version 150
 
-uniform sampler2DRect lfplane;
+// lightfield data
+uniform sampler2DRect lftex;
 
-uniform float xres;
-uniform float yres;
-uniform int xsubimages;
-uniform int ysubimages;
-uniform int xcount;
-uniform int ycount;
-uniform int xstart;
-uniform int ystart;
-uniform float scale;
+uniform vec2 resolution;
+uniform ivec2 subimages;
+
+// refocusing aperture
+uniform ivec2 ap_size;
+uniform ivec2 ap_loc;
+
+// refocusing zoom, pixel roll
+uniform float fscale;
 uniform float zoom;
-uniform float xoffset;
-uniform float yoffset;
+uniform vec2 roll;
 
-in vec2 texCoordVarying;
+// camera_positions
+uniform sampler2DRect campos_tex;
 
 out vec4 fragColor;
 
-uniform vec2 camoffsets[200];
+//in vec2 texCoordVarying;
+
 
 void main (void){
-    vec2 roll = vec2(xoffset, yoffset);
-    vec2 pixelpos = (texCoordVarying.st);// - roll) * zoom;
+    // doesn't work
+    //vec2 pixelpos = (texCoordVarying.st - roll) * zoom;
+
+    vec2 pixelpos = (gl_FragCoord.xy - roll) * zoom;
     vec4 color = vec4(0,0,0,0);
-    float halfxcount = float(xcount) / 2.0;
-    float halfycount = float(ycount) / 2.0;
 
     // grab color from each subimage in arrayed texture
-    for (int x=xstart; x<xstart+xcount; x++){
-        for (int y=ystart; y<ystart+ycount; y++) {
-            vec2 subimg_corner = vec2(float(x)*xres, float(y)*yres);
-            vec2 shift = scale * camoffsets[x + (y* xsubimages)];
+    for (int x=ap_loc.x; x <(ap_loc.x+ap_size.x); x++){
+        for (int y=ap_loc.y; y<(ap_loc.y+ap_size.y); y++) {
+            vec2 subimg_corner = vec2(float(x)*resolution.x, float(y)*resolution.y);
+            vec2 cam_num = vec2(x, y);
 
-            color += texture2DRect(lfplane, subimg_corner+ pixelpos);// - shift);
+            vec2 offset = texture2DRect(campos_tex, cam_num).xy;
+            vec2 shift = fscale * offset;
+
+            color += texture2DRect(lftex, subimg_corner + pixelpos - shift);
         }
     }
 
-    color = color / float(xcount*ycount);
+    color = color / float(ap_size.x*ap_size.y);
     fragColor = color;
 }
 
