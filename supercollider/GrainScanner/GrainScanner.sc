@@ -97,7 +97,7 @@ GrainScanner {
 
 	initSynths {
 		synths = buffers.collect{|buf, i|
-			grnSynthDef.note(target: group).buffer_(buf).bufnum_(buf.bufnum).out_bus_(outbus+i).grainDur_(1.3)
+			grnSynthDef.note(target: group).buffer_(buf).bufnum_(buf.bufnum).outbus_(outbus+i).grainDur_(1.3)
 		}
 	}
 
@@ -178,8 +178,8 @@ GrainScanner {
 		grnSynthDef = CtkSynthDef(\grainScanner, {
 			arg
 			buffer, bufnum,
-			out_bus, 			// main out
-			out_bus_aux,		// outbus to reverb
+			outbus, 			// main out
+			outbus_aux,		// outbus to reverb
 			start=0, end=1,		// bounds of grain position in sound file
 			grainRand = 0,		// gaussian trigger: 0 = regular at grainRate, 1 = random around grainRate
 			grainRate = 10, grainDur = 0.04,
@@ -243,8 +243,8 @@ GrainScanner {
 			out = sig;
 
 			// send signals to outputs
-			Out.ar( out_bus,		out );
-			// Out.ar( out_bus_aux,	aux );
+			Out.ar( outbus,		out );
+			// Out.ar( outbus_aux,	aux );
 		})
 	}
 }
