@@ -29,7 +29,6 @@ KMeansMod : KMeans {
 
 	// super override
 	add { |datum|
-		"ding".postln;
 		data = data ++ [datum];
 		if(centroids.size==k){
 			var class, dist;
