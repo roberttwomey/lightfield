@@ -115,13 +115,18 @@ x.do(_.plot(discrete: true, minval: -0.5, maxval: 1.5))
 //2. define vectors
 (
 ~vectors = ~data.analysis.featuredata.clump( ~data.analysis.numfeatures );
-~numClusters = 4;
+~numClusters = 7;
 k = KMeansMod(~numClusters);
 ~vectors.do{|vec, i| k.add(vec) };
+
 )
 // then... recenter the centroids
 // k.update
 k.reset.update // make sure centroids aren't too heavily weighted toward first entries
+
+// what do our cluster densities look like?
+~numClusters.do{|index| postf("cluster %: %\n", index, k.assignments.occurrencesOf(index)) }
+
 
 (
 // each cluster's frames, ordered from nearest to furthest from centroid
@@ -160,7 +165,7 @@ k.reset.update // make sure centroids aren't too heavily weighted toward first e
 
 	// translate this normalized pointer position
 	// into an index into the clustered frames
-	index = (clusterFrames.size * ptr).round;
+	index = (clusterFrames.size - 1 * ptr).round;
 	clusterFrames[index]
 };
 )
@@ -172,13 +177,34 @@ k.reset.update // make sure centroids aren't too heavily weighted toward first e
 // testing synth grain request
 ~bufDur = ~data.analysis.duration;
 
+// just one channel for now
+File.exists(~data.analysis.sourcepath)
+
+~buf = Buffer.readChannel(s, ~data.analysis.sourcepath, channels: [0]);
+~buf.numChannels
+
 (
-d = CtkSynthDef(\grn_rquest, { arg g_rate = 2, grndur=0.75, start, end, t_reset, clust_spread = 0.01, shift = 0, t_posReset = 0, posRate = 1;
+d = CtkSynthDef(\grn_rquest, { arg g_rate = 2, grndur=1.25, start, end, t_reset, clust_spread = 0.01, shift = 0, t_posReset = 0, posRate = 1, buffer, pos = 0;
+	var trig, out, grain_dens, amp_scale;
+	trig = Impulse.ar(g_rate);
+
+	// calculate grain density
+	grain_dens = g_rate * grndur;
+	amp_scale = (grain_dens.reciprocal).sqrt.clip(0, 1);
+
 	// spread, shift, grndur
-	SendReply.ar(Impulse.ar(g_rate), '/pointer', [clust_spread, shift, grndur]);
+	SendReply.ar(trig, '/pointer', [clust_spread, shift, grndur]);
+	out = GrainBufJ.ar(1, trig, grndur, buffer, 1 , pos, 1, interp:1, grainAmp: amp_scale);
+	Out.ar(0, Pan2.ar(out));
 })
 )
-n = d.note.play
+
+// n = d.note.play
+n = d.note.buffer_(~buf).play
+n.pos_(rand(1.0).postln)
+n.free
+
+~whichCluster = 0
 
 (
 o = OSCdef(\pntr_response, { |msg, time, addr, recvPort|
@@ -187,24 +213,43 @@ o = OSCdef(\pntr_response, { |msg, time, addr, recvPort|
 	#clust_spread, shift, grndur = msg[3..];
 	// [clust_spread, shift, grndur].postln;
 
-	frame = ~chooseClusterFrame.(2, clust_spread, shift).postln;
-	n.posRate_(0); // pause the pointer (update to only do once)
-	// TODO: consider the accuracy of this setting, looping manually throug the grain dur
-	n.start = frame - (grndur * 0.5) / ~bufDur;
-	n.t_posReset_(1); // reset the pointer to jump to the new startPos
+	frame = ~chooseClusterFrame.(~whichCluster, clust_spread, shift).postln;
 
-	// end = start + grndur; // not needed with a paused pointer
+	// n.posRate_(0); // pause the pointer (update to only do once)
+	// // TODO: consider the accuracy of this setting, looping manually throug the grain dur
+	// n.start = frame - (grndur * 0.5) / ~bufDur;
+	// n.t_posReset_(1); // reset the pointer to jump to the new startPos
+	// // end = start + grndur; // not needed with a paused pointer
 
+	n.pos_(frame - (grndur * 0.5) / ~bufDur);
 }, '/pointer')
 )
 o.free
 
-n.g_rate_(10)
-n.clust_spread_(0.01)
+~whichCluster = 1
+~whichCluster = 4
+~whichCluster = 6
 
+n.g_rate_(17)
+n.g_rate_(3)
+n.clust_spread_(0.01)
+n.clust_spread_(0.1)
+n.clust_spread_(0.25)
+n.clust_spread_(0.5) // practical max for random within the cluster
+
+// distance from centroid center 0>1
+n.shift_(0.8)
+n.shift_(0.5)
 n.shift_(0.1)
+n.shift_(0.0)
 
 n.grndur_(0.9)
+n.grndur_(1.9)
+n.grndur_(2.9)
+
+// nil check
+550.do{ ~chooseClusterFrame.(1, 0.7, 0.1) ?? {"got one".postln} }
+550.do{ ~chooseClusterFrame.(1, 0.2, 0.1) ?? {"got one".postln} }
 
 
 // multiple note version - benchmark

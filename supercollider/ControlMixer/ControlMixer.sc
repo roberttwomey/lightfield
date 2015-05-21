@@ -116,7 +116,8 @@ ControlMixer {
 								[ broadcastChk = CheckBox().fixedWidth_(15).value_(broadcasting), a: \right],
 
 								[ StaticText().string_("Hz").align_(\right), a: \right],
-								[ updateBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight), a: \right],
+								[ updateBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight).scroll_(false),
+									a: \right],
 
 								[ StaticText().string_("Plot").align_(\right), a: \right],
 								[ plotChk = CheckBox().fixedWidth_(15), a: \right],
@@ -233,22 +234,22 @@ ControlMixFaderView {
 				HLayout(
 					[ VLayout(
 						StaticText().string_("min"),
-						minBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight)
+						minBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight).scroll_(false)
 					).spacing_(0), a: \left ],
 					[ VLayout(
 						StaticText().string_("max"),
-						maxBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight)
+						maxBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight).scroll_(false)
 					).spacing_(0), a: \left ],
 					nil,
 					[ VLayout(
 						StaticText().string_("StaticVal").align_(\left),
-						valBx = NumberBox().fixedWidth_(nBoxWidth*1.2).fixedHeight_(nBoxHeight)
+						valBx = NumberBox().fixedWidth_(nBoxWidth*1.2).fixedHeight_(nBoxHeight).scroll_(false)
 					).spacing_(5), a: \right ],
 				),
 				HLayout(
 					[ VLayout(
 						rateTxt = StaticText().string_("Rate(sec)"),
-						rateBx = NumberBox().fixedWidth_(nBoxWidth*1.5).fixedHeight_(nBoxHeight),
+						rateBx = NumberBox().fixedWidth_(nBoxWidth*1.5).fixedHeight_(nBoxHeight).scroll_(false),
 					).spacing_(0), a: \left ],
 					[ VLayout(
 						StaticText().string_("period").align_(\center),
@@ -260,12 +261,12 @@ ControlMixFaderView {
 				HLayout(
 					VLayout(
 						StaticText().string_("scale").align_(\center),
-						sclBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight),
+						sclBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight).scroll_(false),
 					).spacing_(0),
 					sclKnb = Knob().mode_(\vert).centered_(true),
 					VLayout(
 						StaticText().string_("offset").align_(\center),
-						offsBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight),
+						offsBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight).scroll_(false),
 					).spacing_(0),
 					offsKnb = Knob().mode_(\vert).centered_(true),
 				),
@@ -273,7 +274,7 @@ ControlMixFaderView {
 					nil,
 					[VLayout(
 						StaticText().string_("mix").align_(\right).fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight),
-						mixBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight).maxWidth_(50),
+						mixBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight).maxWidth_(50).scroll_(false),
 					).spacing_(0), a: \center],
 					[ mixKnb = Knob().mode_(\vert), a: \center],
 					nil
@@ -425,7 +426,7 @@ ControlMixFaderView {
 ControlMixMaster {
 	// copyArgs
 	var broadcastTags, broadcastNetAddr, broadcastRate, server;
-	var <win, <mixers, <lastUpdated, <presetWin;
+	var <win, <mixers, <lastUpdated, <presetWin, <canvas;
 
 	*new { |broadcastTags="/myControlVal", broadcastNetAddr, broadcastRate=30, server|
 		^super.newCopyArgs(broadcastTags, broadcastNetAddr, broadcastRate, server).init
@@ -462,17 +463,73 @@ ControlMixMaster {
 			mixer = ControlMixer(sendToNetAddr, oscTag, sendRate, server, loadCond, colorShift);
 			mixers = mixers.add(mixer);
 			loadCond.wait;
-			win.layout.add( mixer.mixView.postln; );
+			// win.layout.add( mixer.mixView.postln; );
+			canvas.layout.add( mixer.mixView.postln; ); // for ScrollView
 		}.fork(AppClock);
 	}
 
 	makeWin {
 
-		win = Window("Broadcast Controls", Rect(Window.screenBounds.width / 4, Window.screenBounds.height, 100, 100), scroll: true).layout_(
-			HLayout().margins_(2).spacing_(2)
-		).onClose_({ this.free });
+		// win = Window("Broadcast Controls", Rect(Window.screenBounds.width / 4, Window.screenBounds.height, 100, 100), scroll: true).layout_(
+		// 	HLayout().margins_(2).spacing_(2)
+		// ).onClose_({ this.free });
+		//
+		// win.front;
 
-		win.front;
+		var scroller;
+
+		win = Window("Broadcast Controls", Rect(Window.screenBounds.width / 4, Window.screenBounds.height, 900, 600));
+		scroller = ScrollView(win, Rect(0,0, 900, 600)).hasBorder_(true).autohidesScrollers_(false);
+		canvas = View().layout_(
+			HLayout().margins_(2).spacing_(2)
+		);
+		scroller.canvas_(canvas);
+
+		win.layout_(VLayout(
+
+			View(bounds: Rect(0,0, 900,600)).layout_(VLayout(scroller).margins_(0)),
+
+			HLayout(
+				[ Button()
+					.states_([["Send OSC", Color.white, Color.blue],["Stop OSC", Color.white, Color.gray]])
+					.action_({ |but|
+						switch( but.value,
+							0, { mixers.do(_.oscEnabled_(false)) },
+							1, { mixers.do(_.oscEnabled_(true)) }
+						)
+				}).maxWidth_(70).fixedHeight_(25).value_(1), a: \left],
+				VLayout(
+					[ StaticText().string_("Rate"), a: \left],
+					[ NumberBox().action_({ |bx|
+						mixers.do(_.broadcastRate_(bx.value))}).value_(30).maxWidth_(35).scroll_(false),
+					a: \left]
+				).margins_(2),
+				VLayout(
+					[ StaticText().string_("Plot").maxWidth_(25), a: \left],
+					[ CheckBox().action_({ |bx| mixers.do({ |mxr|
+						bx.value.asBoolean.if({
+							mxr.plotChk.value.asBoolean.if{mxr.plotter.start}
+						},{ mxr.plotter.stop }
+						);
+					});
+					}).value_(true).maxWidth_(25), a: \left]
+				).margins_(2),
+				[ Button().states_([["Pause Signals", Color.white, Color.gray],["Resume Controls", Color.black, Color.yellow]]).action_({ |but|
+					switch( but.value,
+						1, { mixers.do(_.pause) },
+						0, { mixers.do(_.run) }
+					)
+				}).maxWidth_(110).fixedHeight_(25), a: \left
+				],
+				nil,
+				Button().states_([["Presets >>"]]).action_({
+					this.presetGUI((this.presets.size / 5).ceil.asInt) // default 5 presets per column
+			})
+			)
+		)
+		);
+
+		win.onClose_({ this.free }).front;
 	}
 
 	// pause/run all the mixers' controlFaders
@@ -695,45 +752,16 @@ ControlMixMaster {
 			)
 		});
 
-		presetWin = Window("Presets", Rect(0,0,100, 100)).view.layout_(
+		presetWin = Window("Presets",
+			Rect( Window.screenBounds.width.half,150, 300, 100)).view.layout_(
 			VLayout(
-				HLayout(
-					[ Button().states_([["Send OSC", Color.white, Color.blue],["Stop OSC", Color.white, Color.gray]]).action_({ |but|
-						switch( but.value,
-							0, { mixers.do(_.oscEnabled_(false)) },
-							1, { mixers.do(_.oscEnabled_(true)) }
-						)
-					}).maxWidth_(70).fixedHeight_(25).value_(1), a: \left],
-					VLayout(
-						[ StaticText().string_("Rate"), a: \left],
-						[ NumberBox().action_({ |bx| mixers.do(_.broadcastRate_(bx.value))}).value_(30).maxWidth_(35), a: \left]
-					).margins_(2),
-					VLayout(
-						[ StaticText().string_("Plot").maxWidth_(25), a: \left],
-						[ CheckBox().action_({ |bx| mixers.do({ |mxr|
-							bx.value.asBoolean.if({
-								mxr.plotChk.value.asBoolean.if{mxr.plotter.start}
-							},{ mxr.plotter.stop }
-							);
-						});
-						}).value_(true).maxWidth_(25), a: \left]
-					).margins_(2),
-					[ Button().states_([["Pause Signals", Color.white, Color.gray],["Resume Controls", Color.black, Color.yellow]]).action_({ |but|
-						switch( but.value,
-							1, { mixers.do(_.pause) },
-							0, { mixers.do(_.run) }
-						)
-					}).maxWidth_(110).fixedHeight_(25), a: \left
-				],
-
-				),
 
 				HLayout(
 					nil,
 					StaticText().string_("Variance").align_(\right).fixedHeight_(25),
-					varBox = NumberBox().value_(0.0).maxWidth_(35).fixedHeight_(25),
+					varBox = NumberBox().value_(0.0).maxWidth_(35).fixedHeight_(25).scroll_(false),
 					StaticText().string_("Fade Time").align_(\right).fixedHeight_(25),
-					ftBox = NumberBox().value_(1.0).maxWidth_(35).fixedHeight_(25)
+					ftBox = NumberBox().value_(1.0).maxWidth_(35).fixedHeight_(25).scroll_(false)
 				),
 				HLayout(
 					msg_Txt = StaticText().string_("Select a preset to update.").fixedHeight_(35),

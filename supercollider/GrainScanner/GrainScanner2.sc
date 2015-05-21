@@ -1,10 +1,13 @@
-GrainScanner {
-	classvar <grnSynthDef;
+GrainScanner2 {
+	classvar <grnSynthDef, <>replyIDCnt = 0;
 
 	// copyArgs
 	var <outbus, bufferOrPath;
 	var server, <sf, <buffers, <group, <synths, <bufDur, <view, <bufferPath;
+	var <grnResponder, <replyID;
 	var <grnDurSpec, <grnRateSpec, <grnRandSpec, <pntrRateSpec, <pntrDispSpec;
+	// cluster vars
+	var setClusterCnt = 0, <curCluster, <numFramesInClusters, <numFramesInCluster, <numClusters, <clusterFramesByDist, <invalidClusters;
 
 	*new { |outbus=0, bufferOrPath|
 		^super.newCopyArgs( outbus, bufferOrPath ).init;
@@ -12,6 +15,12 @@ GrainScanner {
 
 	init {
 		server = Server.default;
+
+		// for this instance's OSC responder
+		replyID = this.class.replyIDCnt;
+		this.class.replyIDCnt = replyID + 1;
+
+		this.buildResponder;
 
 		grnDurSpec = ControlSpec(0.01, 8, warp: 3, step: 0.01, default: 1.3);
 		grnRateSpec = ControlSpec(4.reciprocal, 70, warp: 3, step:0.01, default:10);
@@ -96,27 +105,43 @@ GrainScanner {
 	}
 
 	initSynths {
-		synths = buffers.collect{|buf, i|
-			grnSynthDef.note(target: group).buffer_(buf).bufnum_(buf.bufnum).out_bus_(outbus+i).grainDur_(1.3)
+		synths = buffers.collect{ |buf, i|
+			grnSynthDef.note(target: group)
+			.out_bus_(outbus+i).buffer_(buf)
+			.grainRate_(2).grainDur_(1.3)
+			.clusterSpread_(0.1).distFrmCen_(0).pos_(0).replyID_(this.replyID)
+			.gate_(1)
 		}
 	}
+
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	/* cluster controls */
+	// see also .chooseClusterFrame, which is called by the responder
+
+	// spread: 0 > ~0.5
+	// 0 no random spread from distFrmCen point
+	// ~0.5 effectively random distribution across the cluster
+	clusterSpread_ { |spread| synths.do(_.clusterSpread_(spread)) }
+	// dist: 0 > 1
+	// 0 center of the centroid
+	// 1 furthest distance from centroid in the cluster
+	distFrmCen_ { |dist| synths.do(_.distFrmCen_(dist)) }
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	/* grain controls */
 
 	play { |fadeInTime|
 		fadeInTime !? {synths.do(_.fadein_(fadeInTime))};
-		"playing".postln;
 		synths.do({|synth| synth.isPlaying.not.if({synth.play},{synth.gate_(1)}) });
 	}
 
 	release { |fadeOutTime|
 		fadeOutTime !? { synths.do(_.fadeout_(fadeOutTime)) };
 		synths.do({|synth|
-			synth.isPlaying.not.if({"synth isn't playing".warn},{synth.gate_(0)}) });
+			synth.isPlaying.not.if({"synth isn't playing, can't release".warn},{synth.gate_(0)}) });
 	}
 
-	grnDur_ {|dur| synths.do(_.grainDur_(dur)); this.changed(\grnDur, dur); }
+	grnDur_ { |dur| synths.do(_.grainDur_(dur)); this.changed(\grnDur, dur); }
 
 	grnRate_ {|rateHz| synths.do(_.grainRate_(rateHz)); this.changed(\grnRate, rateHz); }
 
@@ -126,136 +151,140 @@ GrainScanner {
 	// position dispersion of the pointer, in seconds
 	pntrDisp_ {|dispSecs| synths.do(_.posDisp_(dispSecs/bufDur)); this.changed(\pntrDisp, dispSecs); }
 	// speed of the grain position pointer in the buffer, 1 is realtime, 0.5 half-speed, etc
-	pntrRate_ {|rateScale| synths.do(_.posRate_(rateScale)); this.changed(\pntrRate, rateScale); }
+	// pntrRate_ {|rateScale| synths.do(_.posRate_(rateScale)); this.changed(\pntrRate, rateScale); }
 
-	// TODO:
-	// align to the moment in secs
-	timeAlign { |secs| }
 
-	// sync the synths' pointers by resetting to beginning of loop
-	// optionally supply pointer rate so they stay sync'd
-	syncLoop { |pntrRate|
-		pntrRate !? { synths.do(_.posRate_(pntrRate)) };
-		synths.do(_.t_posReset_(1));
+
+	// mirFrames: eg. ~data.beatdata
+	initClusterData { |kMeansData, mirFrames|
+		var framesByCluster;
+
+		numClusters = kMeansData.k;
+		numFramesInClusters = numClusters.collect{ |i| kMeansData.assignments.occurrencesOf(i) };
+		// keep track of clusters without frames to catch later
+		invalidClusters = List();
+		numFramesInClusters.do{ |frmcnt, i| if(frmcnt == 0, { invalidClusters.add(i) }) };
+
+		framesByCluster = numClusters.collect{List()};
+
+		kMeansData.cenDistances.do{|dist, i|
+			// Create an dict for each frame, associating it with its
+			// distance from its assigned centroid, for later sorting
+			// Put each of these frame dicts into its cluster group.
+			framesByCluster[kMeansData.assignments[i]].add(
+				().f_(mirFrames[i]).d_(dist)
+			);
+		};
+
+		// sort by each frame's distance from the centroid, ordered nearest to furthest
+		clusterFramesByDist = framesByCluster.collect{ |dataDictsArr|
+			dataDictsArr.sortBy(\d).collect{|dict| dict.f }
+		};
 	}
 
-	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	/* scan controls */
+	// spread controls the probablitity distribution
+	//	probability -> 'shift' value as spread -> 0
+	//	practical vals to still cluster around 'shift' are ~0.5 max
+	//	beyond that it's pretty much uniform random
+	//	spread of 0.001 pretty much converges on 'shift'
+	chooseClusterFrame { |clusterID, spread = 0.1, shift = 0|
+		var ptr, index;
+		// choose random (gausian) index into the frames
+		ptr = shift.gaussian(spread);
+		ptr = ptr.fold(0,1); // keep in range at cost of slightly altering distro
 
-
-	// move to a new "moment" and loop over spanSec seconds
-	// window centered at centerSec
-	scanRange{ | centerSec, spanSec, syncBufs=true |
-		var span, moment;
-
-		span = spanSec / bufDur; // the span of time of the scanning window
-		moment = centerSec / bufDur;
-
-		synths.do({|me|
-			me.start_(moment - span.half)
-			.end_(moment + span.half)
-		});
-		// sync up the instances, by resetting to start position
-		syncBufs.if{ synths.do(_.t_posReset_(1)) };
+		// translate this normalized pointer position
+		// into an index into the clustered frames
+		index = (numFramesInCluster - 1 * ptr).round;
+		^clusterFramesByDist[clusterID][index]
 	}
 
-	// // direct control over pointer location
-	// setPointer { | distFromCentroid = 0, grainSize = 2 |
-	// 	cluster
-	// }
+	setCluster { |clusterIndex|
+
+		// make sure the cluster has frames in it
+		if( invalidClusters.includes(clusterIndex) and: (setClusterCnt < 20),
+			{
+				warn("chose a cluster with no frames, choosing another randomly");
+				this.setCluster(numClusters.rand);
+				setClusterCnt = setClusterCnt + 1;
+			},{
+				curCluster = clusterIndex;
+				numFramesInCluster = numFramesInClusters[curCluster];
+				setClusterCnt = 0;
+			}
+		);
+	}
 
 
-	gui { view = GrainScannerView(this); }
+	gui { view = GrainScanner2View(this); }
 
 
 	free {
 		group.freeAll;
-		buffers.do(_.free)
+		buffers.do(_.free);
+		grnResponder.free;
 	}
 
+	buildResponder {
+
+		grnResponder !? {grnResponder.free};
+
+		grnResponder = OSCFunc({ |msg, time, addr, recvPort|
+			var clust_spread, shift, grndur, frame, start, end;
+
+			var node;
+			node = msg[1];
+			synths.do{ |synth|
+				// make sure to respond only to the synth that sent the message
+				if( synth.node == node, {
+
+					#clust_spread, shift, grndur = msg[3..];
+
+					frame = this.chooseClusterFrame(this.curCluster, clust_spread, shift).postln;
+
+					// center the grain around the frame location
+					synth.pos_(frame - (grndur * 0.5) / bufDur);
+				})
+			};
+		},
+		'/pointer',
+		Server.default.addr,
+		argTemplate: [nil, this.replyID] // respond only to this instance's synths by replyID
+		);
+
+	}
 
 	loadSynthLib {
-		grnSynthDef = CtkSynthDef(\grainScanner, {
-			arg
-			buffer, bufnum,
-			out_bus, 			// main out
-			out_bus_aux,		// outbus to reverb
-			start=0, end=1,		// bounds of grain position in sound file
-			grainRand = 0,		// gaussian trigger: 0 = regular at grainRate, 1 = random around grainRate
-			grainRate = 10, grainDur = 0.04,
-			posDisp = 0.01,		// position dispersion of the pointer, as percentage of soundfile duration
-			pitch=1,
-			auxmix=0, amp=1,
-			fadein = 2, fadeout = 2,
-			posRate = 1,	// change the speed of the grain position pointer (can be negative)
-			posInv = 0,		// flag (0/1) to invert the posRate
-			monAmp = 1,		// monitor amp, for headphones
-			amp_lag = 0.3,		// time lag on amplitude changes (amp, xfade, mon send, aux send)
-			balance_amp_lag = 0.3,	// time lag on amplitude xfade changes
-			recvUpdate = 0,		// flag to check if next selected buffer is to be input to this instance
-			t_posReset = 0,		// reset the phasor position with a trigger
-			gate = 1;			// gate to start and release the synth
-
-			var
-			env, grain_dens, amp_scale, trig, b_frames,
-			pos, pos_lo, pos_hi, sig, out, aux, auxmix_lagged;
+		grnSynthDef = CtkSynthDef(\grainScanner2, {
+			arg grainRate = 2, grainDur=1.25, clusterSpread = 0.1, distFrmCen = 0, buffer, pos = 0, replyID = -1, fadein = 2, fadeout = 2, gate =1;
+			var env, trig, out, grain_dens, amp_scale;
 
 			// envelope for fading output in and out - re-triggerable
 			env = EnvGen.kr(Env([1,1,0],[fadein, fadeout], \sin, 1), gate, doneAction: 0);
+
+			// TODO: update with gausstrig
+			trig = Impulse.ar(grainRate);
 
 			// calculate grain density
 			grain_dens = grainRate * grainDur;
 			amp_scale = grain_dens.reciprocal.sqrt.clip(0, 1);
 
-			// gaussian trigger
-			// grainRand = 0 regular at grainRate
-			// grainRand = 1 random around grainRate
-			trig = GaussTrig.ar(grainRate, grainRand);
-
-
-			b_frames = BufFrames.kr(bufnum);
-			// use line to go from start to end in buffer
-			pos = Phasor.ar( t_posReset,
-				BufRateScale.kr(bufnum) * posRate * (1 - (posInv*2)),
-				b_frames * start, b_frames * end, b_frames * start
-			);
-			pos = pos * b_frames.reciprocal;
-
-			pos_lo = posDisp * 0.5.neg;
-			pos_hi = posDisp * 0.5;
-
-			// add randomness to position pointer, make sure it remains within limits
-
-			pos = pos + TRand.ar(pos_lo, pos_hi, trig);
-			pos = pos.wrap(start , end);
-
-			/* granulator */
-			sig = GrainBufJ.ar(1, trig, grainDur, buffer, pitch , pos, 1, interp:1, grainAmp: amp_scale);
-
-			/* overall amp control */
-			sig = Limiter.ar( sig * Lag.kr(amp, amp_lag) * env, -0.5.dbamp);
-
-			/* aux send control */
-			// auxmix_lagged = Lag.kr(auxmix, amp_lag);
-			// balance between dry and wet routing
-			// out = sig * (1 - auxmix_lagged).sqrt;
-			// aux = sig * auxmix_lagged.sqrt;
-			out = sig;
-
-			// send signals to outputs
-			Out.ar( out_bus,		out );
-			// Out.ar( out_bus_aux,	aux );
+			// spread, distFrmCen, grainDur
+			SendReply.ar(trig, '/pointer', [clusterSpread, distFrmCen, grainDur], replyID);
+			out = GrainBufJ.ar(1, trig, grainDur, buffer, 1 , pos, 1, interp:1, grainAmp: amp_scale);
+			out = out * env;
+			Out.ar(0, Pan2.ar(out));
 		})
 	}
 }
 
-GrainScannerView {
+GrainScanner2View {
 	// copyArgs
 	var scanner;
 	var <win, <controls;
 
-	*new {|aGrainScanner|
-		^super.newCopyArgs( aGrainScanner ).init;
+	*new {|aGrainScanner2|
+		^super.newCopyArgs( aGrainScanner2 ).init;
 	}
 
 	init {
@@ -303,17 +332,17 @@ GrainScannerView {
 				.value_(scanner.grnRandSpec.unmap(scanner.grnRandSpec.default))
 			),
 
-			\pntrRate, ()
-			.numBox_( NumberBox()
-				.action_({ |bx|
-					scanner.pntrRate_(bx.value) })
-				.value_(scanner.pntrRateSpec.default)
-			)
-			.knob_(	Knob()
-				.action_({|knb|
-					scanner.pntrRate_(scanner.pntrRateSpec.map(knb.value)) })
-				.value_(scanner.pntrRateSpec.unmap(scanner.pntrRateSpec.default))
-			),
+			// \pntrRate, ()
+			// .numBox_( NumberBox()
+			// 	.action_({ |bx|
+			// 	scanner.pntrRate_(bx.value) })
+			// 	.value_(scanner.pntrRateSpec.default)
+			// )
+			// .knob_(	Knob()
+			// 	.action_({|knb|
+			// 	scanner.pntrRate_(scanner.pntrRateSpec.map(knb.value)) })
+			// 	.value_(scanner.pntrRateSpec.unmap(scanner.pntrRateSpec.default))
+			// ),
 
 			\pntrDisp, ()
 			.numBox_( NumberBox()
@@ -340,16 +369,17 @@ GrainScannerView {
 			)
 			.txt_( StaticText().string_("Fade in/out") ),
 
-			// reset the pointer moment loop
-			\syncPntr, ()
-			.button_( Button().states_([[""]]).action_({ |but|
-				scanner.syncLoop }) )
-			.txt_( StaticText().string_("Sync pointer") ),
+			// // reset the pointer moment loop
+			// \syncPntr, ()
+			// .button_( Button().states_([[""]]).action_({ |but|
+			// scanner.syncLoop }) )
+			// .txt_( StaticText().string_("Sync pointer") ),
 
-			\newPos, ()
-			.button_( Button().states_([[""]]).action_({ |but|
-				scanner.scanRange(scanner.bufDur.rand, rrand(2.0, 6.0)) }) )
-			.txt_( StaticText().string_("New moment") ),
+			\newCluster, ()
+			.numBox_( NumberBox()
+				.action_({ |bx|
+				scanner.setCluster(bx.value.asInt) }) )
+			.txt_( StaticText().string_("New cluster") ),
 
 		]);
 	}
@@ -370,13 +400,18 @@ GrainScannerView {
 						[controls[\pntrDisp].slider.orientation_(\vertical).minHeight_(150), a: \left],
 						[controls[\pntrDisp].numBox.fixedWidth_(35), a: \left],
 					),
-					VLayout( *[\newPos, \syncPntr, \fadeIO].collect({ |key|
+					VLayout(
 						HLayout(
-							[controls[key].button.fixedWidth_(35), a: \left],
-							[controls[key].txt.align_(\left), a: \left ]
-						)
-					}) ++ [nil, [StaticText().string_("pntr Dispersion").align_(\left), a: \bottom]]
-					), nil
+							[controls[\fadeIO].button.fixedWidth_(35), a: \left],
+							[controls[\fadeIO].txt.align_(\left), a: \left ]
+						),
+						HLayout(
+							[controls[\newCluster].numBox.fixedWidth_(35), a: \left],
+							[controls[\newCluster].txt.align_(\left), a: \left ]
+						),
+						nil,
+						[StaticText().string_("pntr Dispersion").align_(\left), a: \bottom]
+					),
 				),
 			)
 		)
