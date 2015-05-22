@@ -6,8 +6,9 @@ GrainScanner2 {
 	var server, <sf, <buffers, <group, <synths, <bufDur, <view, <bufferPath;
 	var <grnResponder, <replyID;
 	var <grnDurSpec, <grnRateSpec, <grnRandSpec, <pntrDispSpec, <distFrmCenSpec, <clusterSpreadSpec;
+	var <>postFrames =false, <playing = false;
 	// cluster vars
-	var setClusterCnt = 0, <curCluster, <numFramesInClusters, <numFramesInCluster, <numClusters, <clusterFramesByDist, <invalidClusters;
+	var <curCluster, <numFramesInClusters, <numFramesInCluster, <numClusters, <clusterFramesByDist, <invalidClusters, setClusterCnt = 0;
 
 	*new { |outbus=0, bufferOrPath|
 		^super.newCopyArgs( outbus, bufferOrPath ).init;
@@ -141,7 +142,13 @@ GrainScanner2 {
 
 	play { |fadeInTime|
 		fadeInTime !? {synths.do(_.fadein_(fadeInTime))};
-		synths.do({|synth| synth.isPlaying.not.if({synth.play},{synth.gate_(1)}) });
+		synths.do({|synth|
+			synth.isPlaying.not.if(
+				{synth.play},
+				{synth.gate_(1); synth.run}
+			);
+		});
+		playing = true;
 	}
 
 	release { |fadeOutTime|
@@ -149,6 +156,9 @@ GrainScanner2 {
 		synths.do({|synth|
 			synth.isPlaying.not.if({
 				"synth isn't playing, can't release".warn},{synth.gate_(0)}) });
+		playing = false;
+		// pause after fadetime
+		fork{ synths[0].fadeTime.wait; playing.not.if{synths.do(_.pause)} };
 	}
 
 	grnDur_ { |dur| synths.do(_.grainDur_(dur)); this.changed(\grnDur, dur); }
@@ -164,21 +174,21 @@ GrainScanner2 {
 
 
 	// mirFrames: eg. ~data.beatdata
-	initClusterData { |kMeansData, mirFrames|
+	initClusterData { |aKMeansMod, mirFrames|
 		var framesByCluster;
 
-		numClusters = kMeansData.k;
-		numFramesInClusters = numClusters.collect{ |i| kMeansData.assignments.occurrencesOf(i) };
+		numClusters = aKMeansMod.k;
+		numFramesInClusters = numClusters.collect{ |i| aKMeansMod.assignments.occurrencesOf(i) };
 		invalidClusters = List(); 	// keep track of clusters without frames to catch later
 		numFramesInClusters.do{ |frmcnt, i| if(frmcnt == 0, { invalidClusters.add(i) }) };
 
 		framesByCluster = numClusters.collect{List()};
 
-		kMeansData.cenDistances.do{|dist, i|
+		aKMeansMod.cenDistances.do{|dist, i|
 			// Create an dict for each frame, associating it with its
 			// distance from its assigned centroid, for later sorting
 			// Put each of these frame dicts into its cluster group.
-			framesByCluster[kMeansData.assignments[i]].add(
+			framesByCluster[aKMeansMod.assignments[i]].add(
 				().f_(mirFrames[i]).d_(dist)
 			);
 		};
@@ -247,7 +257,8 @@ GrainScanner2 {
 
 					#clust_spread, shift, grndur = msg[3..];
 
-					frame = this.chooseClusterFrame(this.curCluster, clust_spread, shift).postln;
+					frame = this.chooseClusterFrame(this.curCluster, clust_spread, shift);
+					postFrames.if{ frame.postln }; // debug
 
 					// center the grain around the frame location
 					synth.pos_(frame - (grndur * 0.5) / bufDur);

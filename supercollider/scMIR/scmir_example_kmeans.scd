@@ -29,7 +29,7 @@ SynthDef(\grains2,{|out,buf,pos,dur=0.5,rate=5,offset=1,gate=1,pch=1,amp=1|
 	"Loading Buffer".postln;
 	buffer = Buffer.readChannel(s,path,channels:[0]);
 	event.buf = buffer;
-	if ("/sounds/*".pathMatch.find([PathName(path).pathOnly++PathName(path).fileNameWithoutExtension++".scmirZ"]).notNil) {
+		if (File.exists(PathName(p).pathOnly++PathName(p).fileNameWithoutExtension++".scmirZ") ) {
 			"Found Analysis File...loading".postln;
 			analysis = SCMIRAudioFile.newFromZ(path);
 			analysis.load;
