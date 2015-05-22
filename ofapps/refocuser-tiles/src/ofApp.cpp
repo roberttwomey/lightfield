@@ -9,14 +9,28 @@ void ofApp::setup(){
 
     ofEnableAlphaBlending();
 
+    loadXMLSettings("scenes.xml");
+
+    // medium tiles
+//    loadXMLSettings("./textures/carkeek_med_tile.xml");
+
+    // full res tiles
 //    loadXMLSettings("./textures/carkeek_tile.xml");
 //    loadXMLSettings("./textures/dark_trees_tile.xml");
-    loadXMLSettings("./textures/mike1_tile.xml");
+//    loadXMLSettings("./textures/mike1_tile.xml");
+//    loadXMLSettings("./textures/mike2_tile.xml");
+//    loadXMLSettings("./textures/mike3_tile.xml");
+//    loadXMLSettings("./textures/bookcase_tile.xml");
+//    loadXMLSettings("./textures/cliffside_tile.xml");
+//    loadXMLSettings("./textures/diningroom3_tile.xml");
+//    loadXMLSettings("./textures/outsidelookingin_tile.xml");
+//    loadXMLSettings("./textures/carkeek_night_tile.xml");
 
-    loadLFImage();
+    loadLightfieldData();
 
-    graphicsSetup();
-	    // OSC - listen on the given port
+    setupGraphics();
+
+    // OSC - listen on the given port
     cout << "listening for osc messages on port " << port << "\n";
     receiver.setup(port);
 
@@ -40,6 +54,8 @@ void ofApp::update(){
     // aperture
     shader.setUniform2i("ap_loc", xstart, ystart);
     shader.setUniform2i("ap_size", xcount, ycount);
+
+//    updateAperture();
 
     // focus
     shader.setUniform1f("fscale", synScale);
@@ -79,7 +95,7 @@ void ofApp::draw(){
 
     // thumbnail size
     float tWidth = 160;
-    float tHeight = 160/xsubimages * ysubimages;
+    float tHeight = 160/xnumtextures * ynumtextures;
 
     // fused image size
     float height = ofGetWindowHeight();
@@ -135,6 +151,28 @@ void ofApp::loadXMLSettings(string settingsfile) {
     ofxXmlSettings xml;
 
     xml.loadFile(settingsfile);
+    int numscenes = xml.getNumTags("scene");
+
+    if(numscenes > 0 ) {
+        // store filenames
+        for(int i=0; i < numscenes; i++) {
+            string scenefile = xml.getValue("scene", "nofile.jpg", i);
+            scenefiles.push_back(scenefile);
+        }
+
+        // load first scene
+        loadXMLScene(scenefiles[0]);
+    } else {
+        cout << "No scenes in file" << settingsfile << ". Exiting." << endl;
+        ofExit();
+    }
+
+}
+
+void ofApp::loadXMLScene(string scenefile) {
+    ofxXmlSettings xml;
+
+    xml.loadFile(scenefile);
 
     // lightfield images //
     numlftiles = xml.getNumTags("texturefile");
@@ -163,6 +201,7 @@ void ofApp::loadXMLSettings(string settingsfile) {
     ystart = xml.getValue("ystart", 0);
     xcount = xml.getValue("xcount", xsubimages);
     ycount = xml.getValue("ycount", ysubimages);
+
     synScale = xml.getValue("scale", 0);
     zoom = xml.getValue("zoom", 1.0);
     xoffset = 0;
@@ -191,7 +230,7 @@ void ofApp::loadXMLSettings(string settingsfile) {
 
 }
 
-void ofApp::loadLFImage() {
+void ofApp::loadLightfieldData() {
 //    ofLoadImage(lfplane, lffilenames);
 //
 //    sourceWidth=lfplane.getWidth();
@@ -200,7 +239,7 @@ void ofApp::loadLFImage() {
 //    cout << "LF Texture: " << sourceWidth << ", " << sourceHeight << endl;
 
     for(int i=0; i < numlftiles; i++) {
-        cout << "loading texture" << i << " from " << lffilenames[i] << "...";
+        cout << "loading texture " << i << " from " << lffilenames[i] << "...";
         ofLoadImage(lfplanes[i], lffilenames[i]);
         cout << "done." << endl;
     }
@@ -209,7 +248,7 @@ void ofApp::loadLFImage() {
 
 }
 
-void ofApp::graphicsSetup() {
+void ofApp::setupGraphics() {
 
     fbo.allocate(subwidth,subheight);
     maskFbo.allocate(subwidth,subheight);
@@ -234,7 +273,7 @@ void ofApp::graphicsSetup() {
             int i = x + (y * xsubimages);
 
             pos[i*3 + 0] = offsets[i*2];
-            pos[i*3 + 1] = offsets[i*2+1]; //y*offset;
+            pos[i*3 + 1] = offsets[i*2+1];
             pos[i*3 + 2] = 0.0;
         }
     }
@@ -274,11 +313,9 @@ void ofApp::graphicsSetup() {
             int y_tile = y / yimagespertex;
             int tilenum = x_tile + y_tile * xnumtextures;
 
-            cout << tilenum << " " << x_tile << " " << y_tile << endl;
-
-            tilenums[i*3 + 0] = tilenum;//;//ofRandom(255.0);//128.0;//float(tilenum) * 16.0;
-            tilenums[i*3 + 1] = 0;//ofRandom(255.0);//0.0;
-            tilenums[i*3 + 2] = 0;//ofRandom(255.0);//0.0;
+            tilenums[i*3 + 0] = tilenum;
+            tilenums[i*3 + 1] = 0;
+            tilenums[i*3 + 2] = 0;
 
             int xpixoffset = x_tile * tilewidth;
             int ypixoffset = y_tile * tileheight;
@@ -286,9 +323,6 @@ void ofApp::graphicsSetup() {
             texpixoffsets[i*3 + 0] = xpixoffset;
             texpixoffsets[i*3 + 1] = ypixoffset;
             texpixoffsets[i*3 + 2] = 0;
-
-//            cout << tilenum << " " << xpixoffset << " " << ypixoffset << endl;
-
         }
     }
 
@@ -300,39 +334,40 @@ void ofApp::graphicsSetup() {
     tilepixoffset_tex.getTextureReference().loadData(texpixoffsets, xsubimages, ysubimages, GL_RGB);
     delete texpixoffsets;
 
+//    // initialize aperture mask to zero (no images used)
+//    aperture_mask = new float [numCams * 3];
+//
+//    for (int i=0; i < numCams *3; i++)
+//        aperture_mask[i] = 0.0;
+//
+//    aperture_mask_tex.allocate(xsubimages, ysubimages, GL_RGB32F);
+//    aperture_mask_tex.getTextureReference().loadData(aperture_mask, xsubimages, ysubimages, GL_RGB);
+//
+//    updateAperture();
 
     // setup refocus shader
     shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus_tile_150.frag");
+//    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus_aperture_mask_150.frag");
     shader.linkProgram();
 
     shader.begin();
 
+
     // camera images
     int i=0;
 
-    for(i=0; i < 16; i++)
+    for(i=0; i < numlftiles; i++)
         shader.setUniformTexture("lftex["+ofToString(i)+"]", lfplanes[i], i+1);
 
+    // data textures for shader
+//    shader.setUniformTexture("aperture_mask_tex", aperture_mask_tex, i++);
+    shader.setUniformTexture("campos_tex", campos_tex, i++);
+    shader.setUniformTexture("tilenum_tex", tilenum_tex, i++);
+    shader.setUniformTexture("tilepixoffset_tex", tilepixoffset_tex, i++);
 
-//    shader.setUniformTexture("lftex1", lfplanes[0], 1);
-//    shader.setUniformTexture("lftex2", lfplanes[1], 2);
-//    shader.setUniformTexture("lftex3", lfplanes[2], 3);
-//    shader.setUniformTexture("lftex4", lfplanes[3], 4);
-//    shader.setUniformTexture("lftex5", lfplanes[4], 5);
-//    shader.setUniformTexture("lftex6", lfplanes[5], 6);
-//    shader.setUniformTexture("lftex7", lfplanes[6], 7);
-//    shader.setUniformTexture("lftex8", lfplanes[7], 8);
-//    shader.setUniformTexture("lftex9", lfplanes[8], 9);
-//    shader.setUniformTexture("lftex10", lfplanes[9], 10);
-//    shader.setUniformTexture("lftex11", lfplanes[10], 11);
-//    shader.setUniformTexture("lftex12", lfplanes[11], 12);
-
+    // one-time data set parameters
     shader.setUniform2f("resolution", subwidth, subheight);
     shader.setUniform2i("subimages", xsubimages, ysubimages);
-
-    shader.setUniformTexture("campos_tex", campos_tex, 17);
-    shader.setUniformTexture("tilenum_tex", tilenum_tex, 18);
-    shader.setUniformTexture("tilepixoffset_tex", tilepixoffset_tex, 19);
 
     shader.end();
 
@@ -347,6 +382,23 @@ void ofApp::graphicsSetup() {
 
 }
 
+//void ofApp::updateAperture() {
+//
+//    // set pixels to 1.0 for used, 0.0 for not used
+//    for (int x=0; x < xsubimages; x++) {
+//        for(int y=0; y < ysubimages; y++) {
+//            int i = x + y * xsubimages;
+//            if(ofInRange(x, xstart, xcount) && ofInRange(y, ystart, ycount)) {
+//                aperture_mask[i*3] = 1.0;
+//            } else {
+//                aperture_mask[i*3] = 0.0;
+//            }
+//        }
+//    }
+//
+//    // update aperture on graphics card
+//    aperture_mask_tex.getTextureReference().loadData(aperture_mask, xsubimages, ysubimages, GL_RGB);
+//}
 
 //--------------------------------------------------------------
 //  keyboard interaction / osc control
@@ -413,10 +465,12 @@ void ofApp::keyPressed(int key){
 
 void ofApp::process_OSC(ofxOscMessage m) {
 
-    if( m.getAddress() == "/lf/focus" ){
-        synScale = ofMap(m.getArgAsFloat(0), 0.0, 1.0, minScale, maxScale);
+    if( m.getAddress() == "/focus" ){
+        synScale = m.getArgAsFloat(0);//ofMap(m.getArgAsFloat(0), 0.0, 1.0, minScale, maxScale);
     }
-    else if( m.getAddress() == "/lf/xStart" ){
+    else if( m.getAddress() == "/xstart" ){
+//        xstart = m.getArgAsInt32(0);
+
         int startRequested, constrainByRange, xAvail;
 
         startRequested = m.getArgAsInt32(0);
@@ -440,7 +494,9 @@ void ofApp::process_OSC(ofxOscMessage m) {
         }
     }
 
-    else if(m.getAddress() == "/lf/yStart"){
+    else if(m.getAddress() == "/ystart"){
+//        ystart = m.getArgAsInt32(0);
+
         int startRequested, constrainByRange, yAvail;
 
         startRequested = m.getArgAsInt32(0);
@@ -464,9 +520,10 @@ void ofApp::process_OSC(ofxOscMessage m) {
         }
     }
 
-    else if(m.getAddress() == "/lf/xRange"){
-        int rangeRequested, constrainByXStart, xAvail;
+    else if(m.getAddress() == "/xcount"){
+//        xcount = m.getArgAsInt32(0);
 
+        int rangeRequested, constrainByXStart, xAvail;
         rangeRequested = m.getArgAsInt32(0);
         if ( m.getNumArgs() == 2 ){
             constrainByXStart = m.getArgAsInt32(1);
@@ -490,9 +547,10 @@ void ofApp::process_OSC(ofxOscMessage m) {
         }
     }
 
-    else if(m.getAddress() == "/lf/yRange"){
-        int rangeRequested, constrainByYStart, yAvail;
+    else if(m.getAddress() == "/ycount"){
+//            ycount = m.getArgAsInt32(0);
 
+        int rangeRequested, constrainByYStart, yAvail;
         rangeRequested = m.getArgAsInt32(0);
         if ( m.getNumArgs() == 2 ){
             constrainByYStart = m.getArgAsInt32(1);
@@ -514,6 +572,18 @@ void ofApp::process_OSC(ofxOscMessage m) {
             ystart = max( ystart - yshift, 0);
             ycount = ysubimages - ystart;
         }
+    }
+
+    else if(m.getAddress() == "/xscroll"){
+        xoffset = m.getArgAsFloat(0);
+    }
+
+    else if(m.getAddress() == "/yscroll"){
+        yoffset = m.getArgAsFloat(0);
+    }
+
+    else if(m.getAddress() == "/zoom"){
+        zoom = m.getArgAsFloat(0);
     }
 
     else {

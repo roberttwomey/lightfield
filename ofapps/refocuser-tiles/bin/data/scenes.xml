@@ -1,0 +1,10 @@
+<!-- lightfield scenes -->
+<scene>./textures/carkeek_med_tile.xml</scene>
+
+<!-- refocuser -->
+
+<!-- debug information (text, mouse, thumbnail) -->
+<!--<drawthumbnail>1</drawthumbnail>
+<hidecursor>1</hidecursor>
+<debug>1</debug>
+-->
