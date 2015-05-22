@@ -8,13 +8,15 @@
 void ofApp::setup(){
 
     ofEnableAlphaBlending();
+
 //    loadXMLSettings("./textures/dark_trees_calib.xml");
 //    loadXMLSettings("./textures/yellowcliff_sm.xml");
 //    loadXMLSettings("./textures/cliffside.xml");
 //    loadXMLSettings("./textures/tunnel_sm.xml");
-        loadXMLSettings("./textures/mike1.xml");
+//        loadXMLSettings("./textures/mike1.xml");
 //loadXMLSettings("./textures/mike1_sm.xml");
     //    loadXMLSettings("./textures/mike3_sm.xml");
+    loadXMLSettings("./textures/outsidelookingin.xml");
 
     loadLFImage();
 
@@ -325,10 +327,12 @@ void ofApp::keyPressed(int key){
 
 void ofApp::process_OSC(ofxOscMessage m) {
 
-    if( m.getAddress() == "/lf/focus" ){
-        synScale = ofMap(m.getArgAsFloat(0), 0.0, 1.0, minScale, maxScale);
+    if( m.getAddress() == "/focus" ){
+        synScale = m.getArgAsFloat(0);//ofMap(m.getArgAsFloat(0), 0.0, 1.0, minScale, maxScale);
     }
-    else if( m.getAddress() == "/lf/xStart" ){
+    else if( m.getAddress() == "/xstart" ){
+//        xstart = m.getArgAsInt32(0);
+
         int startRequested, constrainByRange, xAvail;
 
         startRequested = m.getArgAsInt32(0);
@@ -352,7 +356,9 @@ void ofApp::process_OSC(ofxOscMessage m) {
         }
     }
 
-    else if(m.getAddress() == "/lf/yStart"){
+    else if(m.getAddress() == "/ystart"){
+//        ystart = m.getArgAsInt32(0);
+
         int startRequested, constrainByRange, yAvail;
 
         startRequested = m.getArgAsInt32(0);
@@ -376,9 +382,10 @@ void ofApp::process_OSC(ofxOscMessage m) {
         }
     }
 
-    else if(m.getAddress() == "/lf/xRange"){
-        int rangeRequested, constrainByXStart, xAvail;
+    else if(m.getAddress() == "/xcount"){
+//        xcount = m.getArgAsInt32(0);
 
+        int rangeRequested, constrainByXStart, xAvail;
         rangeRequested = m.getArgAsInt32(0);
         if ( m.getNumArgs() == 2 ){
             constrainByXStart = m.getArgAsInt32(1);
@@ -402,9 +409,10 @@ void ofApp::process_OSC(ofxOscMessage m) {
         }
     }
 
-    else if(m.getAddress() == "/lf/yRange"){
-        int rangeRequested, constrainByYStart, yAvail;
+    else if(m.getAddress() == "/ycount"){
+//            ycount = m.getArgAsInt32(0);
 
+        int rangeRequested, constrainByYStart, yAvail;
         rangeRequested = m.getArgAsInt32(0);
         if ( m.getNumArgs() == 2 ){
             constrainByYStart = m.getArgAsInt32(1);
@@ -426,6 +434,18 @@ void ofApp::process_OSC(ofxOscMessage m) {
             ystart = max( ystart - yshift, 0);
             ycount = ysubimages - ystart;
         }
+    }
+
+    else if(m.getAddress() == "/xscroll"){
+        xoffset = m.getArgAsFloat(0);
+    }
+
+    else if(m.getAddress() == "/yscroll"){
+        yoffset = m.getArgAsFloat(0);
+    }
+
+    else if(m.getAddress() == "/zoom"){
+        zoom = m.getArgAsFloat(0);
     }
 
     else {

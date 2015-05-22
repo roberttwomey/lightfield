@@ -11,7 +11,14 @@ void ofApp::setup(){
 
 //    loadXMLSettings("./textures/carkeek_tile.xml");
 //    loadXMLSettings("./textures/dark_trees_tile.xml");
-    loadXMLSettings("./textures/mike1_tile.xml");
+//    loadXMLSettings("./textures/mike1_tile.xml");
+//    loadXMLSettings("./textures/mike2_tile.xml");
+    loadXMLSettings("./textures/mike3_tile.xml");
+//    loadXMLSettings("./textures/bookcase_tile.xml");
+//    loadXMLSettings("./textures/cliffside_tile.xml");
+//    loadXMLSettings("./textures/diningroom3_tile.xml");
+//    loadXMLSettings("./textures/outsidelookingin_tile.xml");
+//    loadXMLSettings("./textures/carkeek_night_tile.xml");
 
     loadLFImage();
 
@@ -79,7 +86,7 @@ void ofApp::draw(){
 
     // thumbnail size
     float tWidth = 160;
-    float tHeight = 160/xsubimages * ysubimages;
+    float tHeight = 160/xnumtextures * ynumtextures;
 
     // fused image size
     float height = ofGetWindowHeight();
@@ -274,7 +281,7 @@ void ofApp::graphicsSetup() {
             int y_tile = y / yimagespertex;
             int tilenum = x_tile + y_tile * xnumtextures;
 
-            cout << tilenum << " " << x_tile << " " << y_tile << endl;
+//            cout << tilenum << " " << x_tile << " " << y_tile << endl;
 
             tilenums[i*3 + 0] = tilenum;//;//ofRandom(255.0);//128.0;//float(tilenum) * 16.0;
             tilenums[i*3 + 1] = 0;//ofRandom(255.0);//0.0;
@@ -413,10 +420,12 @@ void ofApp::keyPressed(int key){
 
 void ofApp::process_OSC(ofxOscMessage m) {
 
-    if( m.getAddress() == "/lf/focus" ){
-        synScale = ofMap(m.getArgAsFloat(0), 0.0, 1.0, minScale, maxScale);
+    if( m.getAddress() == "/focus" ){
+        synScale = m.getArgAsFloat(0);//ofMap(m.getArgAsFloat(0), 0.0, 1.0, minScale, maxScale);
     }
-    else if( m.getAddress() == "/lf/xStart" ){
+    else if( m.getAddress() == "/xstart" ){
+//        xstart = m.getArgAsInt32(0);
+
         int startRequested, constrainByRange, xAvail;
 
         startRequested = m.getArgAsInt32(0);
@@ -440,7 +449,9 @@ void ofApp::process_OSC(ofxOscMessage m) {
         }
     }
 
-    else if(m.getAddress() == "/lf/yStart"){
+    else if(m.getAddress() == "/ystart"){
+//        ystart = m.getArgAsInt32(0);
+
         int startRequested, constrainByRange, yAvail;
 
         startRequested = m.getArgAsInt32(0);
@@ -464,9 +475,10 @@ void ofApp::process_OSC(ofxOscMessage m) {
         }
     }
 
-    else if(m.getAddress() == "/lf/xRange"){
-        int rangeRequested, constrainByXStart, xAvail;
+    else if(m.getAddress() == "/xcount"){
+//        xcount = m.getArgAsInt32(0);
 
+        int rangeRequested, constrainByXStart, xAvail;
         rangeRequested = m.getArgAsInt32(0);
         if ( m.getNumArgs() == 2 ){
             constrainByXStart = m.getArgAsInt32(1);
@@ -490,9 +502,10 @@ void ofApp::process_OSC(ofxOscMessage m) {
         }
     }
 
-    else if(m.getAddress() == "/lf/yRange"){
-        int rangeRequested, constrainByYStart, yAvail;
+    else if(m.getAddress() == "/ycount"){
+//            ycount = m.getArgAsInt32(0);
 
+        int rangeRequested, constrainByYStart, yAvail;
         rangeRequested = m.getArgAsInt32(0);
         if ( m.getNumArgs() == 2 ){
             constrainByYStart = m.getArgAsInt32(1);
@@ -514,6 +527,18 @@ void ofApp::process_OSC(ofxOscMessage m) {
             ystart = max( ystart - yshift, 0);
             ycount = ysubimages - ystart;
         }
+    }
+
+    else if(m.getAddress() == "/xscroll"){
+        xoffset = m.getArgAsFloat(0);
+    }
+
+    else if(m.getAddress() == "/yscroll"){
+        yoffset = m.getArgAsFloat(0);
+    }
+
+    else if(m.getAddress() == "/zoom"){
+        zoom = m.getArgAsFloat(0);
     }
 
     else {
