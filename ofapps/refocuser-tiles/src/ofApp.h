@@ -7,7 +7,7 @@
 #define MAX_SUBIMAGES 600
 #define MAX_OFFSETS 1200
 
-#define MAX_LF_TILES 4
+#define MAX_LF_TILES 20
 
 class ofApp : public ofBaseApp{
 public:
@@ -19,9 +19,9 @@ public:
     void loadXMLSettings(string settingsfile);
     void loadLFImage();
     void graphicsSetup();
-    
+
     void doSnapshot();
-    
+
     void process_OSC(ofxOscMessage m);
     void keyPressed  (int key);
 
@@ -33,8 +33,10 @@ public:
     string lffilenames[MAX_LF_TILES];
     int numlftiles;
     ofFbo campos_tex;
+    ofFbo tilenum_tex;
+    ofFbo tilepixoffset_tex;
     ofFbo subimg_corner_tex;
-    
+
     ofDirectory dir;
 
     ofFbo fbo;
@@ -45,7 +47,15 @@ public:
     float synScale;
     float zoom;
     int xcount, ycount, xstart, ystart;
+
+    // camera images
     int xsubimages, ysubimages, subwidth, subheight;
+
+    // whole set of textures
+    int ximagespertex, yimagespertex, tilewidth, tileheight;
+    int xnumtextures, ynumtextures;
+    int tilenum;
+
     float minScale, maxScale;
     float xoffset, yoffset;
 
@@ -53,7 +63,7 @@ public:
 
     // snapshot
     int snapcount;
-    
+
     // onscreen display
     bool bShowThumbnail;
     bool bHideCursor;

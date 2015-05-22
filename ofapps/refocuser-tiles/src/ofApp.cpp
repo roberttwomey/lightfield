@@ -8,22 +8,18 @@
 void ofApp::setup(){
 
     ofEnableAlphaBlending();
-//    loadXMLSettings("./textures/dark_trees_calib.xml");
-//    loadXMLSettings("./textures/yellowcliff_sm.xml");
-//    loadXMLSettings("./textures/cliffside.xml");
-//    loadXMLSettings("./textures/tunnel_sm.xml");
-//        loadXMLSettings("./textures/bookcase.xml");
-//    loadXMLSettings("./textures/mike1_sm.xml");
-    loadXMLSettings("./textures/bookcase_tile.xml");
-    //    loadXMLSettings("./textures/mike3_sm.xml");
-  
+
+//    loadXMLSettings("./textures/carkeek_tile.xml");
+//    loadXMLSettings("./textures/dark_trees_tile.xml");
+    loadXMLSettings("./textures/mike1_tile.xml");
+
     loadLFImage();
 
     graphicsSetup();
 	    // OSC - listen on the given port
     cout << "listening for osc messages on port " << port << "\n";
     receiver.setup(port);
-    
+
     snapcount = 0;
 }
 
@@ -51,6 +47,8 @@ void ofApp::update(){
     // zoom / pan
     shader.setUniform1f("zoom", zoom);
     shader.setUniform2f("roll", xoffset, yoffset);
+
+    shader.setUniform1i("tilenum", tilenum);
 
     maskFbo.draw(0,0);
 
@@ -96,17 +94,22 @@ void ofApp::draw(){
     // draw thumbnail with indicator
     if(bShowThumbnail == true) {
         ofSetColor(255);
-        
-        // draw four separate textures
-        lfplanes[0].draw(5,5,tWidth/2,tHeight/2);
-        lfplanes[1].draw(5+tWidth/2,5,tWidth/2,tHeight/2);
-        lfplanes[2].draw(5,5+tHeight/2,tWidth/2,tHeight/2);
-        lfplanes[3].draw(5+tWidth/2,5+tHeight/2,tWidth/2,tHeight/2);
-        
+
+        // draw separate textures
+        int tSubWidth = tWidth / xnumtextures;
+        int tSubHeight = tHeight / ynumtextures;
+
+        for (int x = 0; x < xnumtextures; x++){
+            for (int y = 0; y < ynumtextures; y++){
+                int i = x + y * xnumtextures;
+                lfplanes[i].draw(5 + tSubWidth * x ,5 + tSubWidth * y, tSubWidth, tSubHeight);
+            }
+        }
+
         ofSetColor(255, 0, 0);
         ofNoFill();
-        float xunit = tWidth/xsubimages;
-        float yunit = tHeight/ysubimages;
+        float xunit = float(tSubWidth) / float(ximagespertex);
+        float yunit = float(tSubHeight) / float(yimagespertex);
         ofRect(5+xstart*xunit, 5+ystart*yunit, xcount*xunit, ycount*yunit);
     }
 
@@ -138,7 +141,13 @@ void ofApp::loadXMLSettings(string settingsfile) {
     for(int i=0; i < numlftiles; i++) {
         lffilenames[i] = xml.getValue("texturefile", "nofile.jpg", i);
     }
-    
+
+    // number of large textures
+    xnumtextures = xml.getValue("xnumtextures", -1);
+    ynumtextures = xml.getValue("ynumtextures", -1);
+    ximagespertex = xml.getValue("ximagespertex", -1);
+    yimagespertex = xml.getValue("yimagespertex", -1);
+
     // image layout
     subwidth = xml.getValue("subimagewidth", 0);
     subheight = xml.getValue("subimageheight", 0);
@@ -179,7 +188,7 @@ void ofApp::loadXMLSettings(string settingsfile) {
         xml.popTag();
     }
     xml.popTag();
-    
+
 }
 
 void ofApp::loadLFImage() {
@@ -189,15 +198,15 @@ void ofApp::loadLFImage() {
 //    sourceHeight=lfplane.getHeight();
 //
 //    cout << "LF Texture: " << sourceWidth << ", " << sourceHeight << endl;
-    
+
     for(int i=0; i < numlftiles; i++) {
         cout << "loading texture" << i << " from " << lffilenames[i] << "...";
         ofLoadImage(lfplanes[i], lffilenames[i]);
         cout << "done." << endl;
     }
-    
+
     cout << "done loading textures" << endl;
-    
+
 }
 
 void ofApp::graphicsSetup() {
@@ -217,64 +226,121 @@ void ofApp::graphicsSetup() {
 
     // load camera positions into texture
     int numCams = xsubimages * ysubimages;
-    
+
     // make array of float pixels with camera position information
     float * pos = new float[numCams*3];
     for (int x = 0; x < xsubimages; x++){
         for (int y = 0; y < ysubimages; y++){
             int i = x + (y * xsubimages);
-            
+
             pos[i*3 + 0] = offsets[i*2];
             pos[i*3 + 1] = offsets[i*2+1]; //y*offset;
             pos[i*3 + 2] = 0.0;
         }
     }
-    
+
     campos_tex.allocate(xsubimages, ysubimages, GL_RGB32F);
     campos_tex.getTextureReference().loadData(pos, xsubimages, ysubimages, GL_RGB);
     delete pos;
-        
+
     // TODO: implement subimage corners as texture to optimize?
     //    // make array of float pixels with camera position information
 //    unsigned char * corners = new unsigned char [numCams*3];
 //    for (int x = 0; x < xsubimages; x++){
 //        for (int y = 0; y < ysubimages; y++){
 //            int i = x + (y * xsubimages);
-//            
+//
 //            corners[i*3 + 0] = x * subwidth;
 //            corners[i*3 + 1] = y * subheight;
 //            corners[i*3 + 2] = 0.0;
 //        }
 //    }
-//    
+//
 //    subimg_corner_tex.allocate(xsubimages, ysubimages, GL_RGB32I);
 //    subimg_corner_tex.getTextureReference().loadData(corners, xsubimages, ysubimages, GL_RGB);
 //    delete corners;
-    
+
+    // make array of integers with texture tile number for each camera view
+    tilewidth = ximagespertex * subwidth;
+    tileheight = yimagespertex * subheight;
+
+    float * tilenums = new float [numCams*3];
+    float * texpixoffsets = new float [numCams*3];
+
+    for (int y = 0; y < ysubimages; y++){
+        for (int x = 0; x < xsubimages; x++){
+            int i = x + (y * xsubimages);
+            int x_tile = x / ximagespertex;
+            int y_tile = y / yimagespertex;
+            int tilenum = x_tile + y_tile * xnumtextures;
+
+            cout << tilenum << " " << x_tile << " " << y_tile << endl;
+
+            tilenums[i*3 + 0] = tilenum;//;//ofRandom(255.0);//128.0;//float(tilenum) * 16.0;
+            tilenums[i*3 + 1] = 0;//ofRandom(255.0);//0.0;
+            tilenums[i*3 + 2] = 0;//ofRandom(255.0);//0.0;
+
+            int xpixoffset = x_tile * tilewidth;
+            int ypixoffset = y_tile * tileheight;
+
+            texpixoffsets[i*3 + 0] = xpixoffset;
+            texpixoffsets[i*3 + 1] = ypixoffset;
+            texpixoffsets[i*3 + 2] = 0;
+
+//            cout << tilenum << " " << xpixoffset << " " << ypixoffset << endl;
+
+        }
+    }
+
+    tilenum_tex.allocate(xsubimages, ysubimages, GL_RGB32F);//GL_RGB32I);
+    tilenum_tex.getTextureReference().loadData(tilenums, xsubimages, ysubimages, GL_RGB);
+    delete tilenums;
+
+    tilepixoffset_tex.allocate(xsubimages, ysubimages, GL_RGB32F);//GL_RGB32I);
+    tilepixoffset_tex.getTextureReference().loadData(texpixoffsets, xsubimages, ysubimages, GL_RGB);
+    delete texpixoffsets;
+
 
     // setup refocus shader
-    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus_tile.frag");
+    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus_tile_150.frag");
     shader.linkProgram();
-    
+
     shader.begin();
-    
-    // camera images)
-    shader.setUniformTexture("lftex1", lfplanes[0], 1);
-    shader.setUniformTexture("lftex2", lfplanes[1], 2);
-    shader.setUniformTexture("lftex3", lfplanes[2], 3);
-    shader.setUniformTexture("lftex4", lfplanes[3], 4);
-    
+
+    // camera images
+    int i=0;
+
+    for(i=0; i < 16; i++)
+        shader.setUniformTexture("lftex["+ofToString(i)+"]", lfplanes[i], i+1);
+
+
+//    shader.setUniformTexture("lftex1", lfplanes[0], 1);
+//    shader.setUniformTexture("lftex2", lfplanes[1], 2);
+//    shader.setUniformTexture("lftex3", lfplanes[2], 3);
+//    shader.setUniformTexture("lftex4", lfplanes[3], 4);
+//    shader.setUniformTexture("lftex5", lfplanes[4], 5);
+//    shader.setUniformTexture("lftex6", lfplanes[5], 6);
+//    shader.setUniformTexture("lftex7", lfplanes[6], 7);
+//    shader.setUniformTexture("lftex8", lfplanes[7], 8);
+//    shader.setUniformTexture("lftex9", lfplanes[8], 9);
+//    shader.setUniformTexture("lftex10", lfplanes[9], 10);
+//    shader.setUniformTexture("lftex11", lfplanes[10], 11);
+//    shader.setUniformTexture("lftex12", lfplanes[11], 12);
+
     shader.setUniform2f("resolution", subwidth, subheight);
     shader.setUniform2i("subimages", xsubimages, ysubimages);
-    
-    shader.setUniformTexture("campos_tex", campos_tex, 5);
+
+    shader.setUniformTexture("campos_tex", campos_tex, 17);
+    shader.setUniformTexture("tilenum_tex", tilenum_tex, 18);
+    shader.setUniformTexture("tilepixoffset_tex", tilepixoffset_tex, 19);
+
     shader.end();
 
-  
-    //    GLint maxTextureSize;
-    //    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-    //    std::cout <<"Max texture size: " << maxTextureSize << std::endl;
-    
+
+//        GLint maxTextureSize;
+//        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+//        std::cout <<"Max texture size: " << maxTextureSize << std::endl;
+
     //        GLint v_maj;
     //    glGetIntegerv(GL_MAJOR_VERSION, &v_maj);
     //        std::cout <<"gl major version: " << v_maj << std::endl;
@@ -336,6 +402,10 @@ void ofApp::keyPressed(int key){
         bDebug = (bDebug == 0) ;
         cout << "d " << bDebug << endl;
 
+    }
+
+    if(key == '+') {
+        tilenum = (tilenum + 1) % numlftiles;
     }
 
 }
@@ -483,12 +553,12 @@ void ofApp::process_OSC(ofxOscMessage m) {
 
 void ofApp::doSnapshot() {
     string timestamp, imgfilename, paramfilename;
-    
+
     // save time-stamped image to data folder
     timestamp = "./snapshots/"+ofGetTimestampString("%Y%m%d%H%M%S") + "_" + ofToString(snapcount, 4, '0');
     imgfilename = timestamp + ".jpg";
     paramfilename = timestamp + ".txt";
-    
+
     // save fbo to file
     // from http://forum.openframeworks.cc/t/ofxfenster-addon-to-handle-multiple-windows-rewrite/6499/61
     int w = fbo.getWidth();
@@ -497,7 +567,7 @@ void ofApp::doSnapshot() {
     ofImage screenGrab;
     screenGrab.allocate(w,h,OF_IMAGE_COLOR);
     screenGrab.setUseTexture(false);
-    
+
     //copy the pixels from FBO to the pixel array; then set the normal ofImage from those pixels; and use the save method of ofImage
     fbo.begin();
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -506,10 +576,10 @@ void ofApp::doSnapshot() {
     screenGrab.saveImage(imgfilename, OF_IMAGE_QUALITY_BEST);
     fbo.end();
     ofLog(OF_LOG_VERBOSE, "[DiskOut]  saved frame " + imgfilename );
-    
+
     // save refocusing parameters to companion text file
     ofFile file(paramfilename, ofFile::WriteOnly);
-    
+
     // add additional parameters below
     for(int i=0; i < numlftiles; i++)
         file << lffilenames[i] << endl;
@@ -518,9 +588,9 @@ void ofApp::doSnapshot() {
     file << xstart << "," << ystart << endl;
     file << xcount << "," << ycount << endl;
     file << zoom << endl;
-    
+
     file.close();
-    
+
     snapcount++;
 }
 

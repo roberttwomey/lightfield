@@ -24,7 +24,8 @@ def mp_undistort(srcs, K, d, outpath, nprocs = 4):
             newcamera, roi = cv2.getOptimalNewCameraMatrix(K, d, (w,h), 0) 
             newimg = cv2.undistort(img, K, d, None, newcamera)
 
-            undistort_filename = os.path.join(outpath, os.path.basename(src))
+            image_filename = os.path.basename(src).replace("_eq", '')
+            undistort_filename = os.path.join(outpath, image_filename)
             cv2.imwrite(undistort_filename, newimg, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
 
             sys.stdout.write(".")
