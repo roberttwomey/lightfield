@@ -2,11 +2,18 @@
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount"], NetAddr("localhost", 57120) )
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount"], NetAddr("192.168.0.102", 12345) )
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("192.168.0.102", 12345) )
+
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("localhost", 12345) )
-c = ControlMixMaster( ["focus", "xstart", "ystart"], NetAddr("localhost", 57120) )
-c.
-// c = ControlMixer( "/focus", NetAddr("localhost", 57120) );
-// d = ControlMixer( "/test2", NetAddr("localhost", 57120) );
+
+
+// test snapshot loading
+c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("localhost", 57120) )
+
+c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/20150522111823_0003.txt")
+c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/20150522111823_0004.txt")
+
+OSCdef(\texture, {|msg| msg.postln;}, '/loadTextures')
+
 
 // NetAddr("localhost", 12345).sendMsg("/")
 
