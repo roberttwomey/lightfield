@@ -332,13 +332,13 @@ void ofApp::process_OSC(ofxOscMessage m) {
         synScale = m.getArgAsFloat(0);//ofMap(m.getArgAsFloat(0), 0.0, 1.0, minScale, maxScale);
     }
     else if( m.getAddress() == "/xstart" ){
-//        xstart = m.getArgAsInt32(0);
+//        xstart = m.getArgAsFloat(0);
 
         int startRequested, constrainByRange, xAvail;
 
-        startRequested = m.getArgAsInt32(0);
+        startRequested = m.getArgAsFloat(0);
         if ( m.getNumArgs() == 2 ){
-            constrainByRange = m.getArgAsInt32(1);
+            constrainByRange = m.getArgAsFloat(1);
         } else {
             constrainByRange = 0; // default to unconstrained
         };
@@ -358,13 +358,13 @@ void ofApp::process_OSC(ofxOscMessage m) {
     }
 
     else if(m.getAddress() == "/ystart"){
-//        ystart = m.getArgAsInt32(0);
+//        ystart = m.getArgAsFloat(0);
 
         int startRequested, constrainByRange, yAvail;
 
-        startRequested = m.getArgAsInt32(0);
+        startRequested = m.getArgAsFloat(0);
         if ( m.getNumArgs() == 2 ){
-            constrainByRange = m.getArgAsInt32(1);
+            constrainByRange = m.getArgAsFloat(1);
         } else {
             constrainByRange = 0; // default to unconstrained
         };
@@ -384,12 +384,12 @@ void ofApp::process_OSC(ofxOscMessage m) {
     }
 
     else if(m.getAddress() == "/xcount"){
-//        xcount = m.getArgAsInt32(0);
+//        xcount = m.getArgAsFloat(0);
 
         int rangeRequested, constrainByXStart, xAvail;
-        rangeRequested = m.getArgAsInt32(0);
+        rangeRequested = m.getArgAsFloat(0);
         if ( m.getNumArgs() == 2 ){
-            constrainByXStart = m.getArgAsInt32(1);
+            constrainByXStart = m.getArgAsFloat(1);
         } else {
             constrainByXStart = 0; // default to unconstrained
         };
@@ -411,12 +411,12 @@ void ofApp::process_OSC(ofxOscMessage m) {
     }
 
     else if(m.getAddress() == "/ycount"){
-//            ycount = m.getArgAsInt32(0);
+//            ycount = m.getArgAsFloat(0);
 
         int rangeRequested, constrainByYStart, yAvail;
-        rangeRequested = m.getArgAsInt32(0);
+        rangeRequested = m.getArgAsFloat(0);
         if ( m.getNumArgs() == 2 ){
-            constrainByYStart = m.getArgAsInt32(1);
+            constrainByYStart = m.getArgAsFloat(1);
         } else {
             constrainByYStart = 0; // default to unconstrained
         };
@@ -461,7 +461,7 @@ void ofApp::process_OSC(ofxOscMessage m) {
             msg_string += ": ";
             // display the argument - make sure we get the right type
             if(m.getArgType(i) == OFXOSC_TYPE_INT32){
-                msg_string += ofToString(m.getArgAsInt32(i));
+                msg_string += ofToString(m.getArgAsFloat(i));
             }
             else if(m.getArgType(i) == OFXOSC_TYPE_FLOAT){
                 msg_string += ofToString(m.getArgAsFloat(i));
@@ -514,7 +514,8 @@ void ofApp::doSnapshot() {
     ofFile file(paramfilename, ofFile::WriteOnly);
 
     // add additional parameters below
-    file << lfimage_filename << endl;
+    for(int i=0; i < numlftextures; i++)
+        file << lffilenames[i] << endl;
     file << synScale << endl;
     file << xoffset << "," << yoffset << endl;
     file << xstart << "," << ystart << endl;

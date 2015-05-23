@@ -30,6 +30,9 @@
 		<Unit filename="bin/data/scenes.xml">
 			<Option virtualFolder="runtime config/" />
 		</Unit>
+		<Unit filename="bin/data/shaders/blend_per_tile_150.frag">
+			<Option virtualFolder="shaders/" />
+		</Unit>
 		<Unit filename="bin/data/shaders/refocus_per_tile_150.frag">
 			<Option virtualFolder="shaders/" />
 		</Unit>

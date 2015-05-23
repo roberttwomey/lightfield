@@ -96,9 +96,6 @@ void ofApp::update(){
 void ofApp::draw(){
     ofBackground(ofColor::black);
 
-    // thumbnail size
-    float tWidth = 160;
-    float tHeight = 160/xnumtextures * ynumtextures;
 
     // fused image size
     float height = ofGetWindowHeight();
@@ -122,12 +119,28 @@ void ofApp::draw(){
 
     // draw thumbnail with indicator
     if(bShowThumbnail == true) {
+
+        // thumbnail size
+        float tWidth = 160;
+        float tHeight;
+        int tSubWidth, tSubHeight;
+        float xunit, yunit;
+        if(numlftextures > 1) {
+            tHeight = 160/xnumtextures * ynumtextures;
+            tSubWidth = tWidth / xnumtextures;
+            tSubHeight = tHeight / ynumtextures;
+            xunit = float(tSubWidth) / float(ximagespertex);
+            yunit = float(tSubHeight) / float(yimagespertex);
+        } else {
+            tHeight = 160/xsubimages * ysubimages;
+            tSubWidth = tWidth;
+            tSubHeight = tHeight;
+            xunit = float(tSubWidth) / float(xsubimages);
+            yunit = float(tSubHeight) / float(ysubimages);
+        };
         ofSetColor(255);
 
         // draw separate textures
-        int tSubWidth = tWidth / xnumtextures;
-        int tSubHeight = tHeight / ynumtextures;
-
         for (int x = 0; x < xnumtextures; x++){
             for (int y = 0; y < ynumtextures; y++){
                 int i = x + y * xnumtextures;
@@ -137,8 +150,7 @@ void ofApp::draw(){
 
         ofSetColor(255, 0, 0);
         ofNoFill();
-        float xunit = float(tSubWidth) / float(ximagespertex);
-        float yunit = float(tSubHeight) / float(yimagespertex);
+
         ofRect(5+xstart*xunit, 5+ystart*yunit, xcount*xunit, ycount*yunit);
     }
 
@@ -197,21 +209,22 @@ void ofApp::loadXMLScene(string scenefile) {
 
     // lightfield images //
     numlftextures = xml.getNumTags("texturefile");
+
     for(int i=0; i < numlftextures; i++) {
         lffilenames[i] = xml.getValue("texturefile", "nofile.jpg", i);
     }
-
-    // number of large textures
-    xnumtextures = xml.getValue("xnumtextures", -1);
-    ynumtextures = xml.getValue("ynumtextures", -1);
-    ximagespertex = xml.getValue("ximagespertex", -1);
-    yimagespertex = xml.getValue("yimagespertex", -1);
 
     // image layout
     subwidth = xml.getValue("subimagewidth", 0);
     subheight = xml.getValue("subimageheight", 0);
     xsubimages = xml.getValue("numxsubimages", 0);
     ysubimages = xml.getValue("numysubimages", 0);
+
+    // number of large textures
+    xnumtextures = xml.getValue("xnumtextures", 1);
+    ynumtextures = xml.getValue("ynumtextures", 1);
+    ximagespertex = xml.getValue("ximagespertex", xsubimages);
+    yimagespertex = xml.getValue("yimagespertex", ysubimages);
 
     // refocusing params //
     minScale = xml.getValue("minscale", 0);
@@ -489,13 +502,13 @@ void ofApp::process_OSC(ofxOscMessage m) {
         synScale = m.getArgAsFloat(0);//ofMap(m.getArgAsFloat(0), 0.0, 1.0, minScale, maxScale);
     }
     else if( m.getAddress() == "/xstart" ){
-//        xstart = m.getArgAsInt32(0);
+//        xstart = m.getArgAsFloat(0);
 
         int startRequested, constrainByRange, xAvail;
 
-        startRequested = m.getArgAsInt32(0);
+        startRequested = m.getArgAsFloat(0);
         if ( m.getNumArgs() == 2 ){
-            constrainByRange = m.getArgAsInt32(1);
+            constrainByRange = m.getArgAsFloat(1);
         } else {
             constrainByRange = 0; // default to unconstrained
         };
@@ -515,13 +528,13 @@ void ofApp::process_OSC(ofxOscMessage m) {
     }
 
     else if(m.getAddress() == "/ystart"){
-//        ystart = m.getArgAsInt32(0);
+//        ystart = m.getArgAsFloat(0);
 
         int startRequested, constrainByRange, yAvail;
 
-        startRequested = m.getArgAsInt32(0);
+        startRequested = m.getArgAsFloat(0);
         if ( m.getNumArgs() == 2 ){
-            constrainByRange = m.getArgAsInt32(1);
+            constrainByRange = m.getArgAsFloat(1);
         } else {
             constrainByRange = 0; // default to unconstrained
         };
@@ -541,12 +554,12 @@ void ofApp::process_OSC(ofxOscMessage m) {
     }
 
     else if(m.getAddress() == "/xcount"){
-//        xcount = m.getArgAsInt32(0);
+//        xcount = m.getArgAsFloat(0);
 
         int rangeRequested, constrainByXStart, xAvail;
-        rangeRequested = m.getArgAsInt32(0);
+        rangeRequested = m.getArgAsFloat(0);
         if ( m.getNumArgs() == 2 ){
-            constrainByXStart = m.getArgAsInt32(1);
+            constrainByXStart = m.getArgAsFloat(1);
         } else {
             constrainByXStart = 0; // default to unconstrained
         };
@@ -568,12 +581,12 @@ void ofApp::process_OSC(ofxOscMessage m) {
     }
 
     else if(m.getAddress() == "/ycount"){
-//            ycount = m.getArgAsInt32(0);
+//            ycount = m.getArgAsFloat(0);
 
         int rangeRequested, constrainByYStart, yAvail;
-        rangeRequested = m.getArgAsInt32(0);
+        rangeRequested = m.getArgAsFloat(0);
         if ( m.getNumArgs() == 2 ){
-            constrainByYStart = m.getArgAsInt32(1);
+            constrainByYStart = m.getArgAsFloat(1);
         } else {
             constrainByYStart = 0; // default to unconstrained
         };
@@ -618,7 +631,7 @@ void ofApp::process_OSC(ofxOscMessage m) {
             msg_string += ": ";
             // display the argument - make sure we get the right type
             if(m.getArgType(i) == OFXOSC_TYPE_INT32){
-                msg_string += ofToString(m.getArgAsInt32(i));
+                msg_string += ofToString(m.getArgAsFloat(i));
             }
             else if(m.getArgType(i) == OFXOSC_TYPE_FLOAT){
                 msg_string += ofToString(m.getArgAsFloat(i));
