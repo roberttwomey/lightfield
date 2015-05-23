@@ -14,9 +14,10 @@ void ofApp::setup(){
 //    loadXMLSettings("./textures/cliffside.xml");
 //    loadXMLSettings("./textures/tunnel_sm.xml");
 //        loadXMLSettings("./textures/mike1.xml");
+        loadXMLSettings("./textures/bookcase.xml");
 //loadXMLSettings("./textures/mike1_sm.xml");
-    //    loadXMLSettings("./textures/mike3_sm.xml");
-    loadXMLSettings("./textures/outsidelookingin.xml");
+//        loadXMLSettings("./textures/mike3_sm.xml");
+//    loadXMLSettings("./textures/outsidelookingin.xml");
 
     loadLFImage();
 
