@@ -14,14 +14,14 @@ void ofApp::setup(){
 //    loadXMLSettings("./textures/cliffside.xml");
 //    loadXMLSettings("./textures/tunnel_sm.xml");
 //        loadXMLSettings("./textures/mike1.xml");
-        loadXMLSettings("./textures/bookcase.xml");
+    loadXMLSettings("./textures/bookcase.xml");
 //loadXMLSettings("./textures/mike1_sm.xml");
 //        loadXMLSettings("./textures/mike3_sm.xml");
 //    loadXMLSettings("./textures/outsidelookingin.xml");
 
     loadLFImage();
 
-    graphicsSetup();
+    setupGraphics();
 	    // OSC - listen on the given port
     cout << "listening for osc messages on port " << port << "\n";
     receiver.setup(port);
@@ -90,7 +90,8 @@ void ofApp::draw(){
     float width = height/subheight*subwidth;
     float xoff = (ofGetWindowWidth() - width)/2;
 
-    ofSetColor(255);
+    // draw with transparency to fade
+    ofSetColor(255, fade);
 
     // draw fused image
     fbo.draw(xoff, 0, width, height);
@@ -175,8 +176,7 @@ void ofApp::loadXMLSettings(string settingsfile) {
 }
 
 void ofApp::loadLFImage() {
-//    lfplane.loadImage(lfimage_filename);
-
+    
     ofLoadImage(lfplane, lfimage_filename);
 
     sourceWidth=lfplane.getWidth();
@@ -186,13 +186,15 @@ void ofApp::loadLFImage() {
 
 }
 
-void ofApp::graphicsSetup() {
-
+void ofApp::setupGraphics() {
+    // fade
+    fade = 255.0;
+    
+    // allocate FBOs
     fbo.allocate(subwidth,subheight);
     maskFbo.allocate(subwidth,subheight);
 
     // Lets clear the FBOs
-    // otherwise it will bring some junk with it from the memory
     fbo.begin();
     ofClear(0,0,0,255);
     fbo.end();
@@ -239,7 +241,7 @@ void ofApp::graphicsSetup() {
 
 
     // setup refocus shader
-    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus_150.frag");
+    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus.frag");
     shader.linkProgram();
 
 
@@ -330,6 +332,9 @@ void ofApp::process_OSC(ofxOscMessage m) {
 
     if( m.getAddress() == "/focus" ){
         synScale = m.getArgAsFloat(0);//ofMap(m.getArgAsFloat(0), 0.0, 1.0, minScale, maxScale);
+    }
+    else if( m.getAddress() == "/fade") {
+        fade = m.getArgAsFloat(0);
     }
     else if( m.getAddress() == "/xstart" ){
 //        xstart = m.getArgAsFloat(0);
@@ -488,10 +493,16 @@ void ofApp::doSnapshot() {
     string timestamp, imgfilename, paramfilename;
 
     // save time-stamped image to data folder
-    timestamp = "./snapshots/"+ofGetTimestampString("%Y%m%d%H%M%S") + "_" + ofToString(snapcount, 4, '0');
-    imgfilename = timestamp + ".jpg";
-    paramfilename = timestamp + ".txt";
-
+    bool done = false;
+    while(!done) {
+        timestamp = "./snapshots/"+ofGetTimestampString("%m%d%H%M") + "_" + ofToString(snapcount, 4, '0');
+        imgfilename = timestamp + ".jpg";
+        paramfilename = timestamp + ".txt";
+        ofFile test;
+        if(!test.doesFileExist(imgfilename))
+            done = true;
+    }
+        
     // save fbo to file
     // from http://forum.openframeworks.cc/t/ofxfenster-addon-to-handle-multiple-windows-rewrite/6499/61
     int w = fbo.getWidth();
@@ -514,8 +525,7 @@ void ofApp::doSnapshot() {
     ofFile file(paramfilename, ofFile::WriteOnly);
 
     // add additional parameters below
-    for(int i=0; i < numlftextures; i++)
-        file << lffilenames[i] << endl;
+    file << lfimage_filename << endl;
     file << synScale << endl;
     file << xoffset << "," << yoffset << endl;
     file << xstart << "," << ystart << endl;

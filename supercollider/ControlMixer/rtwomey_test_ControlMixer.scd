@@ -6,6 +6,10 @@ c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("refocuser.local", 12345) )
 
 
+// test fade
+c = ControlMixMaster( ["focus", "fade"], NetAddr("localhost", 12345) )
+
+
 // test snapshot loading
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("localhost", 57120) )
 

@@ -102,7 +102,10 @@ void ofApp::draw(){
     float width = height/subheight*subwidth;
     float xoff = (ofGetWindowWidth() - width)/2;
 
-    ofSetColor(255);
+    
+    // draw with transparency to fade
+    ofSetColor(255, fade);
+//    ofSetColor(255);
 
     // draw fused image
     fbo.draw(xoff, 0, width, height);
@@ -279,7 +282,10 @@ void ofApp::loadLightfieldData() {
 }
 
 void ofApp::setupGraphics() {
+    // fade
+    fade = 255.0;
 
+    // allocate fbos
     fbo.allocate(subwidth,subheight);
     maskFbo.allocate(subwidth,subheight);
 
@@ -501,6 +507,9 @@ void ofApp::process_OSC(ofxOscMessage m) {
     if( m.getAddress() == "/focus" ){
         synScale = m.getArgAsFloat(0);//ofMap(m.getArgAsFloat(0), 0.0, 1.0, minScale, maxScale);
     }
+    else if( m.getAddress() == "/fade") {
+        fade = m.getArgAsFloat(0);
+    }
     else if( m.getAddress() == "/xstart" ){
 //        xstart = m.getArgAsFloat(0);
 
@@ -658,9 +667,15 @@ void ofApp::doSnapshot() {
     string timestamp, imgfilename, paramfilename;
 
     // save time-stamped image to data folder
-    timestamp = "./snapshots/"+ofGetTimestampString("%Y%m%d%H%M%S") + "_" + ofToString(snapcount, 4, '0');
-    imgfilename = timestamp + ".jpg";
-    paramfilename = timestamp + ".txt";
+    bool done = false;
+    while(!done) {
+        timestamp = "./snapshots/"+ofGetTimestampString("%m%d%H%M") + "_" + ofToString(snapcount, 4, '0');
+        imgfilename = timestamp + ".jpg";
+        paramfilename = timestamp + ".txt";
+        ofFile test;
+        if(!test.doesFileExist(imgfilename))
+            done = true;
+    }
 
     // save fbo to file
     // from http://forum.openframeworks.cc/t/ofxfenster-addon-to-handle-multiple-windows-rewrite/6499/61

@@ -113,6 +113,11 @@
 		84FF4C7C1AE9BC7E00A205CE /* ofxOscSender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxOscSender.h; sourceTree = "<group>"; };
 		BBAB23BE13894E4700AA2426 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = ../../../libs/glut/lib/osx/GLUT.framework; sourceTree = "<group>"; };
 		E23745B21B0655C1005FCFA1 /* refocus_tile.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = refocus_tile.frag; path = bin/data/shaders/refocus_tile.frag; sourceTree = SOURCE_ROOT; };
+		E244CE7E1B10D0C100D51555 /* blend_per_tile_150.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = blend_per_tile_150.frag; path = bin/data/shaders/blend_per_tile_150.frag; sourceTree = SOURCE_ROOT; };
+		E244CE7F1B10D0C100D51555 /* refocus_aperture_mask_150.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = refocus_aperture_mask_150.frag; path = bin/data/shaders/refocus_aperture_mask_150.frag; sourceTree = SOURCE_ROOT; };
+		E244CE801B10D0C100D51555 /* refocus_tile_150.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = refocus_tile_150.frag; path = bin/data/shaders/refocus_tile_150.frag; sourceTree = SOURCE_ROOT; };
+		E244CE811B10D0C100D51555 /* refocus_per_tile_150.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = refocus_per_tile_150.frag; path = bin/data/shaders/refocus_per_tile_150.frag; sourceTree = SOURCE_ROOT; };
+		E244CE831B10D0E700D51555 /* scenes.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = scenes.xml; path = bin/data/scenes.xml; sourceTree = "<group>"; };
 		E2A1A1941AE9538F003A7ABC /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxml.cpp; sourceTree = "<group>"; };
 		E2A1A1951AE9538F003A7ABC /* tinyxml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tinyxml.h; sourceTree = "<group>"; };
 		E2A1A1961AE9538F003A7ABC /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxmlerror.cpp; sourceTree = "<group>"; };
@@ -315,9 +320,21 @@
 			name = "3rd party frameworks";
 			sourceTree = "<group>";
 		};
+		E244CE821B10D0CD00D51555 /* runtime config */ = {
+			isa = PBXGroup;
+			children = (
+				E244CE831B10D0E700D51555 /* scenes.xml */,
+			);
+			name = "runtime config";
+			sourceTree = "<group>";
+		};
 		E27EF40B1AF9076500010377 /* shaders */ = {
 			isa = PBXGroup;
 			children = (
+				E244CE7E1B10D0C100D51555 /* blend_per_tile_150.frag */,
+				E244CE7F1B10D0C100D51555 /* refocus_aperture_mask_150.frag */,
+				E244CE801B10D0C100D51555 /* refocus_tile_150.frag */,
+				E244CE811B10D0C100D51555 /* refocus_per_tile_150.frag */,
 				E23745B21B0655C1005FCFA1 /* refocus_tile.frag */,
 			);
 			name = shaders;
@@ -376,6 +393,7 @@
 			children = (
 				E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */,
 				E4EB6923138AFD0F00A09F29 /* Project.xcconfig */,
+				E244CE821B10D0CD00D51555 /* runtime config */,
 				E27EF40B1AF9076500010377 /* shaders */,
 				E4B69E1C0A3A1BDC003C02F2 /* src */,
 				E4EEC9E9138DF44700A80321 /* openFrameworks */,

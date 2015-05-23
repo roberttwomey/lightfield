@@ -73,6 +73,8 @@ public:
 
     float offsets[MAX_OFFSETS];
 
+    float fade;
+    
     // snapshot
     int snapcount;
 

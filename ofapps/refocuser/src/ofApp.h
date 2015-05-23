@@ -16,7 +16,7 @@ public:
 
     void loadXMLSettings(string settingsfile);
     void loadLFImage();
-    void graphicsSetup();
+    void setupGraphics();
     
     void doSnapshot();
     
@@ -45,6 +45,7 @@ public:
     
     float sourceWidth, sourceHeight;
     float synScale;
+    float fade;
     float zoom;
     int xcount, ycount, xstart, ystart;
     int xsubimages, ysubimages, subwidth, subheight;
@@ -53,6 +54,7 @@ public:
 
     float offsets[MAX_OFFSETS];
 
+    
     // snapshot
     int snapcount;
     
