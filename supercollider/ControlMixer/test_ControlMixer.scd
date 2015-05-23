@@ -3,11 +3,20 @@ c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount"], NetAddr
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount"], NetAddr("192.168.0.102", 12345) )
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("192.168.0.102", 12345) )
 
-c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("localhost", 12345) )
+c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("refocuser.local", 12345) )
 
 
 // test snapshot loading
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("localhost", 57120) )
+
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_moments/rover_in_mirror/20150521132155_0000.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_moments/rover_in_mirror/20150521132159_0001.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_moments/rover_in_mirror/20150521132202_0002.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_moments/rover_in_mirror/20150521132205_0003.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_moments/rover_in_mirror/20150521132208_0004.txt")
+
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_moments/books/20150521155438_0000.txt")
+
 
 c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/20150522111823_0003.txt")
 c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/20150522111823_0004.txt")
