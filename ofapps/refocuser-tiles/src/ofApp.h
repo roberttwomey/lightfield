@@ -38,19 +38,22 @@ public:
     // lf texture files
     ofTexture lfplanes[MAX_LF_TILES];
     string lffilenames[MAX_LF_TILES];
-    int numlftiles;
+    int numlftextures;
 
     // data textures for shader
     ofFbo campos_tex;
     ofFbo tilenum_tex;
-    ofFbo tilepixoffset_tex;
+    ofFbo tilepixoffset_tex;//[MAX_LF_TILES];
     ofFbo subimg_corner_tex;
     ofDirectory dir;
 
     // render buffers
     ofFbo fbo;
+    ofFbo refocusFbo[MAX_LF_TILES];
+
     ofFbo maskFbo;
-    ofShader shader;
+    ofShader shader[MAX_LF_TILES];
+    ofShader combineShader;
 
     float sourceWidth, sourceHeight;
     float synScale;
