@@ -15,14 +15,10 @@ s.boot
 
 // start a control for fade in/out
 
-~fader = ControlFade(3);
+~fader = ControlFade(0.1);
 ~fader.broadcast( ~broadcastDestination, '/fade', 30 );
-~fader.fadeTime_(1)
+~fader.fadeTime_(0.1)
 ~fader.plot
-~fader.lfo_(SinOsc, 3, 0,1)
-
-~fader.value_(0, 4)
-~fader.value_(1, 3)
 
 ~fader.stopBroadcast;
 ~fader.free

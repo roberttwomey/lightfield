@@ -70,19 +70,19 @@ ControlMixer {
 		completeFunc = { loadCond.test_(true).signal };
 
 		fork({
-		ctl = ControlFade(fadeTime: 0.0, initVal: 0, busnum: busnum, server: server, onComplete: completeFunc);
-		loadCond.wait; loadCond.test_(false);
+			ctl = ControlFade(fadeTime: 0.0, initVal: 0, busnum: busnum, server: server, onComplete: completeFunc);
+			loadCond.wait; loadCond.test_(false);
 
-		ctlFades = ctlFades.add(ctl);
+			ctlFades = ctlFades.add(ctl);
 
-		// create the view for this controlFade
-		faderView = ControlMixFaderView(this, ctl, finishCond: loadCond);
-		loadCond.wait;
+			// create the view for this controlFade
+			faderView = ControlMixFaderView(this, ctl, finishCond: loadCond);
+			loadCond.wait;
 
-		ctlLayout.add( faderView.view );
-		ctlViews = ctlViews.add( faderView.view );
+			ctlLayout.add( faderView.view );
+			ctlViews = ctlViews.add( faderView.view );
 
-		finishCond !? {finishCond.test_(true).signal};
+			finishCond !? {finishCond.test_(true).signal};
 		}, AppClock);
 	}
 
@@ -426,7 +426,7 @@ ControlMixFaderView {
 ControlMixMaster {
 	// copyArgs
 	var broadcastTags, broadcastNetAddr, broadcastRate, server;
-	var <win, <mixers, <lastUpdated, <presetWin, <canvas;
+	var <win, <mixers, <lastUpdated, <presetWin, <canvas, <>globalFadeTime = 0.0;
 
 	*new { |broadcastTags="/myControlVal", broadcastNetAddr, broadcastRate=30, server|
 		^super.newCopyArgs(broadcastTags, broadcastNetAddr, broadcastRate, server).init
@@ -515,9 +515,12 @@ ControlMixMaster {
 				}).maxWidth_(110).fixedHeight_(25), a: \left
 				],
 				nil,
+				StaticText().string_("Preset Fade Time").align_(\right),
+				NumBox().action_({|bx| this.globalFadeTime = bx.value }),
+				nil,
 				Button().states_([["Presets >>"]]).action_({
 					this.presetGUI((this.presets.size / 5).ceil.asInt) // default 5 presets per column
-			})
+				})
 			)
 		)
 		);
@@ -637,17 +640,17 @@ ControlMixMaster {
 			// static or lfo?
 			if( fDict[\signal] == 'static' )
 			{	// just recall the static val
-				ctlFade.value_(fDict[\val])
+				ctlFade.value_(fDict[\val], globalFadeTime)
 			}
 			{	// recall the lfo with bounds, etc...
 				"recalling LFO".postln;
-				ctlFade.lfo_(fDict[\signal], fDict[\freq], fDict[\min], fDict[\max])
+				ctlFade.lfo_(fDict[\signal], fDict[\freq], fDict[\min], fDict[\max], globalFadeTime)
 			};
 
 			// recall mix, scale offset
-			fDict[\scale] !? {ctlFade.scale_(fDict[\scale])};
-			fDict[\offset] !? {ctlFade.offset_(fDict[\offset])};
-			fDict[\mix] !? {ctlFade.amp_(fDict[\mix])};
+			fDict[\scale] !? {ctlFade.scale_(fDict[\scale], globalFadeTime)};
+			fDict[\offset] !? {ctlFade.offset_(fDict[\offset], globalFadeTime)};
+			fDict[\mix] !? {ctlFade.amp_(fDict[\mix], globalFadeTime)};
 		}
 	}
 

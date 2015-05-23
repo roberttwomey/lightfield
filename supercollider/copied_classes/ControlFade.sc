@@ -41,7 +41,7 @@ ControlFade {
 
 					mixDef = CtkSynthDef(\controlfader_mix, {
 						arg
-						outbus, lfoInbus, staticVal=0, staticLag=0.1,
+						outbus, lfoInbus, staticVal=0, staticLag=0.1, scaleLag=0.1,
 						lfoDex = 0, lfoLag=0.1, ctlSrcDex=0,
 						fadeIn=0.1, ctlFade=0.1, curve = 0, scale = 1, amp = 1, offset = 0, gate=1;
 						var
@@ -59,7 +59,7 @@ ControlFade {
 						mixRatio = VarLag.kr(ctlSrcDex, ctlFade, curve);
 						mix = (staticSrc * (1- mixRatio)) + (lfoSrc * mixRatio);
 
-						// // equal power crossfade approach
+						// // equal power crossfade approach - can overshoot
 						// lfoSrc = SelectX.kr(
 						// 	VarLag.kr(lfoDex, lfoLag, curve),
 						// [lfo1, lfo2]);
@@ -67,7 +67,11 @@ ControlFade {
 						// 	VarLag.kr(ctlSrcDex, ctlFade, curve),
 						// [staticSrc, lfoSrc]);
 
-						Out.kr(outbus, mix * env * scale + offset * amp);
+						Out.kr( outbus,
+							mix * env
+							* VarLag.kr(scale, scaleLag, curve)
+							+ VarLag.kr(offset, scaleLag, curve)
+							* VarLag.kr(amp, scaleLag, curve) );
 					});
 					server.sync;
 				};
@@ -110,11 +114,11 @@ ControlFade {
 	}
 
 	// add a scale/offset to the mixed output signal
-	scale_ {|mul| mixSynth.scale_(mul); this.changed(\scale, mul) }
+	scale_ {|mul, thisFadeTime| mixSynth.scaleLag_(thisFadeTime ?? fadeTime).scale_(mul); this.changed(\scale, mul) }
 	scale { ^mixSynth.scale }
-	offset_ {|add| mixSynth.offset_(add); this.changed(\offset, add) }
+	offset_ {|add, thisFadeTime| mixSynth.scaleLag_(thisFadeTime ?? fadeTime).offset_(add); this.changed(\offset, add) }
 	offset {^mixSynth.offset }
-	amp_ {|mul| mixSynth.amp_(mul); this.changed(\amp, mul) }
+	amp_ {|mul, thisFadeTime| mixSynth.scaleLag_(thisFadeTime ?? fadeTime).amp_(mul); this.changed(\amp, mul) }
 	amp {^mixSynth.amp }
 
 	freq_ { |freq, thisFadeTime| freq !? {
