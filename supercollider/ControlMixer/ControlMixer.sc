@@ -1,16 +1,16 @@
 ControlMixer {
 	// copyArga
-	var <broadcastTag, <broadcastAddr, <broadcastRate, <server, loadCond, colorShift;
+	var <broadcastTag, <broadcastAddr, <broadcastRate, <server, loadCond, colorShift, <broadcasting;
 
 	var <busnum, <oscTag, <ctlFades, <ctlViews, <>oscEnabled = true, outVal;
 	var <ratePeriodSpec, <sclSpec, <offsSpec;
 	var <mixView, msgTxt, <broadcastChk, <plotChk, updateBx, outValTxt;
 	var <nBoxWidth = 35, <nBoxHeight = 15, <validLFOs, <plotter, <ctlLayout, plotterAdded = false;
-	var broadcastBus, broadcastWaittime, broadcastTag, pollTask, <broadcasting=true;
+	var broadcastBus, broadcastWaittime, broadcastTag, pollTask;//, <broadcasting=false;
 	var baseColor, idColor, <mixColor, colorStep;
 
-	*new { | broadcastTag="/myMessage", broadcastNetAddr, broadcastRate=30, server, loadCond, colorShift=0.03 |
-		^super.newCopyArgs( broadcastTag, broadcastNetAddr, broadcastRate, server, loadCond, colorShift ).init;
+	*new { | broadcastTag="/myMessage", broadcastNetAddr, broadcastRate=30, server, loadCond, colorShift=0.03, broadcasting=true |
+		^super.newCopyArgs( broadcastTag, broadcastNetAddr, broadcastRate, server, loadCond, colorShift, broadcasting ).init;
 	}
 
 	init {
@@ -692,11 +692,16 @@ ControlMixMaster {
 		};
 
 		// load the new texture
-		broadcastNetAddr.sendMsg('/loadTextures', *textures);
+		// broadcastNetAddr.sendMsg('/loadTextures', *textures);
+		broadcastNetAddr.sendMsg('/loadScene', *textures);
 
 		this.recallPreset(\snapshot);
 		// clear the preset so it doesn't show up on the presets GUI
 		this.removePreset(\snapshot);
+	}
+
+	loadScene{ |sceneName|
+		broadcastNetAddr.sendMsg('/loadScene', sceneName);
 	}
 
 	recallPreset { |key|
