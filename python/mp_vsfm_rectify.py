@@ -424,7 +424,7 @@ def generate_full_res_textures(files, img_path, contactimg_file, reorder = None,
     
     x_imgs_per_tile = int(tile_w / img_w)
     y_imgs_per_tile = int(tile_h / img_h)
-    print "Images per tile", tile_w, "x", tile_h
+    print "Images per tile", x_imgs_per_tile, "x", y_imgs_per_tile
     
     x_tiles = int(math.ceil(total_w / tile_w))
     y_tiles = int(math.ceil(total_h / tile_h))
@@ -639,13 +639,15 @@ if __name__ == '__main__':
     do_warp = args.dowarp
     do_fullres = args.dofullres
     do_inverty = args.doinverty
-    print "\n options"
+    order = args.reorder    # reorder images
+    gridstr = args.grid     # grid layout
+    print "\n  options"
     print "do warp?", do_warp
     print "do full res output?", do_fullres
     print "invert y coordinates?", do_inverty
+    print "reorder images?", order
     
-    gridstr = args.grid     # grid layout
-    order = args.reorder    # reorder images
+    
     if len(args.skip) > 0:
         skip = [i for i in args.skip.split(',')] #.split(',')        # skip certain images
     else:
@@ -686,9 +688,8 @@ if __name__ == '__main__':
     # grid
     grid_w, grid_h = gridstr.split("x")
     grid_w = int(grid_w)
-    grid_h = int(grid_h)
-    
-    print "grid dimensions", grid_w, "x", grid_h
+    grid_h = int(grid_h)    
+    print "acquisition grid dimensions:", grid_w, "x", grid_h
     
     # max_texture_size = 32768
     
