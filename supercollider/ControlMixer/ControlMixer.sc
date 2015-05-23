@@ -463,19 +463,12 @@ ControlMixMaster {
 			mixer = ControlMixer(sendToNetAddr, oscTag, sendRate, server, loadCond, colorShift);
 			mixers = mixers.add(mixer);
 			loadCond.wait;
-			// win.layout.add( mixer.mixView.postln; );
-			canvas.layout.add( mixer.mixView.postln; ); // for ScrollView
+			// win.layout.add( mixer.mixView );
+			canvas.layout.add( mixer.mixView ); // for ScrollView
 		}.fork(AppClock);
 	}
 
 	makeWin {
-
-		// win = Window("Broadcast Controls", Rect(Window.screenBounds.width / 4, Window.screenBounds.height, 100, 100), scroll: true).layout_(
-		// 	HLayout().margins_(2).spacing_(2)
-		// ).onClose_({ this.free });
-		//
-		// win.front;
-
 		var scroller;
 
 		win = Window("Broadcast Controls", Rect(Window.screenBounds.width / 4, Window.screenBounds.height, 900, 600));
