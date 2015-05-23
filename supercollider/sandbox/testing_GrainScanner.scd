@@ -10,7 +10,6 @@
 	event.buf = buffer;
 
 	scmirZTestFile = PathName(path).pathOnly++PathName(path).fileNameWithoutExtension++".scmirZ";
-	"test".postln; scmirZTestFile.postln;
 
 	if ( File.exists(scmirZTestFile))
 	{
@@ -75,7 +74,7 @@ fork{ k.reset.update; "done".postln }
 // Pre-computing and saving this data in advance helps all this run in real-time!
 
 ~kMeansPath = PathName(p).pathOnly ++ PathName(p).fileNameWithoutExtension++"_KMEANS"++".scmirZ";
-k.save(~kMeansPath)
+// k.save(~kMeansPath)
 
 ~recalledK = KMeansMod().load(~kMeansPath)
 
@@ -109,12 +108,36 @@ k.save(~kMeansPath)
 // note differences are very small, rounding errors or something when saving or loading the binary data
 
 
+
+
+// --------------------------------
+// GRAIN SCANNER
+// --------------------------------
+s.boot;
+p = "/Users/admin/src/rover/data/AUDIO/discovery_cliffside_CLIP.WAV"
+~data = ~load.(p, true)
+~kMeansPath = PathName(p).pathOnly ++ PathName(p).fileNameWithoutExtension++"_KMEANS"++".scmirZ";
+~recalledK = KMeansMod().load(~kMeansPath)
+
 // initialize a grain scanner
-g = GrainScanner2(0, p)
+g = GrainScanner2( 0, p )
 // give it the cluser and "beat" data
 // g.initClusterData( k, ~data.beatdata)
-g.initClusterData( ~recalledK, ~data.beatdata)
-g.setCluster( 2 )
+g.initClusterData( ~recalledK, ~data.beatdata )
+g.cluster_( 2 )
+
+g.gui
+g.play
+// g.encoderSynths.do(_.play)
+g.encoderSynth.play
+g.xformSynth.play
+
+g.xformSynth.xformAmt_(pi/2)
+g.xformSynth.xformAmt_(pi/4)
+g.xformSynth.xformAmt_(0)
+g.xformSynth.az_(pi/4)
+g.synths.do(_.free)
+g.encoderSynths.do(_.free)
 
 // INFO: check params
 g.curCluster
