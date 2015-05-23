@@ -5,23 +5,60 @@ c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll
 
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("refocuser.local", 12345) )
 
-
-// test fade
-c = ControlMixMaster( ["focus", "fade"], NetAddr("localhost", 12345) )
-
-
-// test snapshot loading
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("localhost", 57120) )
 
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_moments/rover_in_mirror/20150521132155_0000.txt")
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_moments/rover_in_mirror/20150521132159_0001.txt")
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_moments/rover_in_mirror/20150521132202_0002.txt")
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_moments/rover_in_mirror/20150521132205_0003.txt")
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_moments/rover_in_mirror/20150521132208_0004.txt")
+// test fade
+// test snapshot loading
 
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_moments/books/20150521155438_0000.txt")
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_moments/books/book_spines_small.txt")
+c = ControlMixMaster( ["focus", "fade", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("refocuser.local", 12345))
 
+
+c.loadScene("./textures/dark_trees_calib.xml")
+c.loadScene("./textures/diningroom3.xml")
+c.loadScene("./textures/cliffside.xml")
+c.loadScene("./textures/bookcase.xml")
+c.loadScene("./textures/carkeek_night.xml")
+c.loadScene("./textures/carkeek.xml")
+c.loadScene("./textures/mike1.xml")
+//c.loadScene("./textures/mike2.xml")
+//c.loadScene("./textures/mike3.xml")
+c.loadScene("./textures/outsidelookingin.xml")
+c.loadScene("./textures/tivon1_calib.xml")
+c.loadScene("./textures/tivon2_sm.xml")
+
+c.loadScene("./textures/ballard_wall_calib.xml")
+
+c.loadScene("./textures/carkeek_med_tile.xml")
+
+
+// snapshots
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/yellowcliff/yellowcliff_0002.txt")
+
+c.loadSnapshot("/Volumes/Home Directory/code/lightfield/scenes/test/diningroom3_0000.txt")
+
+
+// presets
+c.storePreset( \yellowcliff_close)
+c.storePreset( \yellowcliff_bush)
+
+// oops I deleted this:
+// c.storePreset( \tivon1 )
+// c.storePreset( \tivon1_lights )
+// c.storePreset( \tivon1_mirror )
+
+
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_in_mirror/20150521132155_0000.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_in_mirror/20150521132159_0001.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_in_mirror/20150521132202_0002.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_in_mirror/20150521132205_0003.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_in_mirror/20150521132208_0004.txt")
+
+
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/books/book_spines_small.txt")
+
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/mike_portal/0000_sm.txt")
+
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/train/05221118_0000_sm.txt")
 
 c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/20150522111823_0003.txt")
 c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/20150522111823_0004.txt")
