@@ -1,0 +1,17 @@
+./textures/outsidelookingin_tile-0.jpg
+./textures/outsidelookingin_tile-1.jpg
+./textures/outsidelookingin_tile-2.jpg
+./textures/outsidelookingin_tile-3.jpg
+./textures/outsidelookingin_tile-4.jpg
+./textures/outsidelookingin_tile-5.jpg
+./textures/outsidelookingin_tile-6.jpg
+./textures/outsidelookingin_tile-7.jpg
+./textures/outsidelookingin_tile-8.jpg
+./textures/outsidelookingin_tile-9.jpg
+./textures/outsidelookingin_tile-10.jpg
+./textures/outsidelookingin_tile-11.jpg
+-72.875
+-12.343,-37.0286
+0,0
+8,9
+0.941

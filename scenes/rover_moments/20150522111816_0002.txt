@@ -1,0 +1,9 @@
+./textures/carkeek_med_tile-0.jpg
+./textures/carkeek_med_tile-1.jpg
+./textures/carkeek_med_tile-2.jpg
+./textures/carkeek_med_tile-3.jpg
+-182.625
+0,0
+2,14
+1,1
+1
