@@ -5,7 +5,7 @@ ControlFade {
 	classvar <lfoUgens, <lfoDefs, <mixDef;
 	var <busnum, <controlBus, <lfoBus, <>fadeTime, <lfoSynths, <mixSynth;
 	var <plotter, server, <curLfoUgens;
-	var broadcasting = false, broadcastTask, broadcastTag, broadcastWaittime, isPaused = false;
+	var <broadcasting = false, <broadcastAddr, broadcastTask, <broadcastTag, <broadcastRate=10, <broadcastWaittime = 0.1, isPaused = false;
 
 	*new { |fadeTime=0.1, initVal=0, busnum, server, onComplete|
 		^super.new.init(fadeTime, initVal, busnum, server, onComplete);
@@ -144,7 +144,6 @@ ControlFade {
 
 	// set the lfo, new or individual params
 	lfo_ { |ugen, freq, low, high, thisFadeTime, onComplete|
-
 		lfoDefs[ugen.asSymbol].notNil.if({
 
 			fork {
@@ -185,6 +184,10 @@ ControlFade {
 						lfoSynths[nextLfoDex] = lfoDefs[ugen.asSymbol].note
 						.freq_(frq).low_(lo).high_(hi)
 						.outbus_(lfoBus.bus+nextLfoDex).play;
+
+						this.changed(\freq, frq);
+						this.changed(\low, lo);
+						this.changed(\high, high);
 
 						server.sync;
 
@@ -272,33 +275,36 @@ ControlFade {
 		mixSynth.fadeIn_(thisFadeTime ?? fadeTime).gate_(1);
 	}
 
-	broadcast { |aNetAddr, tag, rate = 10|
+	broadcast { |aNetAddr, tag, rate|
 
-		tag ?? {"No OSC tag provided".throw};
-		this.broadcastTag_(tag);
-		this.broadcastRate_(rate);
+		aNetAddr.notNil.if({this.broadcastAddr_(aNetAddr)},{
+			broadcastAddr ?? {"No NetAddr provided for OSC destination".error}
+		});
+		tag.notNil.if({this.broadcastTag_(tag)},{
+			broadcastTag ?? {"No OSC tag provided".error}
+		});
+		rate.notNil.if({this.broadcastRate_(rate)});
 
-		broadcasting.not.if({
-			var waittime = rate.reciprocal;
-
+		// define the broadcast task if first time
+		broadcastTask ?? {
 			broadcastTask = Task({
 				inf.do{
-					controlBus.get({|busnum, val| aNetAddr.sendMsg(broadcastTag, val) });
+					controlBus.get({|busnum, val| broadcastAddr.sendMsg(broadcastTag, val) });
 					broadcastWaittime.wait
 				}
 			});
+		};
 
-			broadcastTask.play;
-			broadcasting = true;
-		},{
-			"Already broadcasting".postln;
-		});
+		broadcastTask.play;
+		broadcasting = true;
+
 	}
 
 	broadcastTag_ {  |tag| broadcastTag = tag.asSymbol }
-	broadcastRate_{  |hz| broadcastWaittime = hz.reciprocal }
+	broadcastRate_{  |hz| broadcastRate = hz; broadcastWaittime = hz.reciprocal }
+	broadcastAddr_{  |aNetAddr| "setting broadcastAddr".postln; broadcastAddr = aNetAddr }
 
-	stopBroadcast { broadcastTask !? {broadcastTask.stop} }
+	stopBroadcast { broadcastTask !? {broadcastTask.stop; broadcasting = false} }
 
 	pause { mixSynth.pause; lfoSynths.do(_.pause); isPaused = true; }
 	run { mixSynth.run; lfoSynths.do(_.run); isPaused = false; }
