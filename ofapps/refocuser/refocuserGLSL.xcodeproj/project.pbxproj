@@ -328,6 +328,15 @@
 			path = src;
 			sourceTree = "<group>";
 		};
+		E29A298D1B1117DA009FC39F /* runtime settings */ = {
+			isa = PBXGroup;
+			children = (
+				E2BD6B6A1AEBE25E00DA7159 /* settings.xml */,
+			);
+			name = "runtime settings";
+			path = src;
+			sourceTree = "<group>";
+		};
 		E2A1A1921AE9538F003A7ABC /* ofxXmlSettings */ = {
 			isa = PBXGroup;
 			children = (
@@ -381,6 +390,7 @@
 				E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */,
 				E4EB6923138AFD0F00A09F29 /* Project.xcconfig */,
 				E27EF40B1AF9076500010377 /* shaders */,
+				E29A298D1B1117DA009FC39F /* runtime settings */,
 				E4B69E1C0A3A1BDC003C02F2 /* src */,
 				E4EEC9E9138DF44700A80321 /* openFrameworks */,
 				BB4B014C10F69532006C3DED /* addons */,
@@ -392,7 +402,6 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				E2BD6B6A1AEBE25E00DA7159 /* settings.xml */,
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
 				E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */,
 				E4B69E1F0A3A1BDC003C02F2 /* ofApp.h */,

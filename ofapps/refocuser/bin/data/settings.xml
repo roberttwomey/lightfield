@@ -1,7 +1,6 @@
 <!-- lightfield scenes -->
 
-<!--
-
+<!-- large textures
 <scene>./textures/ballard_wall_calib.xml</scene>
 <scene>./textures/ballard_wall.xml</scene>
 <scene>./textures/bookcase.xml</scene>
@@ -19,9 +18,17 @@
 <scene>./textures/tivon2_sm.xml</scene>
 
 <scene>./textures/tivon1_calib.xml</scene>
+<scene>./textures/yellowcliff.xml</scene>
 -->
 
-<scene>./textures/yellowcliff.xml</scene>
+
+<!-- small textures
+
+<scene>./textures/yellowcliff_sm.xml</scene>
+
+-->
+
+<scene>./textures/yellowcliff_sm.xml</scene>
 
 
 

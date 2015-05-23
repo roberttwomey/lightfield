@@ -516,7 +516,7 @@ ControlMixMaster {
 				],
 				nil,
 				StaticText().string_("Preset Fade Time").align_(\right),
-				NumBox().action_({|bx| this.globalFadeTime = bx.value }),
+				NumberBox().action_({|bx| this.globalFadeTime = bx.value }),
 				nil,
 				Button().states_([["Presets >>"]]).action_({
 					this.presetGUI((this.presets.size / 5).ceil.asInt) // default 5 presets per column
