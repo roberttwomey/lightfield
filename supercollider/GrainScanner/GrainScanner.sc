@@ -4,7 +4,7 @@ GrainScanner {
 	// copyArgs
 	var <outbus, bufferOrPath;
 	var server, <sf, <buffers, <group, <synths, <bufDur, <view, <bufferPath;
-	var <grnDurSpec, <grnRateSpec, <grnRandSpec, <pntrRateSpec, <pntrDispSpec;
+	var <grnDurSpec, <grnRateSpec, <grnRandSpec, <pntrRateSpec, <grnDispSpec;
 
 	*new { |outbus=0, bufferOrPath|
 		^super.newCopyArgs( outbus, bufferOrPath ).init;
@@ -17,7 +17,7 @@ GrainScanner {
 		grnRateSpec = ControlSpec(4.reciprocal, 70, warp: 3, step:0.01, default:10);
 		grnRandSpec = ControlSpec(0, 1, warp: 4, step: 0.01, default: 0.0);
 		pntrRateSpec = ControlSpec(0.05, 3, warp: 0, step: 0.01, default: 1);
-		pntrDispSpec = ControlSpec(0, 5, warp: 3, step: 0.01, default: 1.5);
+		grnDispSpec = ControlSpec(0, 5, warp: 3, step: 0.01, default: 1.5);
 
 		fork{
 			var cond = Condition();
@@ -124,7 +124,7 @@ GrainScanner {
 	grnRand_ {|distro| synths.do(_.grainRand_(distro)); this.changed(\grnRand, distro); }
 
 	// position dispersion of the pointer, in seconds
-	pntrDisp_ {|dispSecs| synths.do(_.posDisp_(dispSecs/bufDur)); this.changed(\pntrDisp, dispSecs); }
+	grnDisp_ {|dispSecs| synths.do(_.grnDisp_(dispSecs)); this.changed(\grnDisp, dispSecs); }
 	// speed of the grain position pointer in the buffer, 1 is realtime, 0.5 half-speed, etc
 	pntrRate_ {|rateScale| synths.do(_.posRate_(rateScale)); this.changed(\pntrRate, rateScale); }
 
@@ -183,7 +183,7 @@ GrainScanner {
 			start=0, end=1,		// bounds of grain position in sound file
 			grainRand = 0,		// gaussian trigger: 0 = regular at grainRate, 1 = random around grainRate
 			grainRate = 10, grainDur = 0.04,
-			posDisp = 0.01,		// position dispersion of the pointer, as percentage of soundfile duration
+			grnDisp = 0.01,		// position dispersion of the pointer, as percentage of soundfile duration
 			pitch=1,
 			auxmix=0, amp=1,
 			fadein = 2, fadeout = 2,
@@ -198,7 +198,7 @@ GrainScanner {
 
 			var
 			env, grain_dens, amp_scale, trig, b_frames,
-			pos, pos_lo, pos_hi, sig, out, aux, auxmix_lagged;
+			pos, disp, sig, out, aux, auxmix_lagged;
 
 			// envelope for fading output in and out - re-triggerable
 			env = EnvGen.kr(Env([1,1,0],[fadein, fadeout], \sin, 1), gate, doneAction: 0);
@@ -221,16 +221,13 @@ GrainScanner {
 			);
 			pos = pos * b_frames.reciprocal;
 
-			pos_lo = posDisp * 0.5.neg;
-			pos_hi = posDisp * 0.5;
-
 			// add randomness to position pointer, make sure it remains within limits
-
-			pos = pos + TRand.ar(pos_lo, pos_hi, trig);
+			disp = grnDisp * BufDur.kr(bufnum).reciprocal * 0.5; // grnDisp (secs) normalized 0-1
+			pos = pos + TRand.ar(disp.neg, disp, trig);
 			pos = pos.wrap(start , end);
 
 			/* granulator */
-			sig = GrainBufJ.ar(1, trig, grainDur, buffer, pitch , pos, 1, interp:1, grainAmp: amp_scale);
+			sig = GrainBufJ.ar(1, trig, grainDur, buffer, pitch , pos, 1, interp: 1, grainAmp: amp_scale);
 
 			/* overall amp control */
 			sig = Limiter.ar( sig * Lag.kr(amp, amp_lag) * env, -0.5.dbamp);
@@ -315,16 +312,16 @@ GrainScannerView {
 				.value_(scanner.pntrRateSpec.unmap(scanner.pntrRateSpec.default))
 			),
 
-			\pntrDisp, ()
+			\grnDisp, ()
 			.numBox_( NumberBox()
 				.action_({ |bx|
-					scanner.pntrDisp_(bx.value) })
-				.value_(scanner.pntrDispSpec.default)
+					scanner.grnDisp_(bx.value) })
+				.value_(scanner.grnDispSpec.default)
 			)
 			.slider_(	Slider()
 				.action_({|sldr|
-					scanner.pntrDisp_(scanner.pntrDispSpec.map(sldr.value)) })
-				.value_(scanner.pntrDispSpec.unmap(scanner.pntrDispSpec.default))
+					scanner.grnDisp_(scanner.grnDispSpec.map(sldr.value)) })
+				.value_(scanner.grnDispSpec.unmap(scanner.grnDispSpec.default))
 			),
 
 			\fadeIO, ()
@@ -367,8 +364,8 @@ GrainScannerView {
 
 				HLayout(
 					VLayout(
-						[controls[\pntrDisp].slider.orientation_(\vertical).minHeight_(150), a: \left],
-						[controls[\pntrDisp].numBox.fixedWidth_(35), a: \left],
+						[controls[\grnDisp].slider.orientation_(\vertical).minHeight_(150), a: \left],
+						[controls[\grnDisp].numBox.fixedWidth_(35), a: \left],
 					),
 					VLayout( *[\newPos, \syncPntr, \fadeIO].collect({ |key|
 						HLayout(
@@ -402,9 +399,9 @@ GrainScannerView {
 				\pntrRate, {
 					controls.pntrRate.numBox.value_(args[0]);
 					controls.pntrRate.knob.value_(scanner.pntrRateSpec.unmap(args[0])); },
-				\pntrDisp, {
-					controls.pntrDisp.numBox.value_(args[0]);
-					controls.pntrDisp.slider.value_(scanner.pntrDispSpec.unmap(args[0])); },
+				\grnDisp, {
+					controls.grnDisp.numBox.value_(args[0]);
+					controls.grnDisp.slider.value_(scanner.grnDispSpec.unmap(args[0])); },
 			)
 		});
 	}

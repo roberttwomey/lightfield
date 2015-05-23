@@ -6,7 +6,7 @@
 		<Option makefile_is_custom="1" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="addons/;src/;build config/;shaders/;" />
+		<Option virtualFolders="addons/;src/;build config/;shaders/;runtime config/;" />
 		<Build>
 			<Target title="Debug">
 				<Option output="bin/$(PROJECT_NAME)_debug" prefix_auto="1" extension_auto="1" />
@@ -27,6 +27,12 @@
 				<Option projectLinkerOptionsRelation="2" />
 			</Target>
 		</Build>
+		<Unit filename="bin/data/scenes.xml">
+			<Option virtualFolder="runtime config/" />
+		</Unit>
+		<Unit filename="bin/data/shaders/refocus_per_tile_150.frag">
+			<Option virtualFolder="shaders/" />
+		</Unit>
 		<Unit filename="bin/data/shaders/refocus_tile.frag">
 			<Option virtualFolder="shaders/" />
 		</Unit>
