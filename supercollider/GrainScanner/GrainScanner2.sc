@@ -590,6 +590,7 @@ GrainScanner2View {
 					})
 				),
 				HLayout(
+					nil,
 					*[\az, \xformAmt].collect({ |key|
 						VLayout( StaticText().string_(key).align_(\center),
 							HLayout( controls[key].numBox.maxWidth_(55), controls[key].knob.mode_(\vert) )

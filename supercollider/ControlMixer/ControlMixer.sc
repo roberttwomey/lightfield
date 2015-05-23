@@ -589,7 +589,7 @@ ControlMixMaster {
 		arch = Archive.global[\roverPresets] ?? { this.prInitArchive };
 
 		(arch[key].notNil and: overwrite.not).if {
-			format("preset already exists! choose another name or first perform .removePreset(%)", key).throw
+			format("PRESET NOT SAVED! Preset with that name already exists. Choose another name or first perform .removePreset(%), or explicityly set overwrite=true in this method call.", key).warn
 		};
 
 
@@ -652,10 +652,55 @@ ControlMixMaster {
 			};
 
 			// recall mix, scale offset
-			ctlFade.scale_(fDict[\scale]);
-			ctlFade.offset_(fDict[\offset]);
-			ctlFade.amp_(fDict[\mix]);
+			fDict[\scale] !? {ctlFade.scale_(fDict[\scale])};
+			fDict[\offset] !? {ctlFade.offset_(fDict[\offset])};
+			fDict[\mix] !? {ctlFade.amp_(fDict[\mix])};
 		}
+	}
+
+	loadSnapshot { |filePath|
+		var f, paramDict;
+		var zoom, xcount, ycount, xstart, ystart, xscroll, yscroll, focus, textures;
+
+		File.exists(filePath).not.if{warn("could not find the file... check the path")};
+
+		f = FileReader.read(filePath).reverse;
+
+		// f.do(_.postln);
+
+		#zoom, xcount, ycount, xstart, ystart, xscroll, yscroll, focus = 5.collect({|i|
+			f[i][0].split($,).asFloat}).flat;
+
+		textures = f[5..].reverse.collect(_.at(0));
+
+		postf("Found these parameters:\n\tzoom, %\n\txcount, %\n\tycount, %\n\txstart, %\n\tystart, %\n\txscroll, %\n\tyscroll, %\n\tfocus %\n\ttextures %\n",
+			zoom, xcount, ycount, xstart, ystart, xscroll, yscroll, focus, textures);
+
+		// initialize preset entry for this snapshot
+		this.presets.put(\snapshot, IdentityDictionary().put(\mixers, IdentityDictionary()) );
+
+		paramDict = IdentityDictionary().putPairs([
+			'/xcount', xcount,
+			'/ycount', ycount,
+			'/ystart', ystart,
+			'/xstart', xstart,
+			'/xscroll', xscroll,
+			'/yscroll', yscroll,
+			'/focus', focus,
+			'/zoom', zoom
+		]);
+
+		paramDict.keysValuesDo{ |key, val|
+			this.presets[\snapshot][\mixers].put( key,
+				[ IdentityDictionary().putPairs(['signal', 'static', 'val', val]) ] );
+		};
+
+		// load the new texture
+		broadcastNetAddr.sendMsg('/loadTextures', *textures);
+
+		this.recallPreset(\snapshot);
+		// clear the preset so it doesn't show up on the presets GUI
+		this.removePreset(\snapshot);
 	}
 
 	recallPreset { |key|
@@ -701,7 +746,7 @@ ControlMixMaster {
 					};
 
 					recalled.not.if{
-						error( format(
+						warn( format(
 							"No mixer found in the current layout to set the preset tag % not found in current setup",
 							ptag ) );
 						// TODO add a mixer that was not found present, remove present mixers that aren't in the preset
