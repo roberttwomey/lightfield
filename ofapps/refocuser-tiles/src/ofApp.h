@@ -21,13 +21,14 @@ public:
     vector<string> scenefiles;
 
     void loadLightfieldData();
+    void freeLightfieldData();
     void setupGraphics();
 
 //    void updateAperture();
 //   ofFbo aperture_mask_tex;
 //    float *aperture_mask;
-//
-    void doSnapshot();
+
+    void snapshot();
 
     void keyPressed  (int key);
     void process_OSC(ofxOscMessage m);
@@ -40,46 +41,52 @@ public:
     string lffilenames[MAX_LF_TILES];
     int numlftextures;
 
-    // data textures for shader
+	// data textures for shader
     ofFbo campos_tex;
-    ofFbo tilenum_tex;
-    ofFbo tilepixoffset_tex;//[MAX_LF_TILES];
     ofFbo subimg_corner_tex;
-    ofDirectory dir;
 
-    // render buffers
-    ofFbo fbo;
-    ofFbo refocusFbo[MAX_LF_TILES];
+	// data textures for tiles
+    ofFbo tilenum_tex;
+    ofFbo tilepixoffset_tex;
 
-    ofFbo maskFbo;
+    // render fbos as pointers
+    ofPtr <ofFbo> fbo;
+    vector <ofPtr <ofFbo> > refocusFbo;
+    ofPtr <ofFbo> maskFbo;
+
+	// refocus shaders
     ofShader shader[MAX_LF_TILES];
     ofShader combineShader;
 
-    float sourceWidth, sourceHeight;
-    float synScale;
+	// refocus parameters
+    float focus;
     float zoom;
     int xcount, ycount, xstart, ystart;
-
-    // camera images
-    int xsubimages, ysubimages, subwidth, subheight;
-
-    // whole set of textures
-    int ximagespertex, yimagespertex, tilewidth, tileheight;
-    int xnumtextures, ynumtextures;
-    int tilenum;
 
     float minScale, maxScale;
     float xoffset, yoffset;
 
+    float fade;
+
+    // camera images
+    int xsubimages, ysubimages, subwidth, subheight;
+
     float offsets[MAX_OFFSETS];
 
-    float fade;
-    
+    // params for tiled dataset
+    int ximagespertex, yimagespertex, tilewidth, tileheight;
+    int xnumtextures, ynumtextures;
+    int tilenum;
+
     // snapshot
     int snapcount;
-
+    
     // onscreen display
     bool bShowThumbnail;
     bool bHideCursor;
     bool bDebug;
+
+	// rendering control
+    bool bSuspendRender;
+
 };

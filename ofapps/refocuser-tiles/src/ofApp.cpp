@@ -1,85 +1,90 @@
 #include "ofApp.h"
 
+
 //--------------------------------------------------------------
 // main program
 //--------------------------------------------------------------
 
 void ofApp::setup(){
+
     ofEnableAlphaBlending();
 
-    loadXMLSettings("scenes.xml");
+    loadXMLSettings("settings.xml");
 
     loadLightfieldData();
 
     setupGraphics();
 
     // OSC - listen on the given port
-    cout << "listening for osc messages on port " << port << "\n";
     receiver.setup(port);
+    ofLog(OF_LOG_NOTICE, "listening for osc messages on port " + ofToString(port));
 
     snapcount = 0;
+    bSuspendRender = false;
 }
 
 //--------------------------------------------------------------
 
 void ofApp::update(){
 
-    // TODO: why is this here?
-    maskFbo.begin();
-    ofClear(255, 0, 0,255);
-    maskFbo.end();
+    if(!bSuspendRender) {
 
-    for(int i=0; i < numlftextures; i++) {
-        refocusFbo[i].begin();
+        // TODO: why is this here?
+        maskFbo->begin();
+        ofClear(255, 0, 0,255);
+        maskFbo->end();
+
+        for(int i=0; i < numlftextures; i++) {
+            refocusFbo[i]->begin();
+            ofClear(0, 0, 0, 255);
+
+            shader[i].begin();
+
+            // aperture
+            shader[i].setUniform2i("ap_loc", xstart, ystart);
+            shader[i].setUniform2i("ap_size", xcount, ycount);
+
+        //    updateAperture();
+            // focus
+            shader[i].setUniform1f("fscale", focus);
+
+            // zoom / pan
+            shader[i].setUniform1f("zoom", zoom);
+            shader[i].setUniform2f("roll", xoffset, yoffset);
+
+            maskFbo->draw(0,0);
+
+            shader[i].end();
+
+            refocusFbo[i]->end();
+        }
+
+
+    //    // TODO: why is this here?
+        maskFbo->begin();
+        ofClear(255, 0, 0,255);
+        maskFbo->end();
+    //
+    //
+        fbo->begin();
         ofClear(0, 0, 0, 255);
 
-        shader[i].begin();
+        combineShader.begin();
 
-        // aperture
-        shader[i].setUniform2i("ap_loc", xstart, ystart);
-        shader[i].setUniform2i("ap_size", xcount, ycount);
+    //    for(int i=0; i < numlftextures; i++) {
+    //        combineShader.setUniformTexture("refocustex[" + ofToString(i) + "]", refocusFbo[i].getTextureReference(), i+9);
+    //    }
 
-    //    updateAperture();
-        // focus
-        shader[i].setUniform1f("fscale", synScale);
+        maskFbo->draw(0, 0);
 
-        // zoom / pan
-        shader[i].setUniform1f("zoom", zoom);
-        shader[i].setUniform2f("roll", xoffset, yoffset);
+        combineShader.end();
+        fbo->end();
 
-        maskFbo.draw(0,0);
-
-        shader[i].end();
-
-        refocusFbo[i].end();
     }
 
-
-//    // TODO: why is this here?
-    maskFbo.begin();
-    ofClear(255, 0, 0,255);
-    maskFbo.end();
-//
-//
-    fbo.begin();
-    ofClear(0, 0, 0, 255);
-
-    combineShader.begin();
-
-//    for(int i=0; i < numlftextures; i++) {
-//        combineShader.setUniformTexture("refocustex[" + ofToString(i) + "]", refocusFbo[i].getTextureReference(), i+9);
-//    }
-
-    maskFbo.draw(0, 0);
-
-    combineShader.end();
-    fbo.end();
-
-
     ofSetWindowTitle( ofToString( ofGetFrameRate(), 2));
-
-    // ~~~ OSC handling ~~~
-    // check for waiting messages
+    
+	// check for waiting OSC messages
     while(receiver.hasWaitingMessages()){
         // get the next message
         ofxOscMessage m;
@@ -88,29 +93,24 @@ void ofApp::update(){
         process_OSC(m);
 
     };
-    // ~~~~ end OSC ~~~~
-
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
     ofBackground(ofColor::black);
 
-
     // fused image size
     float height = ofGetWindowHeight();
     float width = height/subheight*subwidth;
     float xoff = (ofGetWindowWidth() - width)/2;
 
-    
     // draw with transparency to fade
     ofSetColor(255, fade);
-//    ofSetColor(255);
 
     // draw fused image
-    fbo.draw(xoff, 0, width, height);
+    fbo->draw(xoff, 0, width, height);
 
-//    refocusFbo[tilenum].draw(xoff, 0, width, height);
+//    refocusFbo[0].draw(xoff, 0, width, height);
 
 //    refocusFbo[0].draw(xoff, 0, width/2, height/2);
 //    refocusFbo[1].draw(xoff+width/2, 0, width/2, height/2);
@@ -124,10 +124,10 @@ void ofApp::draw(){
     if(bShowThumbnail == true) {
 
         // thumbnail size
-        float tWidth = 160;
-        float tHeight;
-        int tSubWidth, tSubHeight;
+        float tWidth = 160, tHeight;
         float xunit, yunit;
+        int tSubWidth, tSubHeight;
+
         if(numlftextures > 1) {
             tHeight = 160/xnumtextures * ynumtextures;
             tSubWidth = tWidth / xnumtextures;
@@ -162,7 +162,8 @@ void ofApp::draw(){
         ofSetColor(255);
         ofTranslate(10, ofGetHeight()-90);
 //        ofDrawBitmapString("tilenum:  \t"+ofToString(tilenum), 0, -15);
-        ofDrawBitmapString("scale:    \t"+ofToString(synScale), 0, 0);
+        ofDrawBitmapString("fade:     \t"+ofToString(fade), 0, -15);
+        ofDrawBitmapString("scale:    \t"+ofToString(focus), 0, 0);
         ofDrawBitmapString("roll:     \t"+ofToString(xoffset)+" "+ofToString(yoffset), 0, 15);
         ofDrawBitmapString("ap_loc:   \t"+ofToString(xstart)+" "+ofToString(ystart) +" ("+ofToString(xstart + ystart * xsubimages)+")", 0, 30);
         ofDrawBitmapString("ap_size:  \t"+ofToString(xcount)+" "+ofToString(ycount), 0, 45);
@@ -196,16 +197,22 @@ void ofApp::loadXMLSettings(string settingsfile) {
         bool bFullscreen = (xml.getValue("fullscreen", 0) > 0);
         ofSetFullscreen(bFullscreen);
 
+        // osc receiving
+        port = xml.getValue("oscport", 12345);
+
         // load first scene
         loadXMLScene(scenefiles[0]);
     } else {
-        cout << "No scenes in file" << settingsfile << ". Exiting." << endl;
+        ofLog(OF_LOG_WARNING, "No scenes in file" +ofToString(settingsfile)+", exiting.");
         ofExit();
     }
 
 }
 
 void ofApp::loadXMLScene(string scenefile) {
+
+    ofLog(OF_LOG_NOTICE, "loading scene " + scenefile);
+
     ofxXmlSettings xml;
 
     xml.loadFile(scenefile);
@@ -239,18 +246,19 @@ void ofApp::loadXMLScene(string scenefile) {
     xcount = xml.getValue("xcount", xsubimages);
     ycount = xml.getValue("ycount", ysubimages);
 
-    synScale = xml.getValue("scale", 0);
+    focus = xml.getValue("scale", 0);
     zoom = xml.getValue("zoom", 1.0);
     xoffset = 0;
     yoffset = 0;
 
-    // debug information (text, mouse, thumbnail) //
-    bShowThumbnail = (xml.getValue("drawthumbnail", 0) > 0);
-    bHideCursor = (xml.getValue("hidecursor", 0) > 0);
-    bDebug = (xml.getValue("debug", 0) > 0);
-
-    // osc receiving
-    port = xml.getValue("oscport", 12345);
+    // read these from the settings file
+//    // debug information (text, mouse, thumbnail) //
+//    bShowThumbnail = (xml.getValue("drawthumbnail", 0) > 0);
+//    bHideCursor = (xml.getValue("hidecursor", 0) > 0);
+//    bDebug = (xml.getValue("debug", 0) > 0);
+//
+//    // osc receiving
+//    port = xml.getValue("oscport", 12345);
 
     // read camera positions
     xml.pushTag("cameras");
@@ -281,34 +289,67 @@ void ofApp::loadLightfieldData() {
     ofLog(OF_LOG_NOTICE, "done loading textures.");
 }
 
+void ofApp::freeLightfieldData() {
+
+    for(int i=0; i < numlftextures; i++) {
+        lfplanes[i].clear();
+        ofLog(OF_LOG_NOTICE, "cleared texture "+ ofToString(i));
+        //  lfplanes[i].setTextureWrap(GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);//GL_REPEAT, GL_REPEAT);//
+//        GLfloat border[4]={0, 1, 0, 0};
+//        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border);
+        //lfplanes[i].setTextureMinMagFilter(GL_LINEAR, GL_LINEAR);//NEAREST, GL_NEAREST);
+    }
+
+    ofLog(OF_LOG_NOTICE, "done freeing textures.");
+}
+
+
 void ofApp::setupGraphics() {
     // fade
     fade = 255.0;
 
     // allocate fbos
-    fbo.allocate(subwidth,subheight);
-    maskFbo.allocate(subwidth,subheight);
+    fbo = ofPtr<ofFbo>(new ofFbo());
+    fbo->allocate(subwidth,subheight);
+    if(fbo->isAllocated())
+        cout << "fbo is Allocated" << endl;
 
-    // Lets clear the FBOs
-    // otherwise it will bring some junk with it from the memory
-    fbo.begin();
-    ofClear(0,0,0,255);
-    fbo.end();
+    maskFbo = ofPtr<ofFbo>(new ofFbo());
+    maskFbo->allocate(subwidth,subheight);
+    if(fbo->isAllocated())
+        cout << "maskFbo is Allocated" << endl;
 
-    maskFbo.begin();
+    // clear the fbos
+    fbo->begin();
     ofClear(0,0,0,255);
-    maskFbo.end();
+    fbo->end();
+
+    maskFbo->begin();
+    ofClear(0,0,0,255);
+    maskFbo->end();
 
     // load camera positions into texture
     int numCams = xsubimages * ysubimages;
 
+    // reserve space for refocus fbos
+    refocusFbo.clear();
+    refocusFbo.reserve(numCams);
+
     for(int i=0; i < numlftextures; i++) {
         ofLog(OF_LOG_NOTICE, "allocating refocus fbo " + ofToString(i));
 
-        refocusFbo[i].allocate(subwidth,subheight);
-        refocusFbo[i].begin();
+        ofPtr<ofFbo> thisFbo = ofPtr<ofFbo>(new ofFbo());
+        thisFbo->allocate(subwidth,subheight);
+        thisFbo->begin();
         ofClear(0,0,0,255);
-        refocusFbo[i].end();
+        thisFbo->end();
+
+        refocusFbo.push_back(thisFbo);
+
+//        refocusFbo[i].allocate(subwidth,subheight);
+//        refocusFbo[i].begin();
+//        ofClear(0,0,0,255);
+//        refocusFbo[i].end();
     }
 
     // make array of float pixels with camera position information
@@ -365,12 +406,14 @@ void ofApp::setupGraphics() {
 
             // initialize shader
             ofLog(OF_LOG_NOTICE, "initializing shader " + ofToString(i));
+//            shader[i].setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus_per_tile_120.frag");
             shader[i].setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus_per_tile_150.frag");
             shader[i].linkProgram();
 
             shader[i].begin();
 
             shader[i].setUniformTexture("lftex", lfplanes[i], tn++);
+//            shader[i].setUniform2f("size", tilewidth, tileheight);
 
             // data textures for shader
         //    shader[0].setUniformTexture("aperture_mask_tex", aperture_mask_tex, i++);
@@ -395,6 +438,7 @@ void ofApp::setupGraphics() {
 
     // set up shader to combine the four refocus fbos
     ofLog(OF_LOG_NOTICE, "initializing combine shader ");
+//    combineShader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/blend_per_tile_120.frag");
     combineShader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/blend_per_tile_150.frag");
     combineShader.linkProgram();
 
@@ -404,7 +448,7 @@ void ofApp::setupGraphics() {
     // TODO: uncommenting this prevents refocusFbo from working
 
     for(int i=0; i < numlftextures; i++)
-        combineShader.setUniformTexture("refocustex[" + ofToString(i) + "]", refocusFbo[i].getTextureReference(), tn++);
+        combineShader.setUniformTexture("refocustex[" + ofToString(i) + "]", refocusFbo[i]->getTextureReference(), tn++);
 
     combineShader.end();
 
@@ -446,7 +490,7 @@ void ofApp::setupGraphics() {
 void ofApp::keyPressed(int key){
     //    cout << bShowThumbnail << " " << bHideCursor << " " << bDebug << endl;
     if(key=='s') {
-        doSnapshot();
+        snapshot();
     }
     if(key=='f')
         ofToggleFullscreen();
@@ -475,7 +519,7 @@ void ofApp::keyPressed(int key){
     }
     if(key == 'c')
         // focus
-        synScale = ofMap(mouseX, 0, ofGetWindowWidth(), minScale, maxScale);
+        focus = ofMap(mouseX, 0, ofGetWindowWidth(), minScale, maxScale);
     if(key == 't') {
         bShowThumbnail = (bShowThumbnail == 0);
         cout << "t " << bShowThumbnail << endl;
@@ -492,7 +536,6 @@ void ofApp::keyPressed(int key){
     if(key == 'd') {
         bDebug = (bDebug == 0) ;
         cout << "d " << bDebug << endl;
-
     }
 
     if(key == '+') {
@@ -505,7 +548,32 @@ void ofApp::keyPressed(int key){
 void ofApp::process_OSC(ofxOscMessage m) {
 
     if( m.getAddress() == "/focus" ){
-        synScale = m.getArgAsFloat(0);//ofMap(m.getArgAsFloat(0), 0.0, 1.0, minScale, maxScale);
+        focus = subwidth * m.getArgAsFloat(0);
+    }
+    else if( m.getAddress() == "/loadScene") {
+        string scenefile = m.getArgAsString(0);
+
+        ofFile file(scenefile);
+
+        if(file.doesFileExist(scenefile)) {
+            // suspend render
+            bSuspendRender = true;
+
+            freeLightfieldData();
+
+            // TODO: I think this vector of scene files is unnecessary
+            scenefiles.clear();
+    //        scenefiles.push_back(scenefile);
+            loadXMLScene(scenefile);
+
+            loadLightfieldData();
+
+            setupGraphics();
+
+            bSuspendRender = false;
+        } else {
+            ofLog(OF_LOG_WARNING, "requested file " + scenefile + " does not exist.");
+        }
     }
     else if( m.getAddress() == "/fade") {
         fade = m.getArgAsFloat(0);
@@ -617,11 +685,11 @@ void ofApp::process_OSC(ofxOscMessage m) {
     }
 
     else if(m.getAddress() == "/xscroll"){
-        xoffset = m.getArgAsFloat(0);
+        xoffset = subwidth * m.getArgAsFloat(0);
     }
 
     else if(m.getAddress() == "/yscroll"){
-        yoffset = m.getArgAsFloat(0);
+        yoffset = subheight * m.getArgAsFloat(0);
     }
 
     else if(m.getAddress() == "/zoom"){
@@ -663,52 +731,57 @@ void ofApp::process_OSC(ofxOscMessage m) {
 // snapshot
 //--------------------------------------------------------------
 
-void ofApp::doSnapshot() {
+void ofApp::snapshot() {
     string timestamp, imgfilename, paramfilename;
 
     // save time-stamped image to data folder
     bool done = false;
     while(!done) {
-        timestamp = "./snapshots/"+ofGetTimestampString("%m%d%H%M") + "_" + ofToString(snapcount, 4, '0');
+//        timestamp = "./snapshots/"+ofGetTimestampString("%m%d%H%M") + "_" + ofToString(snapcount, 4, '0');
+
+        ofFile file(scenefiles[0]);
+        string filename = file.getBaseName();
+//        timestamp = "./snapshots/"+filename+ "_" +ofGetTimestampString("%m%d%H%M")+"_" + ofToString(snapcount, 4, '0');
+        timestamp = "./snapshots/"+filename+"_" + ofToString(snapcount, 4, '0');
         imgfilename = timestamp + ".jpg";
         paramfilename = timestamp + ".txt";
         ofFile test;
         if(!test.doesFileExist(imgfilename))
             done = true;
+        snapcount++;
     }
 
     // save fbo to file
     // from http://forum.openframeworks.cc/t/ofxfenster-addon-to-handle-multiple-windows-rewrite/6499/61
-    int w = fbo.getWidth();
-    int h = fbo.getHeight();
+    int w = fbo->getWidth();
+    int h = fbo->getHeight();
     unsigned char* pixels = new unsigned char[w*h*3];  ;
     ofImage screenGrab;
     screenGrab.allocate(w,h,OF_IMAGE_COLOR);
     screenGrab.setUseTexture(false);
 
     //copy the pixels from FBO to the pixel array; then set the normal ofImage from those pixels; and use the save method of ofImage
-    fbo.begin();
+    fbo->begin();
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glReadPixels(0, 0, fbo.getWidth(), fbo.getHeight(), GL_RGB, GL_UNSIGNED_BYTE, pixels);
-    screenGrab.setFromPixels(pixels, fbo.getWidth(), fbo.getHeight(), OF_IMAGE_COLOR);
+    glReadPixels(0, 0, fbo->getWidth(), fbo->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, pixels);
+    screenGrab.setFromPixels(pixels, fbo->getWidth(), fbo->getHeight(), OF_IMAGE_COLOR);
     screenGrab.saveImage(imgfilename, OF_IMAGE_QUALITY_BEST);
-    fbo.end();
+    fbo->end();
     ofLog(OF_LOG_VERBOSE, "[DiskOut]  saved frame " + imgfilename );
 
     // save refocusing parameters to companion text file
     ofFile file(paramfilename, ofFile::WriteOnly);
 
     // add additional parameters below
-    for(int i=0; i < numlftextures; i++)
-        file << lffilenames[i] << endl;
-    file << synScale << endl;
-    file << xoffset << "," << yoffset << endl;
+//    for(int i=0; i < numlftextures; i++)
+//        file << lffilenames[i] << endl;
+    file << scenefiles[0] << endl;
+    file << focus/float(subwidth) << endl;
+    file << xoffset/float(subwidth) << "," << yoffset/float(subheight) << endl;
     file << xstart << "," << ystart << endl;
     file << xcount << "," << ycount << endl;
     file << zoom << endl;
 
     file.close();
-
-    snapcount++;
 }
 

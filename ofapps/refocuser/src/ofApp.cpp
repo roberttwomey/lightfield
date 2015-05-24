@@ -9,62 +9,57 @@ void ofApp::setup(){
 
     ofEnableAlphaBlending();
 
-//    loadXMLSettings("./textures/dark_trees_calib.xml");
-//    loadXMLSettings("./textures/yellowcliff_sm.xml");
-//    loadXMLSettings("./textures/cliffside.xml");
-//    loadXMLSettings("./textures/tunnel_sm.xml");
-//        loadXMLSettings("./textures/mike1.xml");
-    loadXMLSettings("./textures/bookcase.xml");
-//loadXMLSettings("./textures/mike1_sm.xml");
-//        loadXMLSettings("./textures/mike3_sm.xml");
-//    loadXMLSettings("./textures/outsidelookingin.xml");
+    loadXMLSettings("settings.xml");
 
-    loadLFImage();
+    loadLightfieldData();
 
     setupGraphics();
-	    // OSC - listen on the given port
-    cout << "listening for osc messages on port " << port << "\n";
+
+    // OSC - listen on the given port
     receiver.setup(port);
+    ofLog(OF_LOG_NOTICE, "listening for osc messages on port " + ofToString(port));
 
     snapcount = 0;
+    bSuspendRender = false;
 }
 
 //--------------------------------------------------------------
 
 void ofApp::update(){
 
-    // TODO: why is this here?
-    maskFbo.begin();
-    ofClear(255, 0, 0,255);
-    maskFbo.end();
+    if(!bSuspendRender) {
 
-    fbo.begin();
-    ofClear(0, 0, 0,255);
+        // TODO: why is this here?
+        maskFbo->begin();
+        ofClear(255, 0, 0,255);
+        maskFbo->end();
 
-    shader.begin();
+		fbo->begin();
+		ofClear(0, 0, 0,255);
 
-    // aperture
-    shader.setUniform2i("ap_loc", xstart, ystart);
-    shader.setUniform2i("ap_size", xcount, ycount);
+		shader.begin();
 
-    // focus
-    shader.setUniform1f("fscale", synScale);
+		// aperture
+		shader.setUniform2i("ap_loc", xstart, ystart);
+		shader.setUniform2i("ap_size", xcount, ycount);
 
-    // zoom / pan
-    shader.setUniform1f("zoom", zoom);
-    shader.setUniform2f("roll", xoffset, yoffset);
+		// focus
+		shader.setUniform1f("fscale", focus);
 
-    maskFbo.draw(0,0);
+		// zoom / pan
+		shader.setUniform1f("zoom", zoom);
+		shader.setUniform2f("roll", xoffset, yoffset);
 
-    shader.end();
+		maskFbo->draw(0,0);
 
-    fbo.end();
+		shader.end();
 
-    ofSetWindowTitle( ofToString( ofGetFrameRate()));
+		fbo->end();
+	}
 
-    // ~~~ OSC handling ~~~
+    ofSetWindowTitle( ofToString( ofGetFrameRate(), 2));
 
-    // check for waiting messages
+	// check for waiting OSC messages
     while(receiver.hasWaitingMessages()){
         // get the next message
         ofxOscMessage m;
@@ -73,17 +68,11 @@ void ofApp::update(){
         process_OSC(m);
 
     };
-    // ~~~~ end OSC ~~~~
-
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
     ofBackground(ofColor::black);
-
-    // thumbnail size
-    float tWidth = 160;//320;
-    float tHeight = 160/xsubimages * ysubimages; //90;//180;
 
     // fused image size
     float height = ofGetWindowHeight();
@@ -94,28 +83,39 @@ void ofApp::draw(){
     ofSetColor(255, fade);
 
     // draw fused image
-    fbo.draw(xoff, 0, width, height);
+    fbo->draw(xoff, 0, width, height);
 
     // draw thumbnail with indicator
     if(bShowThumbnail == true) {
+
+
+		// thumbnail size
+		float tWidth = 160;
+		float tHeight = 160/xsubimages * ysubimages;
+        float xunit = tWidth/xsubimages;
+        float yunit = tHeight/ysubimages;
+
         ofSetColor(255);
         lfplane.draw(5,5,tWidth,tHeight);
+
         ofSetColor(255, 0, 0);
         ofNoFill();
-        float xunit = tWidth/xsubimages;//29.;
-        float yunit = tHeight/ysubimages;//20.0;
+
         ofRect(5+xstart*xunit, 5+ystart*yunit, xcount*xunit, ycount*yunit);
     }
 
     if(bDebug == true) {
         // display text about refocusing
         ofSetColor(255);
-        ofTranslate(10, ofGetHeight()-75);
-        ofDrawBitmapString("scale:   \t"+ofToString(synScale), 0, 0);
-        ofDrawBitmapString("roll:    \t"+ofToString(xoffset)+" "+ofToString(yoffset), 0, 15);
-        ofDrawBitmapString("ap_loc:  \t"+ofToString(xstart)+" "+ofToString(ystart) +" ("+ofToString(xstart + ystart * xsubimages)+")", 0, 30);
-        ofDrawBitmapString("ap_size: \t"+ofToString(xcount)+" "+ofToString(ycount), 0, 45);
-        ofDrawBitmapString("zoom:    \t"+ofToString(zoom), 0, 60);
+        ofTranslate(10, ofGetHeight()-90);
+//        ofDrawBitmapString("tilenum:  \t"+ofToString(tilenum), 0, -15);
+        ofDrawBitmapString("fade:     \t"+ofToString(fade), 0, -15);
+        ofDrawBitmapString("scale:    \t"+ofToString(focus), 0, 0);
+        ofDrawBitmapString("roll:     \t"+ofToString(xoffset)+" "+ofToString(yoffset), 0, 15);
+        ofDrawBitmapString("ap_loc:   \t"+ofToString(xstart)+" "+ofToString(ystart) +" ("+ofToString(xstart + ystart * xsubimages)+")", 0, 30);
+        ofDrawBitmapString("ap_size:  \t"+ofToString(xcount)+" "+ofToString(ycount), 0, 45);
+        ofDrawBitmapString("zoom:     \t"+ofToString(zoom), 0, 60);
+        ofDrawBitmapString("framerate:\t"+ofToString(ofGetFrameRate(), 2), 0, 75);
     }
 }
 
@@ -128,9 +128,44 @@ void ofApp::loadXMLSettings(string settingsfile) {
     ofxXmlSettings xml;
 
     xml.loadFile(settingsfile);
+    int numscenes = xml.getNumTags("scene");
+
+    if(numscenes > 0 ) {
+        // store filenames
+        for(int i=0; i < numscenes; i++) {
+            string scenefile = xml.getValue("scene", "nofile.jpg", i);
+            scenefiles.push_back(scenefile);
+        }
+
+        // debug information (text, mouse, thumbnail) //
+        bShowThumbnail = (xml.getValue("drawthumbnail", 0) > 0);
+        bHideCursor = (xml.getValue("hidecursor", 0) > 0);
+        bDebug = (xml.getValue("debug", 0) > 0);
+        bool bFullscreen = (xml.getValue("fullscreen", 0) > 0);
+        ofSetFullscreen(bFullscreen);
+
+        // osc receiving
+        port = xml.getValue("oscport", 12345);
+
+        // load first scene
+        loadXMLScene(scenefiles[0]);
+    } else {
+        ofLog(OF_LOG_WARNING, "No scenes in file " +ofToString(settingsfile)+", exiting.");
+        ofExit();
+    }
+
+}
+
+void ofApp::loadXMLScene(string scenefile) {
+
+    ofLog(OF_LOG_NOTICE, "loading scene " + scenefile);
+
+    ofxXmlSettings xml;
+
+    xml.loadFile(scenefile);
 
     // lightfield images //
-    lfimage_filename = xml.getValue("texturefile", "nofile.jpg");
+    lffilename = xml.getValue("texturefile", "nofile.jpg");
 
     // image layout
     subwidth = xml.getValue("subimagewidth", 0);
@@ -147,18 +182,20 @@ void ofApp::loadXMLSettings(string settingsfile) {
     ystart = xml.getValue("ystart", 0);
     xcount = xml.getValue("xcount", xsubimages);
     ycount = xml.getValue("ycount", ysubimages);
-    synScale = xml.getValue("scale", 0);
+
+    focus = xml.getValue("scale", 0);
     zoom = xml.getValue("zoom", 1.0);
     xoffset = 0;
     yoffset = 0;
 
-    // debug information (text, mouse, thumbnail) //
-    bShowThumbnail = (xml.getValue("drawthumbnail", 0) > 0);
-    bHideCursor = (xml.getValue("hidecursor", 0) > 0);
-    bDebug = (xml.getValue("debug", 0) > 0);
-
-    // osc receiving
-    port = xml.getValue("oscport", 12345);
+    // read these from the settings file
+//    // debug information (text, mouse, thumbnail) //
+//    bShowThumbnail = (xml.getValue("drawthumbnail", 0) > 0);
+//    bHideCursor = (xml.getValue("hidecursor", 0) > 0);
+//    bDebug = (xml.getValue("debug", 0) > 0);
+//
+//    // osc receiving
+//    port = xml.getValue("oscport", 12345);
 
     // read camera positions
     xml.pushTag("cameras");
@@ -175,33 +212,45 @@ void ofApp::loadXMLSettings(string settingsfile) {
 
 }
 
-void ofApp::loadLFImage() {
-    
-    ofLoadImage(lfplane, lfimage_filename);
+void ofApp::loadLightfieldData() {
 
-    sourceWidth=lfplane.getWidth();
-    sourceHeight=lfplane.getHeight();
-
-    cout << "LF Texture: " << sourceWidth << ", " << sourceHeight << endl;
-
+	ofLoadImage(lfplane, lffilename);
 }
+
+void ofApp::freeLightfieldData() {
+
+    lfplane.clear();
+    ofLog(OF_LOG_NOTICE, "cleared texture 0");
+        //  lfplanes[i].setTextureWrap(GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);//GL_REPEAT, GL_REPEAT);//
+//        GLfloat border[4]={0, 1, 0, 0};
+//        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border);
+        //lfplanes[i].setTextureMinMagFilter(GL_LINEAR, GL_LINEAR);//NEAREST, GL_NEAREST);
+}
+
 
 void ofApp::setupGraphics() {
     // fade
     fade = 255.0;
-    
-    // allocate FBOs
-    fbo.allocate(subwidth,subheight);
-    maskFbo.allocate(subwidth,subheight);
 
-    // Lets clear the FBOs
-    fbo.begin();
-    ofClear(0,0,0,255);
-    fbo.end();
+    // allocate fbos
+    fbo = ofPtr<ofFbo>(new ofFbo());
+    fbo->allocate(subwidth,subheight);
+    if(fbo->isAllocated())
+        cout << "fbo is Allocated" << endl;
 
-    maskFbo.begin();
+    maskFbo = ofPtr<ofFbo>(new ofFbo());
+    maskFbo->allocate(subwidth,subheight);
+    if(fbo->isAllocated())
+        cout << "maskFbo is Allocated" << endl;
+
+    // clear the fbos
+    fbo->begin();
     ofClear(0,0,0,255);
-    maskFbo.end();
+    fbo->end();
+
+    maskFbo->begin();
+    ofClear(0,0,0,255);
+    maskFbo->end();
 
     // load camera positions into texture
     int numCams = xsubimages * ysubimages;
@@ -213,7 +262,7 @@ void ofApp::setupGraphics() {
             int i = x + (y * xsubimages);
 
             pos[i*3 + 0] = offsets[i*2];
-            pos[i*3 + 1] = offsets[i*2+1]; //y*offset;
+            pos[i*3 + 1] = offsets[i*2+1];
             pos[i*3 + 2] = 0.0;
         }
     }
@@ -239,6 +288,16 @@ void ofApp::setupGraphics() {
 //    subimg_corner_tex.getTextureReference().loadData(corners, xsubimages, ysubimages, GL_RGB);
 //    delete corners;
 
+//    // initialize aperture mask to zero (no images used)
+//    aperture_mask = new float [numCams * 3];
+//
+//    for (int i=0; i < numCams *3; i++)
+//        aperture_mask[i] = 0.0;
+//
+//    aperture_mask_tex.allocate(xsubimages, ysubimages, GL_RGB32F);
+//    aperture_mask_tex.getTextureReference().loadData(aperture_mask, xsubimages, ysubimages, GL_RGB);
+//
+//    updateAperture();
 
     // setup refocus shader
     shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus.frag");
@@ -268,6 +327,23 @@ void ofApp::setupGraphics() {
 
 }
 
+//void ofApp::updateAperture() {
+//
+//    // set pixels to 1.0 for used, 0.0 for not used
+//    for (int x=0; x < xsubimages; x++) {
+//        for(int y=0; y < ysubimages; y++) {
+//            int i = x + y * xsubimages;
+//            if(ofInRange(x, xstart, xcount) && ofInRange(y, ystart, ycount)) {
+//                aperture_mask[i*3] = 1.0;
+//            } else {
+//                aperture_mask[i*3] = 0.0;
+//            }
+//        }
+//    }
+//
+//    // update aperture on graphics card
+//    aperture_mask_tex.getTextureReference().loadData(aperture_mask, xsubimages, ysubimages, GL_RGB);
+//}
 
 //--------------------------------------------------------------
 //  keyboard interaction / osc control
@@ -276,7 +352,7 @@ void ofApp::setupGraphics() {
 void ofApp::keyPressed(int key){
     //    cout << bShowThumbnail << " " << bHideCursor << " " << bDebug << endl;
     if(key=='s') {
-        doSnapshot();
+        snapshot();
     }
     if(key=='f')
         ofToggleFullscreen();
@@ -305,7 +381,7 @@ void ofApp::keyPressed(int key){
     }
     if(key == 'c')
         // focus
-        synScale = ofMap(mouseX, 0, ofGetWindowWidth(), minScale, maxScale);
+        focus = ofMap(mouseX, 0, ofGetWindowWidth(), minScale, maxScale);
     if(key == 't') {
         bShowThumbnail = (bShowThumbnail == 0);
         cout << "t " << bShowThumbnail << endl;
@@ -322,16 +398,40 @@ void ofApp::keyPressed(int key){
     if(key == 'd') {
         bDebug = (bDebug == 0) ;
         cout << "d " << bDebug << endl;
-
     }
-
 }
 
 
 void ofApp::process_OSC(ofxOscMessage m) {
 
     if( m.getAddress() == "/focus" ){
-        synScale = m.getArgAsFloat(0);//ofMap(m.getArgAsFloat(0), 0.0, 1.0, minScale, maxScale);
+        focus = subwidth * m.getArgAsFloat(0);
+    }
+    else if( m.getAddress() == "/loadScene") {
+        string scenefile = m.getArgAsString(0);
+
+        ofFile file(scenefile);
+
+        if(file.doesFileExist(scenefile)) {
+            // suspend render
+            bSuspendRender = true;
+
+            freeLightfieldData();
+
+            // TODO: I think this vector of scene files is unnecessary
+            scenefiles.clear();
+            scenefiles.push_back(scenefile);
+
+            loadXMLScene(scenefile);
+
+            loadLightfieldData();
+
+            setupGraphics();
+
+            bSuspendRender = false;
+        } else {
+            ofLog(OF_LOG_WARNING, "requested file " + scenefile + " does not exist.");
+        }
     }
     else if( m.getAddress() == "/fade") {
         fade = m.getArgAsFloat(0);
@@ -443,11 +543,11 @@ void ofApp::process_OSC(ofxOscMessage m) {
     }
 
     else if(m.getAddress() == "/xscroll"){
-        xoffset = m.getArgAsFloat(0);
+        xoffset = subwidth * m.getArgAsFloat(0);
     }
 
     else if(m.getAddress() == "/yscroll"){
-        yoffset = m.getArgAsFloat(0);
+        yoffset = subheight * m.getArgAsFloat(0);
     }
 
     else if(m.getAddress() == "/zoom"){
@@ -489,51 +589,54 @@ void ofApp::process_OSC(ofxOscMessage m) {
 // snapshot
 //--------------------------------------------------------------
 
-void ofApp::doSnapshot() {
+void ofApp::snapshot() {
     string timestamp, imgfilename, paramfilename;
 
     // save time-stamped image to data folder
     bool done = false;
     while(!done) {
-        timestamp = "./snapshots/"+ofGetTimestampString("%m%d%H%M") + "_" + ofToString(snapcount, 4, '0');
+//        timestamp = "./snapshots/"+ofGetTimestampString("%m%d%H%M") + "_" + ofToString(snapcount, 4, '0');
+
+        ofFile file(scenefiles[0]);
+        string filename = file.getBaseName();
+//        timestamp = "./snapshots/"+filename+ "_" +ofGetTimestampString("%m%d%H%M")+"_" + ofToString(snapcount, 4, '0');
+        timestamp = "./snapshots/"+filename+"_" + ofToString(snapcount, 4, '0');
         imgfilename = timestamp + ".jpg";
         paramfilename = timestamp + ".txt";
         ofFile test;
         if(!test.doesFileExist(imgfilename))
             done = true;
+        snapcount++;
     }
-        
+
     // save fbo to file
     // from http://forum.openframeworks.cc/t/ofxfenster-addon-to-handle-multiple-windows-rewrite/6499/61
-    int w = fbo.getWidth();
-    int h = fbo.getHeight();
+    int w = fbo->getWidth();
+    int h = fbo->getHeight();
     unsigned char* pixels = new unsigned char[w*h*3];  ;
     ofImage screenGrab;
     screenGrab.allocate(w,h,OF_IMAGE_COLOR);
     screenGrab.setUseTexture(false);
 
     //copy the pixels from FBO to the pixel array; then set the normal ofImage from those pixels; and use the save method of ofImage
-    fbo.begin();
+    fbo->begin();
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glReadPixels(0, 0, fbo.getWidth(), fbo.getHeight(), GL_RGB, GL_UNSIGNED_BYTE, pixels);
-    screenGrab.setFromPixels(pixels, fbo.getWidth(), fbo.getHeight(), OF_IMAGE_COLOR);
+    glReadPixels(0, 0, fbo->getWidth(), fbo->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, pixels);
+    screenGrab.setFromPixels(pixels, fbo->getWidth(), fbo->getHeight(), OF_IMAGE_COLOR);
     screenGrab.saveImage(imgfilename, OF_IMAGE_QUALITY_BEST);
-    fbo.end();
+    fbo->end();
     ofLog(OF_LOG_VERBOSE, "[DiskOut]  saved frame " + imgfilename );
 
     // save refocusing parameters to companion text file
     ofFile file(paramfilename, ofFile::WriteOnly);
 
-    // add additional parameters below
-    file << lfimage_filename << endl;
-    file << synScale << endl;
-    file << xoffset << "," << yoffset << endl;
+    file << scenefiles[0] << endl;
+    file << focus/float(subwidth) << endl;
+    file << xoffset/float(subwidth) << "," << yoffset/float(subheight) << endl;
     file << xstart << "," << ystart << endl;
     file << xcount << "," << ycount << endl;
     file << zoom << endl;
 
     file.close();
-
-    snapcount++;
 }
 

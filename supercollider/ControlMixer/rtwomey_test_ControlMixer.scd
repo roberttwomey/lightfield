@@ -10,8 +10,9 @@ c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll
 // test fade
 // test snapshot loading
 
-c = ControlMixMaster( ["focus", "fade", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("refocuser.local", 12345))
+c = ControlMixMaster( ["focus", "fade", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("localhost", 12345))
 
+c = ControlMixMaster( ["focus", "fade", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("refocuser.local", 12345))
 
 c.loadScene("./textures/dark_trees_calib.xml")
 c.loadScene("./textures/diningroom3.xml")
