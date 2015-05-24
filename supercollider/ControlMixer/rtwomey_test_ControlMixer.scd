@@ -14,31 +14,58 @@ c = ControlMixMaster( ["focus", "fade", "zoom", "xscroll", "yscroll", "xstart", 
 
 c = ControlMixMaster( ["focus", "fade", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("refocuser.local", 12345))
 
-c.loadScene("./textures/dark_trees_calib.xml")
-c.loadScene("./textures/diningroom3.xml")
-c.loadScene("./textures/cliffside.xml")
-c.loadScene("./textures/bookcase.xml")
-c.loadScene("./textures/carkeek_night.xml")
-c.loadScene("./textures/carkeek.xml")
-c.loadScene("./textures/mike1.xml")
-//c.loadScene("./textures/mike2.xml")
-//c.loadScene("./textures/mike3.xml")
-c.loadScene("./textures/outsidelookingin.xml")
-c.loadScene("./textures/tivon1_calib.xml")
-c.loadScene("./textures/tivon2_sm.xml")
+c.loadScene("./textures/dark_trees_sm.xml")
+c.loadScene("./textures/cliffside_sm.xml")
+c.loadScene("./textures/bookcase_sm.xml")
+c.loadScene("./textures/carkeek_night_sm.xml")
+c.loadScene("./textures/carkeek_sm.xml")
+c.loadScene("./textures/mike1_sm.xml")
+c.loadScene("./textures/mike2_sm.xml")
+c.loadScene("./textures/mike3_sm.xml")
+c.loadScene("./textures/diningroom3_sm.xml")
+c.loadScene("./textures/outsidelookingin_sm.xml")
+// c.loadScene("./textures/tivon1_calib.xml")
+// c.loadScene("./textures/tivon2_sm.xml")
 
-c.loadScene("./textures/ballard_wall_calib.xml")
+// c.loadScene("./textures/ballard_wall_sm.xml")
 
-c.loadScene("./textures/carkeek_med_tile.xml")
+// c.loadScene("./textures/carkeek_med_tile.xml")
 
 
 // snapshots
 c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/yellowcliff/yellowcliff_0002.txt")
-
 c.loadSnapshot("/Volumes/Home Directory/code/lightfield/scenes/test/diningroom3_0000.txt")
 
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/outsidelookingin_tex_0000.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/outsidelookingin_tex_0001.txt")
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/outsidelookingin_tex_0004.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/outsidelookingin_tex_0005.txt")
+
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/mike1_sm_0000.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/mike1_sm_0001.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/mike1_sm_0002.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/mike1_sm_0003.txt")
+
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_sm_0000.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_sm_0006.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_sm_0007.txt")
+
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/diningroom3_sm_0008.txt")
 
 // presets
+c.storePreset( \mike2)
+
+c.storePreset( \mike1_1)
+c.storePreset( \mike1_2)
+c.storePreset( \mike1_3)
+c.storePreset( \mike1_4)
+c.storePreset( \mike1_5_fruitbowl)
+c.storePreset( \mike1_5_weird)
+
+c.storePreset( \mike1_parallax_left)
+
+
+c.loadScene("./textures/yellowcliff_sm.xml")
 c.storePreset( \yellowcliff_close)
 c.storePreset( \yellowcliff_bush)
 
@@ -46,6 +73,13 @@ c.storePreset( \yellowcliff_bush)
 // c.storePreset( \tivon1 )
 // c.storePreset( \tivon1_lights )
 // c.storePreset( \tivon1_mirror )
+c.globalFadeTime_(3)
+
+c.loadScene("./textures/mike1_sm.xml")
+c.recallPreset(\mike1_1,)
+c.storePreset( \mike1_4)
+
+
 
 
 c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_in_mirror/20150521132155_0000.txt")
