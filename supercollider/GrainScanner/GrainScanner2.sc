@@ -154,7 +154,13 @@ GrainScanner2 {
 				.distFrmCen_(0)
 				.pos_(0).replyID_(this.replyID)
 				.gate_(1)
-			}
+			};
+
+			server.sync;
+			xformSynth.play;
+			server.sync;
+			encoderSynth.play;
+
 		}
 	}
 
@@ -567,7 +573,7 @@ GrainScanner2View {
 	}
 
 	makeWin {
-		win = Window("a GrainScanner", Rect(200,200,100,100)).layout_(
+		win = Window("a GrainScanner", Rect(200,200,250,100)).layout_(
 			VLayout(
 				HLayout(
 					*[\grnDur, \grnRate, \grnRand, \grnDisp].collect({ |key|

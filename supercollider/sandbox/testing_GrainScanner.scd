@@ -123,7 +123,7 @@ p = "/Users/admin/src/rover/data/AUDIO/EDITS/carkeek_seaside_train_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_1_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_2_EDIT.WAV";
-p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_CLIP.WAV";
+// p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_CLIP.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_yellow_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/garden_morning1_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/garden_morning2_EDIT.WAV";
@@ -136,7 +136,7 @@ p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_porch_13min_EDIT.WAV";
 // define vectors
 (
 ~vectors = ~data.analysis.featuredata.clump( ~data.analysis.numfeatures );
-~numClusters = 5;
+~numClusters = 8;
 k = KMeansMod(~numClusters);
 ~vectors.do{|vec, i| k.add(vec) };
 )

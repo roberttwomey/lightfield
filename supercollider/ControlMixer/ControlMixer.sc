@@ -426,7 +426,7 @@ ControlMixFaderView {
 ControlMixMaster {
 	// copyArgs
 	var broadcastTags, broadcastNetAddr, broadcastRate, server;
-	var <win, <mixers, <lastUpdated, <presetWin, <canvas, <>globalFadeTime = 0.0;
+	var <win, <mixers, <lastUpdated, <presetWin, <canvas, <globalFadeTime = 0.0;
 
 	*new { |broadcastTags="/myControlVal", broadcastNetAddr, broadcastRate=30, server|
 		^super.newCopyArgs(broadcastTags, broadcastNetAddr, broadcastRate, server).init
@@ -516,7 +516,7 @@ ControlMixMaster {
 				],
 				nil,
 				StaticText().string_("Preset Fade Time").align_(\right),
-				NumberBox().action_({|bx| this.globalFadeTime = bx.value }),
+				NumberBox().action_({|bx| this.globalFadeTime_(bx.value) }),
 				nil,
 				Button().states_([["Presets >>"]]).action_({
 					this.presetGUI((this.presets.size / 5).ceil.asInt) // default 5 presets per column
@@ -533,6 +533,11 @@ ControlMixMaster {
 	run { mixers.do(_.run) }
 
 	broadcastRate_{ |rateHz| mixers.do(_.broadcastRate_(rateHz)) }
+
+	globalFadeTime_{ |fadeTime|
+		globalFadeTime = fadeTime;
+		mixers.do{|mxr| mxr.ctlFades.do(_.fadeTime_(fadeTime))};
+	}
 
 	free {
 		mixers.do(_.free);
@@ -627,7 +632,7 @@ ControlMixMaster {
 		arch[key].keysValuesDo{|k,v| [k,v].postln;}
 	}
 
-	prRecallCtlFaderState { | mixer, faderStates |
+	prRecallCtlFaderState { | mixer, faderStates, thisFadeTime |
 		var kind, ctlFade;
 
 		faderStates.do{ |fDict, fDex|
@@ -640,17 +645,17 @@ ControlMixMaster {
 			// static or lfo?
 			if( fDict[\signal] == 'static' )
 			{	// just recall the static val
-				ctlFade.value_(fDict[\val], globalFadeTime)
+				ctlFade.value_(fDict[\val], thisFadeTime)
 			}
 			{	// recall the lfo with bounds, etc...
 				"recalling LFO".postln;
-				ctlFade.lfo_(fDict[\signal], fDict[\freq], fDict[\min], fDict[\max], globalFadeTime)
+				ctlFade.lfo_(fDict[\signal], fDict[\freq], fDict[\min], fDict[\max], thisFadeTime)
 			};
 
 			// recall mix, scale offset
-			fDict[\scale] !? {ctlFade.scale_(fDict[\scale], globalFadeTime)};
-			fDict[\offset] !? {ctlFade.offset_(fDict[\offset], globalFadeTime)};
-			fDict[\mix] !? {ctlFade.amp_(fDict[\mix], globalFadeTime)};
+			fDict[\scale] !? {ctlFade.scale_(fDict[\scale], thisFadeTime)};
+			fDict[\offset] !? {ctlFade.offset_(fDict[\offset], thisFadeTime)};
+			fDict[\mix] !? {ctlFade.amp_(fDict[\mix], thisFadeTime)};
 		}
 	}
 
@@ -704,7 +709,7 @@ ControlMixMaster {
 		broadcastNetAddr.sendMsg('/loadScene', sceneName);
 	}
 
-	recallPreset { |key|
+	recallPreset { |key, thisFadeTime|
 		var p;
 		block { |break|
 
@@ -739,7 +744,7 @@ ControlMixMaster {
 								};
 							};
 
-							this.prRecallCtlFaderState( mixer, faderStates );
+							this.prRecallCtlFaderState( mixer, faderStates, thisFadeTime );
 
 							recalled =true;
 							lastUpdated = key;
