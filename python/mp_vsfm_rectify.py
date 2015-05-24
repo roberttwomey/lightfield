@@ -6,8 +6,11 @@
     
     step 1. produces warped images, aligned
     step 2. generate thumbnails
-    step 3. create contact sheet at max GL texture size
-
+    step 3. create contact sheet at a variety of sizes: 
+        -laptop friendly 512MB pixel data max
+        -opengl max texture size 16384x16384
+        -full res tiled textures (same as camera acquisition)
+    
     http://wiki.roberttwomey.com/Lightfield
 
     Robert Twomey 2015
@@ -28,28 +31,6 @@ import pickle
 from pylab import * 
 import re
         
-def readImageFilenames(dir_name):
-    # read in image filenames
-    dir_list = []
-    for extension in (".png", ".jpg", ".jpeg", '.JPG'):
-        try:
-            temp = os.listdir(dir_name)
-            temp = filter(lambda x: x.find(extension) > -1, temp)
-            temp = sorted(temp)
-            if len(temp) > 0:
-                dir_list = temp
-        except:
-            print >> sys.stderr, ("Unable to open directory: %s" % dir_name)
-            sys.exit(-1)
-
-    dir_list = map(lambda x: os.path.join(dir_name,x), dir_list)
-
-    #print len(dir_list), "files in directory"
-    #print dir_list
-    
-    return dir_list
-    
-    
 def readCamerasV2File(camerasfile, cameraloc_img):
     global datapath
     
@@ -478,8 +459,8 @@ def generate_full_res_textures(files, img_path, contactimg_file, reorder = None,
                         
                         sys.stdout.flush()
 
-            base, ext = contactimg_file.split("tex")
-            this_texture_file = base + "tile-" +str(tilenum) + ext
+            base, ext = contactimg_file.split("tex.")
+            this_texture_file = base + "tile-" +str(tilenum) + "."+ ext
 
             print "writing contact image", tile_img.shape, "to", os.path.basename(this_texture_file)
             cv2.imwrite(this_texture_file, tile_img)
@@ -586,8 +567,10 @@ def generate_single_texture(files, img_path, contactimg_file, reorder = None, sk
                 
                 sys.stdout.flush()
 
-    base, ext = contactimg_file.split("tex")
-    this_texture_file = base + "tex" + ext
+    # single texture keeps _tex.jpg extension
+    this_texture_file = contactimg_file
+    # base, ext = contactimg_file.split("tex.")
+    # this_texture_file = base + "tex." + ext
 
     print "writing contact image", tile_img.shape, "to", os.path.basename(this_texture_file)
     cv2.imwrite(this_texture_file, tile_img)
@@ -920,20 +903,30 @@ if __name__ == '__main__':
     
     # outputs
     if do_laptop:
-        texturepath= "/home/rtwomey/code/lightfield/data/laptop_textures"
-        camerapos = os.path.join(texturepath, scene_name+'.xml')
-        contactimg_file = os.path.join(texturepath, scene_name+'_tex.jpg')
-        cameraloc_img = os.path.join(texturepath, scene_name+'_cameras.png')
+        texturepath = "/home/rtwomey/code/lightfield/data/laptop_textures"
+    elif do_single:
+        texturepath = "/home/rtwomey/code/lightfield/data/single_textures"
+    elif do_fullres:
+        texturepath = "/home/rtwomey/code/lightfield/data/tiled_textures"
     else:
-        camerapos = os.path.join(datapath, scene_name+'.xml')
-        contactimg_file = os.path.join(datapath, scene_name+'_tex.jpg')
-        cameraloc_img = os.path.join(datapath, scene_name+'_cameras.png')
+        texturepath = "/home/rtwomey/code/lightfield/data/textures"
+        
+    camerapos = os.path.join(texturepath, scene_name+'.xml')
+    contactimg_file = os.path.join(texturepath, scene_name+'_tex.jpg')
+    cameraloc_img = os.path.join(texturepath, scene_name+'_cameras.png')
+
+    # camerapos = os.path.join(datapath, scene_name+'.xml')
+    # contactimg_file = os.path.join(datapath, scene_name+'_tex.jpg')
+    # cameraloc_img = os.path.join(datapath, scene_name+'_cameras.png')
 
     # create folders as necessary
     if not os.path.exists(warpedpath):
         os.makedirs(warpedpath)
 
-    # NOT GENERATING THUMBS
+    if not os.path.exists(texturepath):
+        os.makedirs(texturepath)
+
+    # NOT GENERATING THUMBS ANY MORE
     # if not os.path.exists(thumbpath):
     #     os.makedirs(thumbpath)
     
@@ -1035,8 +1028,9 @@ if __name__ == '__main__':
         camerapos = base + "_tile" + ext
     elif do_single:
         texture_files = generate_single_texture(image_files, warpedpath, contactimg_file, reorder, skip)
-        base, ext = os.path.splitext(camerapos)
-        camerapos = base + "_sm" + ext
+        # single textures are named scene.xml, scene_cameras.png, scene_tex.jpg
+        # base, ext = os.path.splitext(camerapos)
+        # camerapos = base + "" + ext        
     elif do_laptop:
         texture_files = generate_laptop_texture(image_files, warpedpath, contactimg_file, reorder, skip)
         base, ext = os.path.splitext(camerapos)
