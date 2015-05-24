@@ -3,7 +3,7 @@
 s.options.sampleRate_(44100)
 s.boot
 
-~broadcastDestination = NetAddr("localhost", 57120);
+~broadcastDestination = NetAddr("refocuser.local", 12345);
 
 ////////////////////////
 // Video
@@ -17,8 +17,10 @@ s.boot
 
 ~fader = ControlFade(0.1);
 ~fader.broadcast( ~broadcastDestination, '/fade', 30 );
-~fader.fadeTime_(0.1)
+~fader.fadeTime_(15)
 ~fader.plot
+~fader.value_(0)
+~fader.value_(255)
 
 ~fader.stopBroadcast;
 ~fader.free
