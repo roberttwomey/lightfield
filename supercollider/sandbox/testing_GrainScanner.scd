@@ -61,7 +61,7 @@ File.exists(~mirPath)
 // define vectors
 (
 ~vectors = ~data.analysis.featuredata.clump( ~data.analysis.numfeatures );
-~numClusters = 9;
+~numClusters = 5;
 k = KMeansMod(~numClusters);
 ~vectors.do{|vec, i| k.add(vec) };
 )
@@ -114,9 +114,41 @@ fork{ k.reset.update; "done".postln }
 // GRAIN SCANNER
 // --------------------------------
 s.boot;
-p = "/Users/admin/src/rover/data/AUDIO/discovery_cliffside_CLIP.WAV"
+// p = "/Users/admin/src/rover/data/AUDIO/discovery_cliffside_CLIP.WAV"
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/around_the_dining_room_morning_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/carkeek_seaside_train_EDIT.WAV";
+// p = "/Users/admin/src/rover/data/AUDIO/EDITS/dark_trees_shoot_EDIT.WAV";
+// p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_capture_EDIT.WAV";
+// p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_capture2_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_1_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_2_EDIT.WAV";
+// p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_CLIP.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_yellow_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/garden_morning1_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/garden_morning2_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_central_dist_clear_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_porch_13min_EDIT.WAV";
+
 ~data = ~load.(p, true)
+
+// clustering
+// define vectors
+(
+~vectors = ~data.analysis.featuredata.clump( ~data.analysis.numfeatures );
+~numClusters = 8;
+k = KMeansMod(~numClusters);
+~vectors.do{|vec, i| k.add(vec) };
+)
+// then... make sure centroids aren't too heavily weighted
+// toward first entriesrecenter the centroids
+// k.update
+fork{ k.reset.update; "done".postln }
+~numClusters.do{|index| postf("cluster %: %\n", index, k.assignments.occurrencesOf(index)) }
+
+
 ~kMeansPath = PathName(p).pathOnly ++ PathName(p).fileNameWithoutExtension++"_KMEANS"++".scmirZ";
+// k.save(~kMeansPath)
 ~recalledK = KMeansMod().load(~kMeansPath)
 
 // initialize a grain scanner
@@ -124,7 +156,7 @@ g = GrainScanner2( 0, p )
 // give it the cluser and "beat" data
 // g.initClusterData( k, ~data.beatdata)
 g.initClusterData( ~recalledK, ~data.beatdata )
-g.cluster_( 2 )
+g.cluster_( 0 )
 
 g.gui
 g.play
@@ -152,8 +184,8 @@ g.invalidClusters		// any clusters with 0 frames?
 // g.play
 g.gui
 
-g.grnResponder.free
 
+g.release
 g.free
 
 i = GrainScanner(0, g.buffers)
