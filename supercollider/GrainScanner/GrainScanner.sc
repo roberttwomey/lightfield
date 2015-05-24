@@ -270,7 +270,7 @@ GrainScannerView {
 				.action_({ |bx|scanner.grnDur_(bx.value) })
 				.value_(scanner.grnDurSpec.default)
 			)
-			.knob_(	Knob()
+			.knob_(	Knob().keystep_(0.0001)
 				.action_({|knb|
 					scanner.grnDur_(scanner.grnDurSpec.map(knb.value)) })
 				.value_(scanner.grnDurSpec.unmap(scanner.grnDurSpec.default))
@@ -282,7 +282,7 @@ GrainScannerView {
 					scanner.grnRate_(bx.value) })
 				.value_(scanner.grnRateSpec.default)
 			)
-			.knob_(	Knob()
+			.knob_(	Knob().keystep_(0.0001)
 				.action_({|knb|
 					scanner.grnRate_(scanner.grnRateSpec.map(knb.value)) })
 				.value_(scanner.grnRateSpec.unmap(scanner.grnRateSpec.default))
@@ -294,7 +294,7 @@ GrainScannerView {
 					scanner.grnRand_(bx.value) })
 				.value_(scanner.grnRandSpec.default)
 			)
-			.knob_(	Knob()
+			.knob_(	Knob().keystep_(0.0001)
 				.action_({|knb|
 					scanner.grnRand_(scanner.grnRandSpec.map(knb.value)) })
 				.value_(scanner.grnRandSpec.unmap(scanner.grnRandSpec.default))
@@ -306,7 +306,7 @@ GrainScannerView {
 					scanner.pntrRate_(bx.value) })
 				.value_(scanner.pntrRateSpec.default)
 			)
-			.knob_(	Knob()
+			.knob_(	Knob().keystep_(0.0001)
 				.action_({|knb|
 					scanner.pntrRate_(scanner.pntrRateSpec.map(knb.value)) })
 				.value_(scanner.pntrRateSpec.unmap(scanner.pntrRateSpec.default))

@@ -21,7 +21,7 @@
 		analysis = SCMIRAudioFile(path, [[MFCC,4],[SpecCentroid],[Chromagram]]);
 		analysis.extractFeatures();
 		analysis.extractBeats();
-		analysis.save;
+		analysis.save(scmirZTestFile);
 		"File Saved".postln;
 	};
 
@@ -152,6 +152,8 @@ fork{ k.reset.update; "done".postln }
 ~recalledK = KMeansMod().load(~kMeansPath)
 
 // initialize a grain scanner
+s.boot
+
 g = GrainScanner2( 0, p )
 // give it the cluser and "beat" data
 // g.initClusterData( k, ~data.beatdata)
@@ -160,16 +162,23 @@ g.cluster_( 0 )
 
 g.gui
 g.play
-// g.encoderSynths.do(_.play)
-g.encoderSynth.play
-g.xformSynth.play
 
-g.xformSynth.xformAmt_(pi/2)
-g.xformSynth.xformAmt_(pi/4)
-g.xformSynth.xformAmt_(0)
-g.xformSynth.az_(pi/4)
-g.synths.do(_.free)
-g.encoderSynths.do(_.free)
+
+e = GrainScanner2( 0, g.buffers )
+e.initClusterData( ~recalledK, ~data.beatdata )
+e.cluster_( 1 )
+
+e.gui
+
+
+f = GrainScanner2( 0, g.buffers )
+f.initClusterData( ~recalledK, ~data.beatdata )
+f.cluster_( 2 )
+
+f.gui
+
+
+[g,e,f].do(_.free)
 
 // INFO: check params
 g.curCluster
