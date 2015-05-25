@@ -5,7 +5,8 @@ GrainScanner2 {
 	var <outbus, bufferOrPath;
 	var server, <sf, <buffers, <grnGroup, <bfGroup, <synths, <bufDur, <view, <bufferPath;
 	var <grnResponder, <replyID;
-	var <grnDurSpec, <grnRateSpec, <grnRandSpec, <grnDispSpec, <distFrmCenSpec, <clusterSpreadSpec, <azSpec, <xformAmtSpec;
+	var <grnDurSpec, <grnRateSpec, <grnRandSpec, <grnDispSpec, <distFrmCenSpec, <clusterSpreadSpec, <azSpec, <xformAmtSpec, <ampSpec;
+	var <panSpreadSpec, <panCenterSpec;
 	var <>postFrames =false, <playing = false;
 	var <panBus, <bfBus, <diffuser, <encoderSynth, <xformSynth, <bfEncoderDef;
 	var <sphereDec;
@@ -34,15 +35,18 @@ GrainScanner2 {
 			grnDurSpec = ControlSpec(0.01, 8, warp: 3, default: 1.3);
 			grnRateSpec = ControlSpec(4.reciprocal, 70, warp: 3, default:10);
 			grnRandSpec = ControlSpec(0, 1, warp: 4, default: 0.0);
-			grnDispSpec = ControlSpec(0, 5, warp: 3, default: 0.1);
+			grnDispSpec = ControlSpec(0, 5, warp: 3, default: 0.03);
+			ampSpec = ControlSpec(-90, 16, warp: 'db', default: 0.0);
 
 			// cluster specs
-			clusterSpreadSpec = ControlSpec(0, 0.5, warp: 4, default: 0.01);
-			distFrmCenSpec = ControlSpec(0, 1, warp: 0, default: 0.01);
+			clusterSpreadSpec = ControlSpec(0, 0.5, warp: 3, default: 0.05);
+			distFrmCenSpec = ControlSpec(0, 1, warp: 0, default: 0.1);
 
 			// space specs
 			azSpec = ControlSpec(pi, -pi, warp: 0, default: 0);
-			xformAmtSpec = ControlSpec(0, pi/2, warp: 0, default: 0);
+			xformAmtSpec = ControlSpec(0, pi/2, warp: 0, default: pi/4);
+			panCenterSpec = ControlSpec(-1, 1, warp: 0, default: 0.0);
+			panSpreadSpec = ControlSpec(0, 1, warp: 'db', default: 0.25);
 
 			fork{
 				var cond = Condition();
@@ -128,14 +132,15 @@ GrainScanner2 {
 			panBus = CtkAudio.play(4);
 			bfBus = CtkAudio.play(4);
 			diffuser = FoaEncoderKernel.newDiffuse( 4, 1024 );
-			sphereDec = FoaDecoderKernel.newCIPIC;
+			// sphereDec = FoaDecoderKernel.newCIPIC;
+			sphereDec = FoaDecoderMatrix.newDiametric([pi/5, -pi/5], 'controlled');
 			server.sync;
 			this.loadLocalSynthLib; // load encoder synth with diffuser
 			server.sync;
 
 			encoderSynth = bfEncoderDef.note(addAction: \head, target: bfGroup)
-				.outbus_(bfBus).inbus_(panBus)
-				.rotateRate_( (8 + 6.0.rand).reciprocal );
+			.outbus_(bfBus).inbus_(panBus)
+			.rotateRate_( (8 + 6.0.rand).reciprocal );
 
 			xformSynth = bfXformDef.note(addAction: \tail, target: bfGroup)
 			.outbus_(outbus).inbus_(bfBus)
@@ -144,7 +149,8 @@ GrainScanner2 {
 			synths = buffers.collect{ |buf, i|
 				grnSynthDef.note(addAction: \head, target: grnGroup)
 				// .outbus_(outbus+i)
-				.outbus_(panBus)
+				// .outbus_(panBus)
+				.outbus_(outbus)
 				.buffer_(buf).bufnum_(buf.bufnum)
 				.grainRate_(grnRateSpec.default)
 				.grainDur_(grnDurSpec.default)
@@ -216,11 +222,18 @@ GrainScanner2 {
 	grnDisp_ {|dispSecs|
 		synths.do(_.grainDisp_(dispSecs)); this.changed(\grnDisp, dispSecs); }
 
+	amp_ {|amp| synths.do(_.amp_(amp)); this.changed(\amp, amp); }
+
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	/* space controls */
-	az_ { |azRad| xformSynth.az_(azRad); this.changed(\az, azRad); }
-
-	xformAmt_ { |amtRad| xformSynth.xformAmt_(amtRad); this.changed(\xformAmt, amtRad); }
+	// az_ { |azRad| xformSynth.az_(azRad); this.changed(\az, azRad); }
+	// xformAmt_ { |amtRad| xformSynth.xformAmt_(amtRad); this.changed(\xformAmt, amtRad); }
+	az_ { |az| // -0.5, 0.5
+		synths.do(_.panCenter_(az)); this.changed(\az, az);
+	}
+	xformAmt_ { |amt| // 0>1
+		synths.do(_.panSpread_(amt)); this.changed(\xformAmt, amt);
+	}
 
 	// mirFrames: eg. ~data.beatdata
 	initClusterData { |aKMeansMod, mirFrames|
@@ -355,7 +368,9 @@ GrainScanner2 {
 			arg outbus = 0, grainRate = 2, grainDur=1.25, grainRand = 0, grainDisp = 0,
 			clusterSpread = 0.1, distFrmCen = 0,
 			buffer, bufnum, pos = 0, replyID = -1,
-			fadein = 2, fadeout = 2, gate = 1;
+			panCenter = 0, panSpread = 0.25,
+			fadein = 2, fadeout = 2, amp = 1, gate = 1;
+
 			var env, trig, out, grain_dens, amp_scale, disp, dispNorm;
 
 			// envelope for fading output in and out - re-triggerable
@@ -382,11 +397,11 @@ GrainScanner2 {
 				trig, grainDur, buffer, 1,
 				(pos + disp).wrap(0,1),
 				1, interp:1, grainAmp: amp_scale,
-				pan: WhiteNoise.kr // random grain location in the panned channels (difusers)
+				pan: WhiteNoise.kr(panSpread, panCenter).wrap(-1,1) // random grain location in the panned channels (difusers)
 			);
 			out = out * env;
 			// out = Pan2.ar(out);
-			Out.ar(outbus, out);
+			Out.ar(outbus, out * amp);
 		});
 	}
 
@@ -394,13 +409,13 @@ GrainScanner2 {
 	loadLocalSynthLib {
 		// TODO: move back to global once Decoder kernel method is removed
 		// transform the global bformat image
-		bfXformDef = CtkSynthDef(\bfXform, { arg inbus, outbus, az=0, el = 0, xformAmt = 0.785;
+		bfXformDef = CtkSynthDef(\bfXform, { arg inbus, outbus, az=0, el = 0, xformAmt = 0.785, amp = 1;
 			var in, out, xform, decode;
 			in = In.ar(inbus, 1);
 			xform = FoaPush.ar(in, xformAmt, az, el);
 			// decode = FoaDecode.ar(xform, FoaDecoderMatrix.newStereo(pi/3.5, 0.5));
 			decode = FoaDecode.ar(xform, sphereDec);
-			Out.ar(outbus, decode);
+			Out.ar(outbus, decode * amp);
 		});
 
 		bfEncoderDef = CtkSynthDef(\bfEncodeRotate, { arg inbus, outbus, rotateRate = 0.1;
@@ -420,12 +435,14 @@ GrainScanner2 {
 			// // sum the 4 BF signals into 1
 			// Out.ar(outbus, Mix.ar(rotate));
 
-			encoder = FoaEncode.ar(in, FoaEncoderMatrix.newAtoB('flu', 'car'));
-			rotate = FoaRTT.ar( encoder,
-				LFDNoise1.kr(rotateRate).range(0,2pi),
-				LFDNoise1.kr(rotateRate).range(0,2pi),
-				LFDNoise1.kr(rotateRate).range(0,2pi)
-			);
+			// encoder = FoaEncode.ar(in, FoaEncoderMatrix.newAtoB('flr', 'car'));
+			encoder = FoaEncode.ar(in, FoaEncoderMatrix.newDirections([0.25pi, -0.25pi, -0.75pi, 0.75pi], 0.6));
+			rotate = encoder;
+			// rotate = FoaRTT.ar( encoder,
+			// 	LFDNoise1.kr(rotateRate).range(0,2pi),
+			// 	LFDNoise1.kr(rotateRate).range(0,2pi),
+			// 	LFDNoise1.kr(rotateRate).range(0,2pi)
+			// );
 			Out.ar(outbus, rotate);
 		});
 	}
@@ -457,7 +474,7 @@ GrainScanner2View {
 				.action_({ |bx|scanner.grnDur_(bx.value) })
 				.value_(scanner.grnDurSpec.default)
 			)
-			.knob_(	Knob()
+			.knob_(	Knob().keystep_(0.0001)
 				.action_({|knb|
 					scanner.grnDur_(scanner.grnDurSpec.map(knb.value)) })
 				.value_(scanner.grnDurSpec.unmap(scanner.grnDurSpec.default))
@@ -469,7 +486,7 @@ GrainScanner2View {
 					scanner.grnRate_(bx.value) })
 				.value_(scanner.grnRateSpec.default)
 			)
-			.knob_(	Knob()
+			.knob_(	Knob().keystep_(0.0001)
 				.action_({|knb|
 					scanner.grnRate_(scanner.grnRateSpec.map(knb.value)) })
 				.value_(scanner.grnRateSpec.unmap(scanner.grnRateSpec.default))
@@ -481,7 +498,7 @@ GrainScanner2View {
 					scanner.grnRand_(bx.value) })
 				.value_(scanner.grnRandSpec.default)
 			)
-			.knob_(	Knob()
+			.knob_(	Knob().keystep_(0.0001)
 				.action_({|knb|
 					scanner.grnRand_(scanner.grnRandSpec.map(knb.value)) })
 				.value_(scanner.grnRandSpec.unmap(scanner.grnRandSpec.default))
@@ -493,10 +510,25 @@ GrainScanner2View {
 					scanner.grnDisp_(bx.value) })
 				.value_(scanner.grnDispSpec.default)
 			)
-			.knob_(	Knob()
+			.knob_(	Knob().keystep_(0.0001)
 				.action_({|knb|
 					scanner.grnDisp_(scanner.grnDispSpec.map(knb.value)) })
 				.value_(scanner.grnDispSpec.unmap(scanner.grnDispSpec.default))
+			),
+
+			\amp, ()
+			.slider_( Slider().orientation_('vertical')
+				.action_({|sl|
+					scanner.amp_(scanner.ampSpec.map(sl.value).dbamp)
+				})
+				.value_(scanner.ampSpec.unmap(scanner.ampSpec.default))
+			)
+			.numBox_( NumberBox()
+				.action_({ |bx|
+					scanner.amp_(bx.value.dbamp) })
+				.value_(scanner.ampSpec.default)
+			)
+			.txt_( StaticText().string_("dB").align_(\center)
 			),
 
 			// cluster controls
@@ -507,7 +539,7 @@ GrainScanner2View {
 					scanner.clusterSpread_(bx.value) })
 				.value_(scanner.clusterSpreadSpec.default)
 			)
-			.knob_(	Knob()
+			.knob_(	Knob().keystep_(0.0001)
 				.action_({|knb|
 					scanner.clusterSpread_(scanner.clusterSpreadSpec.map(knb.value)) })
 				.value_(scanner.clusterSpreadSpec.unmap(scanner.clusterSpreadSpec.default))
@@ -519,7 +551,7 @@ GrainScanner2View {
 					scanner.distFrmCen_(bx.value) })
 				.value_(scanner.distFrmCenSpec.default)
 			)
-			.knob_(	Knob()
+			.knob_(	Knob().keystep_(0.0001)
 				.action_({|knb|
 					scanner.distFrmCen_(scanner.distFrmCenSpec.map(knb.value)) })
 				.value_(scanner.distFrmCenSpec.unmap(scanner.distFrmCenSpec.default))
@@ -528,7 +560,7 @@ GrainScanner2View {
 			\newCluster, ()
 			.numBox_( NumberBox()
 				.action_({ |bx| scanner.cluster_(bx.value.asInt) }) )
-			.txt_( StaticText().string_("New cluster") ),
+			.txt_( StaticText().string_("Cluster") ),
 
 
 			// space controls
@@ -536,23 +568,30 @@ GrainScanner2View {
 			.numBox_( NumberBox()
 				.action_({ |bx|
 					scanner.az_(bx.value) })
-				.value_(scanner.azSpec.default)
+				// .value_(scanner.azSpec.default)
+				.value_(scanner.panCenterSpec.default)
 			)
-			.knob_(	Knob().centered_(true)
+			.knob_(	Knob().keystep_(0.0001).centered_(true)
 				.action_({|knb|
-					scanner.az_(scanner.azSpec.map(knb.value)) })
-				.value_(scanner.azSpec.unmap(scanner.azSpec.default))
+					// scanner.az_(scanner.azSpec.map(knb.value)) })
+					scanner.az_(scanner.panCenterSpec.map(knb.value)) })
+				// .value_(scanner.azSpec.unmap(scanner.azSpec.default))
+				.value_(scanner.panCenterSpec.unmap(scanner.panCenterSpec.default))
 			),
+
 			\xformAmt, ()
 			.numBox_( NumberBox()
 				.action_({ |bx|
 					scanner.xformAmt_(bx.value) })
-				.value_(scanner.xformAmtSpec.default)
+				// .value_(scanner.xformAmtSpec.default)
+				.value_(scanner.panSpreadSpec.default)
 			)
-			.knob_(	Knob()
+			.knob_(	Knob().keystep_(0.0001)
 				.action_({|knb|
-					scanner.xformAmt_(scanner.xformAmtSpec.map(knb.value)) })
-				.value_(scanner.xformAmtSpec.unmap(scanner.xformAmtSpec.default))
+					// scanner.xformAmt_(scanner.xformAmtSpec.map(knb.value)) })
+					scanner.xformAmt_(scanner.panSpreadSpec.map(knb.value)) })
+				// .value_(scanner.xformAmtSpec.unmap(scanner.xformAmtSpec.default))
+				.value_(scanner.xformAmtSpec.unmap(scanner.panSpreadSpec.default))
 			),
 
 			// play/release
@@ -573,42 +612,49 @@ GrainScanner2View {
 	}
 
 	makeWin {
-		win = Window("a GrainScanner", Rect(200,200,250,100)).layout_(
-			VLayout(
-				HLayout(
-					*[\grnDur, \grnRate, \grnRand, \grnDisp].collect({ |key|
-						VLayout( StaticText().string_(key).align_(\center),
-							HLayout( controls[key].numBox.maxWidth_(55), controls[key].knob.mode_(\vert) )
-						)
-					})
+		win = Window("a GrainScanner", Rect(200,200,450,100)).layout_(
+			HLayout(
+				VLayout(
+					[controls[\amp].slider.maxWidth_(30), a: \center],
+					controls[\amp].numBox.fixedWidth_(45),
+					controls[\amp].txt.maxWidth_(45),
 				),
-				HLayout(
-					VLayout(
-						[controls[\newCluster].txt.align_(\left), a: \top ],
-						[controls[\newCluster].numBox.maxWidth_(55), a: \top],
-						nil
+				VLayout(
+					HLayout(
+						*[\grnDur, \grnRate, \grnRand, \grnDisp].collect({ |key|
+							VLayout( StaticText().string_(key).align_(\center),
+								HLayout( controls[key].numBox.maxWidth_(55), controls[key].knob.mode_(\vert) )
+							)
+						})
+					),
+					HLayout(
+						VLayout(
+							[controls[\newCluster].txt.align_(\left), a: \topLeft ],
+							[controls[\newCluster].numBox.maxWidth_(55), a: \topLeft],
+							nil
+						),
+						nil,
+						*[\distFrmCen, \clusterSpread].collect({ |key|
+							VLayout( StaticText().string_(key).align_(\center),
+								HLayout( controls[key].numBox.maxWidth_(55), controls[key].knob.mode_(\vert) )
+							)
+						})
+					),
+					HLayout(
+						nil, nil,
+						*[\az, \xformAmt].collect({ |key|
+							VLayout( StaticText().string_(key).align_(\center),
+								HLayout( controls[key].numBox.maxWidth_(55), controls[key].knob.mode_(\vert) )
+							)
+						})
 					),
 					nil,
-					*[\distFrmCen, \clusterSpread].collect({ |key|
-						VLayout( StaticText().string_(key).align_(\center),
-							HLayout( controls[key].numBox.maxWidth_(55), controls[key].knob.mode_(\vert) )
-						)
-					})
-				),
-				HLayout(
-					nil,
-					*[\az, \xformAmt].collect({ |key|
-						VLayout( StaticText().string_(key).align_(\center),
-							HLayout( controls[key].numBox.maxWidth_(55), controls[key].knob.mode_(\vert) )
-						)
-					})
-				),
-				nil,
-				HLayout(
-					[controls[\fadeIO].button.fixedWidth_(35), a: \left],
-					[controls[\fadeIO].txt.align_(\left), a: \left ],
-					nil
-				),
+					HLayout(
+						[controls[\fadeIO].button.fixedWidth_(35), a: \left],
+						[controls[\fadeIO].txt.align_(\left), a: \left ],
+						nil
+					),
+				)
 			)
 		)
 		.onClose_({scanner.addDependant( this );})
@@ -638,6 +684,11 @@ GrainScanner2View {
 					ctl.numBox.value_( val );
 					ctl.knob.value_(scanner.grnDispSpec.unmap( val ));
 				},
+				\amp, {  var ctl = controls.amp;
+					ctl.numBox.value_( val.ampdb );
+					ctl.slider.value_(scanner.ampSpec.unmap( val.ampdb ));
+				},
+
 				\distFrmCen, {  var ctl = controls.distFrmCen;
 					ctl.numBox.value_( val );
 					ctl.knob.value_(scanner.distFrmCenSpec.unmap( val ));
@@ -648,11 +699,13 @@ GrainScanner2View {
 				},
 				\az, { var ctl = controls.az;
 					ctl.numBox.value_( val );
-					ctl.knob.value_(scanner.azSpec.unmap( val ));
+					// ctl.knob.value_(scanner.azSpec.unmap( val ));
+					ctl.knob.value_(scanner.panCenterSpec.unmap( val ));
 				},
 				\xformAmt, { var ctl = controls.xformAmt;
 					ctl.numBox.value_( val );
-					ctl.knob.value_(scanner.xformAmtSpec.unmap( val ));
+					// ctl.knob.value_(scanner.xformAmtSpec.unmap( val ));
+					ctl.knob.value_(scanner.panSpreadSpec.unmap( val ));
 				},
 			)
 		});
