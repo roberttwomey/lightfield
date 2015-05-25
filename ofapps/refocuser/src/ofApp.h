@@ -7,6 +7,11 @@
 #define MAX_SUBIMAGES 600
 #define MAX_OFFSETS 1200
 
+// physical setup
+#define SCREEN_WIDTH 55.0
+#define SCREEN_HEIGHT 50.0
+
+
 class ofApp : public ofBaseApp{
 public:
 

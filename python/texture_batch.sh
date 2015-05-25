@@ -1,5 +1,6 @@
 #!/bin/bash
 
+export DISPLAY=:0
 
 # ==== laptop versions 
 # python mp_vsfm_rectify.py --reorder wrap --laptop 20x30 ~/code/lightfield/data/shoots/yellowcliff/undistorted/*.jpg
@@ -17,6 +18,7 @@
 # python mp_vsfm_rectify.py --laptop 20x10 ~/code/lightfield/data/shoots/ballard_wall/undistorted/*.jpg
 # python mp_vsfm_rectify.py --laptop 16x14 ~/code/lightfield/data/shoots/precise/undistorted/*.jpg
 # python mp_vsfm_rectify.py --reorder wrap --laptop 20x15 ~/code/lightfield/data/shoots/towers/undistorted/*.jpg
+# python mp_vsfm_rectify.py --reorder wrap --laptop 15x20 ~/code/lightfield/data/shoots/tivon1/undistorted/*.jpg
 
 
 # # ==== max res single texture versions
@@ -35,6 +37,7 @@
 # python mp_vsfm_rectify.py --single 20x10 ~/code/lightfield/data/shoots/ballard_wall/undistorted/*.jpg
 # python mp_vsfm_rectify.py --single 16x14 ~/code/lightfield/data/shoots/precise/undistorted/*.jpg
 # python mp_vsfm_rectify.py --reorder wrap --single 20x15 ~/code/lightfield/data/shoots/towers/undistorted/*.jpg
+# python mp_vsfm_rectify.py --reorder wrap --single 15x20 ~/code/lightfield/data/shoots/tivon1/undistorted/*.jpg
 
 
 # ==== full res tiled versions
@@ -52,18 +55,11 @@
 # python mp_vsfm_rectify.py --reorder wrap --fullres 20x30 ~/code/lightfield/data/shoots/tunnel/undistorted/*.jpg
 # python mp_vsfm_rectify.py --fullres 20x10 ~/code/lightfield/data/shoots/ballard_wall/undistorted/*.jpg
 # python mp_vsfm_rectify.py --fullres 16x14 ~/code/lightfield/data/shoots/precise/undistorted/*.jpg
+# python mp_vsfm_rectify.py --reorder wrap --fullres 15x20 ~/code/lightfield/data/shoots/tivon1/undistorted/*.jpg
 
-# start with frame 1
-# python mp_vsfm_rectify.py --reorder wrap --fullres 20x15 ~/code/lightfield/data/shoots/towers/undistorted/*.jpg
-
-
-
-# vsfm results seem to be missing
-#python mp_vsfm_rectify.py --reorder wrap --single 15x20 ~/code/lightfield/data/shoots/tivon1/undistorted/*.jpg
 
 # multiple independent models (12)
 # python mp_vsfm_rectify.py --reorder wrap --single 15x20 ~/code/lightfield/data/shoots/tivon2/undistorted/*.jpg
 
-
-#eq results // yellow_trees, outsidelookingin, towers
+#eq'd results // yellow_trees, outsidelookingin, towers
 

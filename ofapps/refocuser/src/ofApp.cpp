@@ -85,6 +85,14 @@ void ofApp::draw(){
     // draw fused image
     fbo->draw(xoff, 0, width, height);
 
+    // crop to 50 x 55 screen size
+    float cwidth = height / SCREEN_HEIGHT * SCREEN_WIDTH;
+    float bar = (width-cwidth)/2.0;
+    ofSetColor(0);
+    ofFill();
+    ofRect(0, 0, bar, height);
+    ofRect(width-bar, 0, width, height);
+    
     // draw thumbnail with indicator
     if(bShowThumbnail == true) {
 
@@ -187,15 +195,6 @@ void ofApp::loadXMLScene(string scenefile) {
     zoom = xml.getValue("zoom", 1.0);
     xoffset = 0;
     yoffset = 0;
-
-    // read these from the settings file
-//    // debug information (text, mouse, thumbnail) //
-//    bShowThumbnail = (xml.getValue("drawthumbnail", 0) > 0);
-//    bHideCursor = (xml.getValue("hidecursor", 0) > 0);
-//    bDebug = (xml.getValue("debug", 0) > 0);
-//
-//    // osc receiving
-//    port = xml.getValue("oscport", 12345);
 
     // read camera positions
     xml.pushTag("cameras");
@@ -592,11 +591,11 @@ void ofApp::process_OSC(ofxOscMessage m) {
 void ofApp::snapshot() {
     string timestamp, imgfilename, paramfilename;
 
-    // save time-stamped image to data folder
+    // save sequential snapshot image to data folder
     bool done = false;
-    while(!done) {
-//        timestamp = "./snapshots/"+ofGetTimestampString("%m%d%H%M") + "_" + ofToString(snapcount, 4, '0');
 
+    snapcount = 0;
+    while(!done) {
         ofFile file(scenefiles[0]);
         string filename = file.getBaseName();
 //        timestamp = "./snapshots/"+filename+ "_" +ofGetTimestampString("%m%d%H%M")+"_" + ofToString(snapcount, 4, '0');
@@ -609,21 +608,41 @@ void ofApp::snapshot() {
         snapcount++;
     }
 
-    // save fbo to file
-    // from http://forum.openframeworks.cc/t/ofxfenster-addon-to-handle-multiple-windows-rewrite/6499/61
+    // fbo pixels
     int w = fbo->getWidth();
     int h = fbo->getHeight();
-    unsigned char* pixels = new unsigned char[w*h*3];  ;
+    unsigned char* fbo_pixels = new unsigned char[w*h*3];
+
+    // crop to projection size
+    int crop_w = h / SCREEN_HEIGHT * SCREEN_WIDTH;
+    int edge = (w-crop_w)/2.0;
+
+    // output images
     ofImage screenGrab;
-    screenGrab.allocate(w,h,OF_IMAGE_COLOR);
+    unsigned char* img_pixels = new unsigned char[crop_w*h*3];
+
+    screenGrab.allocate(crop_w,h,OF_IMAGE_COLOR);
     screenGrab.setUseTexture(false);
 
     //copy the pixels from FBO to the pixel array; then set the normal ofImage from those pixels; and use the save method of ofImage
     fbo->begin();
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glReadPixels(0, 0, fbo->getWidth(), fbo->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, pixels);
-    screenGrab.setFromPixels(pixels, fbo->getWidth(), fbo->getHeight(), OF_IMAGE_COLOR);
+    glReadPixels(0, 0, fbo->getWidth(), fbo->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, fbo_pixels);
+
+    // copy cropped window from fbo to screengrab pixels
+    for(int x=edge; x<edge+crop_w; x++) {
+        for(int y=0; y<h; y++) {
+            int fbo_i = (x+y*w) * 3;
+            int img_i = ((x-edge) + y*crop_w) * 3;
+            img_pixels[img_i]=fbo_pixels[fbo_i];
+            img_pixels[img_i+1]=fbo_pixels[fbo_i+1];
+            img_pixels[img_i+2]=fbo_pixels[fbo_i+2];
+        }
+    }
+    
+    screenGrab.setFromPixels(img_pixels, crop_w, h, OF_IMAGE_COLOR);
     screenGrab.saveImage(imgfilename, OF_IMAGE_QUALITY_BEST);
+    
     fbo->end();
     ofLog(OF_LOG_VERBOSE, "[DiskOut]  saved frame " + imgfilename );
 
