@@ -1,5 +1,26 @@
 (
 ~load = { |path,auto_segment=true|
+	var scmirZTestFile;
+
+	"Loading SCMIR data".postln;
+
+	scmirZTestFile = PathName(path).pathOnly++PathName(path).fileNameWithoutExtension++".scmirZ";
+
+	if ( File.exists(scmirZTestFile))
+	{
+		"Found scMIR Analysis File...loading".postln;
+		SCMIRAudioFile.newFromZ(scmirZTestFile);
+	} {
+		Error("No analysis found at this path");
+		nil;
+	};
+}
+)
+
+
+// This method for performing the analysis if none exists already
+(
+~load = { |path,auto_segment=true|
 	var name, event=(), buffer, analysis, frames, beatdata, segments;
 	var blind_segment_grain_size=0.1, scmirZTestFile;
 
@@ -129,8 +150,12 @@ p = "/Users/admin/src/rover/data/AUDIO/EDITS/garden_morning1_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/garden_morning2_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_central_dist_clear_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_porch_13min_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/sandwich_fridge_rover.wav"
 
-~data = ~load.(p, true)
+(
+~data = ~load.(p, true);
+"done".postln;
+)
 
 // clustering
 // define vectors
@@ -158,6 +183,10 @@ g = GrainScanner2( 0, p )
 // give it the cluser and "beat" data
 // g.initClusterData( k, ~data.beatdata)
 g.initClusterData( ~recalledK, ~data.beatdata )
+
+g.addScanner
+g.scanners[0].gui
+
 g.cluster_( 0 )
 
 g.gui
