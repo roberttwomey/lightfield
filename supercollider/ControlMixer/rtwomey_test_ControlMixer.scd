@@ -18,49 +18,47 @@ c = ControlMixMaster( ["focus", "fade", "zoom", "xscroll", "yscroll", "xstart", 
 
  // interiors
 
-//
- <scene>./textures/mike1_laptop.xml</scene>
- <scene>./textures/mike2_laptop.xml</scene>
- <scene>./textures/mike3_laptop.xml</scene>
- <scene>./textures/diningroom3_laptop.xml</scene>
+ <scene>./textures/mike1.xml</scene>
+ <scene>./textures/mike2.xml</scene>
+ <scene>./textures/mike3.xml</scene>
+ <scene>./textures/diningroom3.xml</scene>
 
 
 // departures
 // desaturate?
 
-<scene>./textures/dark_trees_laptop.xml</scene>
-<scene>./textures/outsidelookingin_laptop.xml</scene>
-<scene>./textures/bookcase_laptop.xml</scene>
-<scene>./textures/carkeek_laptop.xml</scene>
-
+<scene>./textures/dark_trees.xml</scene>
+<scene>./textures/outsidelookingin.xml</scene>
+<scene>./textures/carkeek.xml</scene>
+<scene>./textures/bookcase.xml</scene>
 
 
 // outtakes
-<scene>./textures/cliffside_laptop.xml</scene>
-<scene>./textures/tunnel_laptop.xml</scene>
-<scene>./textures/yellowcliff_laptop.xml</scene>
+<scene>./textures/cliffside.xml</scene>
+<scene>./textures/tunnel.xml</scene>
+<scene>./textures/yellowcliff.xml</scene>
 
 
-<scene>./textures/precise_laptop.xml</scene>
-<scene>./textures/towers_laptop.xml</scene>
-<scene>./textures/ballard_wall_laptop.xml</scene>
-<scene>./textures/carkeek_night_laptop.xml</scene>
+<scene>./textures/precise.xml</scene>
+<scene>./textures/towers.xml</scene>
+<scene>./textures/ballard_wall.xml</scene>
+<scene>./textures/carkeek_night.xml</scene>
 
 */
-c.loadScene("./textures/bookcase_laptop.xml")
-c.loadScene("./textures/carkeek_laptop.xml")
-c.loadScene("./textures/carkeek_night_laptop.xml")
-c.loadScene("./textures/cliffside_laptop.xml")
-c.loadScene("./textures/dark_trees_laptop.xml")
-c.loadScene("./textures/diningroom3_laptop.xml")
-c.loadScene("./textures/mike1_laptop.xml")
-c.loadScene("./textures/mike2_laptop.xml")
-c.loadScene("./textures/mike3_laptop.xml")
-c.loadScene("./textures/outsidelookingin_laptop.xml")
-c.loadScene("./textures/precise_laptop.xml")
-c.loadScene("./textures/towers_laptop.xml")
-c.loadScene("./textures/tunnel_laptop.xml")
-c.loadScene("./textures/yellowcliff_laptop.xml")
+c.loadScene("./textures/bookcase.xml")
+c.loadScene("./textures/carkeek.xml")
+c.loadScene("./textures/carkeek_night.xml")
+c.loadScene("./textures/cliffside.xml")
+c.loadScene("./textures/dark_trees.xml")
+c.loadScene("./textures/diningroom3.xml")
+c.loadScene("./textures/mike1.xml")
+c.loadScene("./textures/mike2.xml")
+c.loadScene("./textures/mike3.xml")
+c.loadScene("./textures/outsidelookingin.xml")
+c.loadScene("./textures/precise.xml")
+c.loadScene("./textures/towers.xml")
+c.loadScene("./textures/tunnel.xml")
+c.loadScene("./textures/yellowcliff.xml")
 
 
 // c.loadScene("./textures/tivon1_calib.xml")

@@ -1,0 +1,6 @@
+./textures/outsidelookingin_tex.xml
+-0.0163095
+-0.0351562,-0.1875
+0,0
+22,22
+0.839951
