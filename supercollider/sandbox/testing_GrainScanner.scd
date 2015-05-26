@@ -1,6 +1,6 @@
 (
-~load = { |path,auto_segment=true|
-	var scmirZTestFile;
+~loadFromFile = { |path,auto_segment=true|
+	var scmirZTestFile, data;
 
 	"Loading SCMIR data".postln;
 
@@ -9,7 +9,9 @@
 	if ( File.exists(scmirZTestFile))
 	{
 		"Found scMIR Analysis File...loading".postln;
-		SCMIRAudioFile.newFromZ(scmirZTestFile);
+		data = SCMIRAudioFile.newFromZ(scmirZTestFile);
+		"SCMIR data loaded".postln;
+		data;
 	} {
 		Error("No analysis found at this path");
 		nil;
@@ -20,7 +22,7 @@
 
 // This method for performing the analysis if none exists already
 (
-~load = { |path,auto_segment=true|
+~loadOrProcess = { |path,auto_segment=true|
 	var name, event=(), buffer, analysis, frames, beatdata, segments;
 	var blind_segment_grain_size=0.1, scmirZTestFile;
 
@@ -39,7 +41,8 @@
 		//analysis.load; // << newFromZ calls this already!!
 	} {
 		"New file...beginning analysis".postln;
-		analysis = SCMIRAudioFile(path, [[MFCC,4],[SpecCentroid],[Chromagram]]);
+		// analysis = SCMIRAudioFile(path, [[MFCC,4],[SpecCentroid],[Chromagram]]);
+		analysis = SCMIRAudioFile(path, [[MFCC,4],[SpecCentroid],[Chromagram, 6], [FFTCrest]]);
 		analysis.extractFeatures();
 		analysis.extractBeats();
 		analysis.save(scmirZTestFile);
@@ -76,7 +79,7 @@ File.exists(~mirPath)
 
 //-run analysis function [path,auto-segment]
 // auto-segment
-~data = ~load.(p, true)
+~data = ~loadOrProcess.(p, true)
 
 // clustering
 // define vectors
@@ -136,26 +139,30 @@ fork{ k.reset.update; "done".postln }
 // --------------------------------
 s.boot;
 // p = "/Users/admin/src/rover/data/AUDIO/discovery_cliffside_CLIP.WAV"
-p = "/Users/admin/src/rover/data/AUDIO/EDITS/around_the_dining_room_morning_EDIT.WAV";
-p = "/Users/admin/src/rover/data/AUDIO/EDITS/carkeek_seaside_train_EDIT.WAV";
+// p = "/Users/admin/src/rover/data/AUDIO/sandwich_fridge_rover.wav"
 // p = "/Users/admin/src/rover/data/AUDIO/EDITS/dark_trees_shoot_EDIT.WAV";
 // p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_capture_EDIT.WAV";
 // p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_capture2_EDIT.WAV";
+// p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_CLIP.WAV";
+
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/around_the_dining_room_morning_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/carkeek_seaside_train_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_yellow_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_1_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_2_EDIT.WAV";
-// p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_CLIP.WAV";
-p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_yellow_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/garden_morning1_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/garden_morning2_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_central_dist_clear_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_porch_13min_EDIT.WAV";
-p = "/Users/admin/src/rover/data/AUDIO/sandwich_fridge_rover.wav"
+
 
 (
-~data = ~load.(p, true);
+~data = ~loadOrProcess.(p, true);
 "done".postln;
 )
+~data.beatdata
+
 
 // clustering
 // define vectors
@@ -173,13 +180,27 @@ fork{ k.reset.update; "done".postln }
 
 
 ~kMeansPath = PathName(p).pathOnly ++ PathName(p).fileNameWithoutExtension++"_KMEANS"++".scmirZ";
-// k.save(~kMeansPath)
+k.save(~kMeansPath)
 ~recalledK = KMeansMod().load(~kMeansPath)
 
 // initialize a grain scanner
 s.boot
 
 g = GrainScanner2( 0, p )
+
+g.addScanner(2)
+
+g.prepareNewDataSet(p)
+
+g.storePreset(\test1)
+g.storePreset(\test2)
+g.storePreset(\crow)
+g.storePreset(\crow2)
+g.presets[\test1]
+
+g.recallPreset(\test1)
+g.recallPreset(\test2)
+
 // give it the cluser and "beat" data
 // g.initClusterData( k, ~data.beatdata)
 g.initClusterData( ~recalledK, ~data.beatdata )

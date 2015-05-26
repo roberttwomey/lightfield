@@ -2,15 +2,15 @@ GrainScanner2 {
 	classvar <grnSynthDef, <>replyIDCnt = 0;
 
 	// copyArgs
-	var <outbus, bufferOrPath;
+	var <outbus, initSfPath;
 	var server, <scanners, <sf, <buffers, <grnGroup, <synths, <bufDur, <view, <bufferPath;
 	var <grnDurSpec, <grnRateSpec, <grnRandSpec, <grnDispSpec, <distFrmCenSpec, <clusterSpreadSpec, <azSpec, <xformAmtSpec, <ampSpec;
-	var <>dataDir;
+	var <dataDir, loadSuccess = true, <curDataSet;
 	var <spreadSpec, <panSpec;
 	var <curCluster, <numFramesInClusters, <numClusters, <clusterFramesByDist, <invalidClusters, setClusterCnt = 0;
 
-	*new { |outbus=0, bufferOrPath|
-		^super.newCopyArgs( outbus, bufferOrPath ).init;
+	*new { |outbus=0, sfPath|
+		^super.newCopyArgs( outbus, sfPath ).init;
 	}
 
 	init {
@@ -42,7 +42,8 @@ GrainScanner2 {
 				this.class.grnSynthDef ?? { this.loadGlobalSynthLib; 0.2.wait; };
 				server.sync;
 
-				this.setBuffer(bufferOrPath, cond);
+				this.prepareNewDataSet(initSfPath, cond);
+					// this.setBuffer(bufferOrPath, cond);
 				cond.wait;
 
 				grnGroup = CtkGroup.play;
@@ -50,22 +51,23 @@ GrainScanner2 {
 		}
 	}
 
-	setBuffer{ |path, finishCond|
+	setBuffer{ |bufferOrPath, finishCond|
 		fork{
-			var cond = Condition();
+			var cond = Condition(), result;
 			case
 			{ bufferOrPath.isKindOf(String) }{
 				bufferPath = bufferOrPath;
-				this.prepareBuffers(cond);
+				result = this.prepareBuffers(cond);
 				cond.wait;
 			}
-			// this assumes mutiple channels of mono buffers from the same file path
+			// this assumes an array of mono buffers from the same file path
 			{ bufferOrPath.isKindOf(Array) }{
 				var test;
 				test = bufferOrPath.collect({|elem| elem.isKindOf(Buffer)}).includes(false);
 				test.if{ "one or more elements in the array provided is not a buffer".error };
 				buffers = bufferOrPath;
 				bufferPath = buffers[0].path;
+				result = true;
 			}
 			{ bufferOrPath.isKindOf(Buffer) }{
 				case
@@ -74,19 +76,25 @@ GrainScanner2 {
 					"using mono buffer provided".postln;
 					bufferPath = bufferOrPath.path;
 					buffers = [bufferOrPath];
+					result = true;
 				}
 				// split into mono buffers
 				{ bufferOrPath.numChannels > 1 }{
 					"loading buffer anew as single channel buffers".postln;
 					bufferPath = bufferOrPath.path;
-					this.prepareBuffers(cond);
+					result = this.prepareBuffers(cond);
 					cond.wait;
 				}
 			};
 
-			bufDur = buffers[0].duration;
-
-			scanners.do(_.updateBuffer(buffers));
+			result.notNil.if({
+				bufDur = buffers[0].duration;
+				scanners.do(_.updateBuffer(buffers));
+				dataDir ?? { dataDir = PathName(buffers[0].path).pathOnly }; // set dataDir if it hasn't yet been set;
+			}, {
+				warn("There was a problem loading the buffer(s)");
+				loadSuccess = false;
+			});
 
 			finishCond !? {finishCond.test_(true).signal};
 		}
@@ -94,36 +102,34 @@ GrainScanner2 {
 
 	prepareBuffers { |finishCond|
 
-		block { |break|
-			// check the soundfile is valid and get it's metadata
-			sf = SoundFile.new;
-			{sf.openRead(bufferPath)}.try({
-				"Soundfile could not be opened".warn;
-				finishCond.test_(true).signal;
-				break.()
-			});
-			sf.close;
+		// check the soundfile is valid and get it's metadata
+		sf = SoundFile.new;
+		{sf.openRead(bufferPath)}.try({
+			"Soundfile could not be opened".warn;
+			finishCond.test_(true).signal;
+			^nil // break
+		});
+		sf.close;
 
-			// load the buffers
-			fork {
-				// one condition for each channel loaded into a Buffer
-				var bufLoadConds = [];
-				buffers = sf.numChannels.collect{|i|
-					var myCond = Condition();
-					bufLoadConds = bufLoadConds.add(myCond);
-					Buffer.readChannel(
-						server, bufferPath,
-						channels: i, action: {myCond.test_(true).signal} );
-				};
-				bufLoadConds.do(_.wait); // wait for each channel to load
-				"grain scanner buffer(s) loaded".postln;
-				finishCond.test_(true).signal;
-			}
+		// load the buffers
+		fork {
+			// one condition for each channel loaded into a Buffer
+			var bufLoadConds = [];
+			buffers = sf.numChannels.collect{|i|
+				var myCond = Condition();
+				bufLoadConds = bufLoadConds.add(myCond);
+				Buffer.readChannel(
+					server, bufferPath,
+					channels: i, action: {myCond.test_(true).signal} );
+			};
+			bufLoadConds.do(_.wait); // wait for each channel to load
+			"grain scanner buffer(s) loaded".postln;
+			finishCond.test_(true).signal;
 		}
 	}
 
-	addScanner {
-		scanners = scanners.add( GrainScan2(this) );
+	addScanner { |initCluster=0, gui=true|
+		scanners = scanners.add( GrainScan2(this, initCluster, gui) );
 	}
 
 	// mirFrames: eg. ~data.beatdata
@@ -167,7 +173,80 @@ GrainScanner2 {
 		buffers.do(_.free);
 	}
 
+	dataDir_ { |dirPath|
+		(dirPath.last != "/").if{ dirPath = dirPath ++ "/" };
+		File.exists(dirPath).if(
+			{ dataDir = dirPath },
+			{ warn("Directory not found!") }
+		);
+	}
 
+	loadSCMIRdata { |path|
+		var scmirZTestFile, data;
+
+		scmirZTestFile = PathName(path).pathOnly++PathName(path).fileNameWithoutExtension++".scmirZ";
+
+		if ( File.exists(scmirZTestFile))
+		{
+			"Found SCMIR Analysis File...loading".postln;
+			data = SCMIRAudioFile.newFromZ(scmirZTestFile);
+			"SCMIR data loaded".postln;
+			^data;
+		} {
+			("No SCMIR analysis found at this path: " ++ scmirZTestFile).error;
+			^nil;
+		};
+	}
+
+	loadKMeansData { |path|
+		var kmeansTestFile, data;
+
+		kmeansTestFile = PathName(path).pathOnly ++ PathName(path).fileNameWithoutExtension++"_KMEANS"++".scmirZ";
+
+		if ( File.exists(kmeansTestFile)) {
+			"Found KMeans Data File...loading".postln;
+			data = KMeansMod().load( kmeansTestFile );
+			"KMeans data loaded".postln;
+			^data
+		} {
+			("No KMeans analysis found at this path: " ++ kmeansTestFile).error;
+			^nil;
+		}
+	}
+
+	prepareNewDataSet { |sfPath, finishCond|
+		var scmirData, kmeansData;
+		fork {
+			if(curDataSet != PathName(sfPath).fileName){
+
+				// retrieve scmir data
+				scmirData = this.loadSCMIRdata(sfPath);
+				// retrieve kmeans data
+				kmeansData = this.loadKMeansData(sfPath);
+
+				(scmirData.notNil and: kmeansData.notNil).if({
+					var curbuffers, bufLoadCond = Condition();
+
+					// recall the buffer
+					curbuffers = buffers; // store to free later
+					this.setBuffer(sfPath, bufLoadCond);
+					bufLoadCond.wait;
+
+					loadSuccess.if({
+						// recall load the cluster data
+						this.initClusterData(kmeansData, scmirData.beatdata);
+						curDataSet = PathName(sfPath).fileName;
+						// free the previous buffers
+						(curbuffers.size > 0).if{curbuffers.do(_.free)};
+
+					},{ "Could not prepare new data set.".error });
+				},{ loadSuccess = false });
+
+			} { "Data set already loaded".postln };
+
+			finishCond !? { finishCond.test_(true).signal };
+		}
+	}
 
 	// --------------------------------------------------
 	/* PRESETS */
@@ -190,89 +269,111 @@ GrainScanner2 {
 				IdentityDictionary(know: true).putPairs([
 					\bufName, PathName(buffers[0].path).fileName,
 
-					\params, IdentityDictionary(know: true).putPairs([
-						\grnDur,		synths[0].grainDur,
-						\grnRate,		synths[0].grainRate,
-						\grnRand,		synths[0].grainRand,
-						\grnDisp,		synths[0].grainDisp,
-						\cluster,		synths[0].cluster,
-						\clusterSpread,	synths[0].clusterSpread,
-						\distFrmCen,	synths[0].distFrmCen,
-					]);
+					\params, scanners.collect{ |scanner, i|
+						IdentityDictionary(know: true).putPairs([
+							// NOTE: these keys must match the class setters
+							// so they can be recalled with this.perform(key++'_', val)
+							\grnDur,		scanner.synths[0].grainDur,
+							\grnRate,		scanner.synths[0].grainRate,
+							\grnRand,		scanner.synths[0].grainRand,
+							\grnDisp,		scanner.synths[0].grainDisp,
+							\cluster,		scanner.synths[0].cluster,
+							\clusterSpread,	scanner.synths[0].clusterSpread,
+							\distFrmCen,	scanner.synths[0].distFrmCen,
+							\pan,			scanner.synths[0].pan,
+							\spread,		scanner.synths[0].spread,
+							\amp,			scanner.synths[0].amp,
+						]);
+					}
 				])
 			);
 		}
 	}
 
-	recallPreset { |name|
-		var curbuffers, preset = this.presets[name.asSymbol];
+	recallPreset { |name, fadeTime = 2|
+		var preset = this.presets[name.asSymbol], scmirdata;
 
 		fork{
 			block { |break|
-				var
-				preset	?? {Warn("Preset not found."); break.()};
-				dataDir ?? {Error("Must set dataDir before recalling presets!"); break.()};
-				// store to free later
-				curbuffers = buffers;
+				preset ??	{ "Preset not found.".warn; break.() };
+				dataDir ??	{ "Must set dataDir before recalling presets!".error; break.() };
 
-				preset.bufName =
-				// recall the buffer
-				this.setBuffer(bufferOrPath, cond);
+				// check if the preset uses a different data set...
+				if(curDataSet != preset.bufName, {
+					var curbuffers, dataLoadCond = Condition();
 
-				// recall load the cluster data
-				this.initClusterData();
+					loadSuccess = true;
+					this.prepareNewDataSet( dataDir ++ preset.bufName, dataLoadCond );
+					dataLoadCond.wait;
+
+					loadSuccess.not.if{ "Could not prepare new data set.".error; break.() };
+				});
 
 				// recall the synth settings
-				preset.keysValuesDo({ |k,v| this.perform((k++'_').asSymbol, v) });
-
-
-				// free the old buffers
-				(curbuffers.size > 0).if{curbuffers.do(_.free)};
-
-
+				fork({
+				preset[\params].do{|dict, index|
+					dict.keysValuesDo({ |k,v|
+							scanners[index].synths.do(_.ctllag_(fadeTime));
+							scanners[index].perform((k++'_').asSymbol, v);
+						})
+				};
+				}, AppClock);
 			}
 		}
 	}
 
 	loadGlobalSynthLib {
 		grnSynthDef = CtkSynthDef(\grainScanner2, {
-			arg outbus = 0, grainRate = 2, grainDur=1.25, grainRand = 0, grainDisp = 0,
+			arg outbus = 0, ctllag = 0, lagcrv = 0,
+			grainRate = 2, grainDur=1.25, grainRand = 0, grainDisp = 0,
 			cluster = 0, clusterSpread = 0.1, distFrmCen = 0, // bookkeeping args
 			buffer, bufnum, pos = 0, replyID = -1,
 			pan = 0, spread = 0.25,
 			fadein = 2, fadeout = 2, amp = 1, gate = 1;
 
 			var env, trig, out, grain_dens, amp_scale, disp, dispNorm;
+			var gRate, gDur, gRand, gDisp, gPan, gSpread, gAmp, cSpread, dFrmCen;
 
 			// envelope for fading output in and out - re-triggerable
 			env = EnvGen.kr(Env([1,1,0],[fadein, fadeout], \sin, 1), gate, doneAction: 0);
+
+			// TODO: wrap these up in 1 VarLag via multichannel expansion
+			gRate = VarLag.kr(grainRate, ctllag, lagcrv);
+			gDur = VarLag.kr(grainDur, ctllag, lagcrv);
+			gRand = VarLag.kr(grainRand, ctllag, lagcrv);
+			gDisp = VarLag.kr(grainDisp, ctllag, lagcrv);
+			gPan = VarLag.kr(pan, ctllag, lagcrv);
+			gSpread = VarLag.kr(spread, ctllag, lagcrv);
+			gAmp = VarLag.kr(amp, ctllag, lagcrv);
+			cSpread = VarLag.kr(clusterSpread, ctllag, lagcrv);
+			dFrmCen = VarLag.kr(distFrmCen, ctllag, lagcrv);
 
 
 			// gaussian trigger
 			// grainRand = 0 regular at grainRate
 			// grainRand = 1 random around grainRate
-			trig = GaussTrig.ar(grainRate, grainRand);
+			trig = GaussTrig.ar( gRate, gRand );
 			// trig = Impulse.ar(grainRate);
 
-			dispNorm = grainDisp * 0.5 * BufDur.kr(bufnum).reciprocal;
+			dispNorm = gDisp * 0.5 * BufDur.kr(bufnum).reciprocal;
 			disp = TRand.ar(dispNorm.neg, dispNorm, trig);
 
 			// calculate grain density
-			grain_dens = grainRate * grainDur;
+			grain_dens = gRate * gDur;
 			amp_scale = grain_dens.reciprocal.sqrt.clip(0, 1);
 
-			SendReply.ar(trig, '/pointer', [clusterSpread, distFrmCen, grainDur], replyID);
+			SendReply.ar(trig, '/pointer', [cSpread, dFrmCen, gDur], replyID);
 
 			out = GrainBufJ.ar(
 				4, //1, // pan to multiple channels
-				trig, grainDur, buffer, 1,
+				trig, gDur, buffer, 1,
 				(pos + disp).wrap(0,1),
 				1, interp:1, grainAmp: amp_scale,
-				pan: WhiteNoise.kr(spread, pan).wrap(-1,1) // random grain location in the panned channels (difusers)
+				pan: WhiteNoise.kr(gSpread, gPan).wrap(-1,1) // random grain location in the panned channels (difusers)
 			);
 			out = out * env;
 			// out = Pan2.ar(out);
-			Out.ar(outbus, out * amp);
+			Out.ar(outbus, out * gAmp);
 		});
 	}
 }
@@ -594,7 +695,7 @@ GrainScan2View {
 
 			\newCluster, ()
 			.numBox_( NumberBox()
-				.action_({ |bx| scanner.cluster_(bx.value.asInt) }) )
+				.action_({ |bx| scanner.cluster_(bx.value.asInt) }).value_(scanner.curCluster) )
 			.txt_( StaticText().string_("Cluster") ),
 
 
