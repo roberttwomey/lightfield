@@ -271,14 +271,23 @@ g.free
 // How to note the soundfile used in the preset?
 
 // mamnually grabbing presets from GrainScanner1's
-\grainDur,
-\minDisp
-\maxDisp
-\density
-\fluxRate
-start
-end
-t_posReset
+Archive.global.put(\grainScanner1, IdentityDictionary(know: true))
+
+Archive.global[\grainScanner1].put(
+
+IdentityDictionary(know: true).putPairs([
+\grainDur, scnr.grainDur
+\grainRand, scnr.grainRand
+\minDisp, scnr.minDisp
+\maxDisp, scnr.maxDisp
+\density, scnr.density
+\fluxRate, scnr.fluxRate
+\start, scnr.start
+\end, scnr.end
+
+	t_posReset
+
+PathName(.buffer).filename
 
 
 i = GrainScanner(0, g.buffers)

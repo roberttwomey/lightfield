@@ -6,7 +6,7 @@ GrainScanner2 {
 	var server, <scanners, <sf, <buffers, <grnGroup, <synths, <bufDur, <view, <bufferPath;
 	var <grnDurSpec, <grnRateSpec, <grnRandSpec, <grnDispSpec, <distFrmCenSpec, <clusterSpreadSpec, <azSpec, <xformAmtSpec, <ampSpec;
 	var <dataDir, loadSuccess = true, <curDataSet;
-	var <spreadSpec, <panSpec;
+	var <spreadSpec, <panSpec, <lastRecalledPreset;
 	var <curCluster, <numFramesInClusters, <numClusters, <clusterFramesByDist, <invalidClusters, setClusterCnt = 0;
 
 	*new { |outbus=0, sfPath|
@@ -287,6 +287,7 @@ GrainScanner2 {
 					}
 				])
 			);
+			postf("Preset % stored\n", name);
 		}
 	}
 
@@ -311,14 +312,22 @@ GrainScanner2 {
 
 				// recall the synth settings
 				fork({
-				preset[\params].do{|dict, index|
-					dict.keysValuesDo({ |k,v|
+					preset[\params].do{|dict, index|
+						dict.keysValuesDo({ |k,v|
 							scanners[index].synths.do(_.ctllag_(fadeTime));
 							scanners[index].perform((k++'_').asSymbol, v);
 						})
-				};
+					};
+					lastRecalledPreset = name.asSymbol;
 				}, AppClock);
 			}
+		}
+	}
+
+	updatePreset {
+		lastRecalledPreset !? {
+			postf("Updating preset %\n", lastRecalledPreset);
+			this.storePreset( lastRecalledPreset, overwrite: true )
 		}
 	}
 
