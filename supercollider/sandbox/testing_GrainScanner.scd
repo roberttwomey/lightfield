@@ -249,6 +249,23 @@ g.free
 
 
 // GRAINSCANNER1
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/around_the_dining_room_morning_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_EDIT.WAV";
+
+i = GrainScanner1( 3, p )
+
+i.storePreset(\int_sparse)
+i.storePreset(\int_sparse2)
+
+i.presets[\int_sparse].bufName
+i.presets[\int_sparse].params.do{|set| set.do(_.postln); "".postln}
+
+i.recallPreset(\int_sparse)
+i.recallPreset(\int_sparse2)
+
+i.updatePreset
+
+i.free(freeBufs: true)
 
 ~grns = 3.collect{ GrainScanner(0, g.buffers) }
 ~grns.do(_.gui)

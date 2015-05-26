@@ -20,7 +20,7 @@ GrainScanner1 {
 				case
 				// buffers is a string (path) to soundfile to assign to buffers
 				{ initbuffers.isKindOf(String) }{
-					this.prepareBuffers(cond);
+					this.prepareBuffers(initbuffers, cond);
 					cond.wait;
 				}
 				// this assumes mutiple channels of mono buffers from the same file path
@@ -46,14 +46,14 @@ GrainScanner1 {
 					// split into mono buffers
 					{ initbuffers.numChannels > 1 }{
 						"loading buffer anew as single channel buffers".postln;
-						this.prepareBuffers(cond);
+						this.prepareBuffers(initbuffers.path, cond);
 						cond.wait;
 					}
 				};
 
 				// catch failed buffer load
 				loadSuccessful.if({
-					scanners = numScanners.collect{ GrainScanner(outbus, buffers) };
+					scanners = numScanners.collect{ GrainScan1(outbus, buffers) };
 
 					initGUI.if{ 0.3.wait; scanners.do(_.gui) };
 
@@ -95,38 +95,47 @@ GrainScanner1 {
 		}
 	}
 
-	recallPreset { |name, fadeTime = 2|
+	recallPreset { |name, fadeTime = 0.1|
 		var preset = this.presets[name.asSymbol];
 
-		// fork{
-		// 	block { |break|
-		// 		var curFileName;
-		// 		preset ??	{ "Preset not found.".warn; break.() };
-		//
-		// 		// TODO: check the number of scanners used in this
-		// 		// preset vs. how many are currently runnin and adjust accordingly
-		//
-		// 		// check if the preset uses a different buffer...
-		// 		curFileName = PathName(buffers[0].path).fileName;
-		// 		if(curFileName != preset.bufName, {
-		// 			warn("Preset file doens't match the buffer currently loaded");
-		// 			// TODO: load the requested preset buffer
-		// 			break.()
-		// 		});
-		//
-		// 		// recall the synth settings
-		// 		fork({
-		// 			preset[\params].do{|dict, index|
-		// 				dict.keysValuesDo({ |k,v|
-		// 					scanners[index].synths.do(_.ctllag_(fadeTime));
-		// 					scanners[index].perform((k++'_').asSymbol, v);
-		// 				})
-		// 			};
-		// 			lastRecalledPreset = name.asSymbol;
-		// 			t_posReset
-		// 		}, AppClock);
-		// 	}
-		// }
+		fork{
+			block { |break|
+				var curFileName;
+				preset ??	{ "Preset not found.".warn; break.() };
+
+				// TODO: check the number of scanners used in this
+				// preset vs. how many are currently runnin and adjust accordingly
+
+				// check if the preset uses a different buffer...
+				curFileName = PathName(buffers[0].path).fileName;
+				if(curFileName != preset.bufName, {
+					warn("Preset file doens't match the buffer currently loaded");
+					// TODO: load the requested preset buffer
+					break.()
+				});
+
+				// recall the synth settings
+				fork({
+					var panCen = rrand(-1.0,1.0);
+
+					preset[\params].do{|dict, index|
+						scanners[index].synths.do{ |synth, j|
+							synth
+							.ctllag_(fadeTime)
+							.panCenter_((panCen + (scanners.size.reciprocal * index)).wrap(-1,1))
+							.panOffset_(j) // 180 deg offset from one another (stereo sources)
+						};
+						dict.keysValuesDo({ |k,v|
+							scanners[index].perform((k++'_').asSymbol, v);
+						})
+					};
+					lastRecalledPreset = name.asSymbol;
+					fadeTime.wait;
+					// reallign the gran pointer for the new preset
+					scanners.do{|scnr| scnr.synths.do(_.t_posReset_(1)) };
+				}, AppClock);
+			}
+		}
 	}
 
 	updatePreset {
@@ -442,7 +451,7 @@ GrainScan1 {
 			frames_start = b_frames * st;
 			// use line to go from start to end in buffer
 			pos = Phasor.ar( t_posReset,
-				BufRateScale.kr(bufnum) * (posRate + (posRate * 0.05 * flux)), //* (1 - (posInv*2)),
+				BufRateScale.kr(bufnum) * posRate, // * (posRate + (posRate * 0.05 * flux)), //* (1 - (posInv*2)),
 				frames_start, b_frames * ed, frames_start
 			);
 			pos = pos * b_frames.reciprocal;
@@ -466,7 +475,7 @@ GrainScan1 {
 			// aux = sig * auxmix_lagged.sqrt;
 			out = sig;
 			panPos = panCenter + panOffset;
-			out = PanAz.ar(4, out, (panPos + (0.25 * flux)).wrap(-1,1));
+			out = PanAz.ar(4, out, (panPos + (0.1 * flux)).wrap(-1,1));
 
 			// send signals to outputs
 			Out.ar( outbus,		out * globalAmp);
@@ -671,13 +680,15 @@ GrainScan1View {
 							StaticText().string_(key.asString).align_(\center),
 							controls[key].numBox.fixedWidth_(35),
 						)
-					})
+					}) ++ [nil]
 					),
 					VLayout( *[\density, \fluxRate].collect({ |key|
 						VLayout(
 							StaticText().string_(key.asString).align_(\center),
-							controls[key].knob.mode_(\vert).fixedWidth_(35),
-							controls[key].numBox.fixedWidth_(35),
+							HLayout(
+								controls[key].numBox.fixedWidth_(35),
+								controls[key].knob.mode_(\vert).fixedWidth_(35),
+							)
 						)
 					})
 					),
