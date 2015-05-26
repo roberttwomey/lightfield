@@ -96,8 +96,10 @@ GrainScanner {
 	}
 
 	initSynths {
+		var pancen = rrand(-1,1.0);
 		synths = buffers.collect{|buf, i|
-			grnSynthDef.note(target: group).buffer_(buf).bufnum_(buf.bufnum).outbus_(outbus+i).grainDur_(1.3)
+			grnSynthDef.note(target: group).buffer_(buf).bufnum_(buf.bufnum).outbus_(outbus+i).grainDur_(2.7)
+			.panCenter_(pancen).panOffset_(i)
 		}
 	}
 
@@ -194,38 +196,55 @@ GrainScanner {
 			balance_amp_lag = 0.3,	// time lag on amplitude xfade changes
 			recvUpdate = 0,		// flag to check if next selected buffer is to be input to this instance
 			t_posReset = 0,		// reset the phasor position with a trigger
-			gate = 1;			// gate to start and release the synth
+			gate = 1,			// gate to start and release the synth
+
+			fluxRate = 0.2,		// rate at which density and dispersion change
+			density = 13,		// desity held while modulating duration
+			maxDisp = 2.5,		// dispersion can modulate between max and min dispersion
+			minDisp = 0.01,
+			panCenter = 0,
+			panOffset = 0.5,
+			globalAmp = 1;		// for overall control over all instances
 
 			var
 			env, grain_dens, amp_scale, trig, b_frames,
 			pos, disp, sig, out, aux, auxmix_lagged;
+			var panPos, flux, g_rate;
 
 			// envelope for fading output in and out - re-triggerable
 			env = EnvGen.kr(Env([1,1,0],[fadein, fadeout], \sin, 1), gate, doneAction: 0);
 
-			// calculate grain density
-			grain_dens = grainRate * grainDur;
-			amp_scale = grain_dens.reciprocal.sqrt.clip(0, 1);
+			flux = LFDNoise3.kr( fluxRate); // -1>1
 
+			g_rate = density * (grainDur + (grainDur * 0.15 * flux)).reciprocal;
+			amp_scale = density.reciprocal.sqrt.clip(0, 1);
+			trig = GaussTrig.ar(g_rate, grainRand);
+
+
+			// // calculate grain density
+			// grain_dens = grainRate * grainDur;
+			// amp_scale = grain_dens.reciprocal.sqrt.clip(0, 1);
+			//
 			// gaussian trigger
 			// grainRand = 0 regular at grainRate
 			// grainRand = 1 random around grainRate
-			trig = GaussTrig.ar(grainRate, grainRand);
+			// trig = GaussTrig.ar(grainRate, grainRand);
 
 
 			b_frames = BufFrames.kr(bufnum);
 			// use line to go from start to end in buffer
 			pos = Phasor.ar( t_posReset,
-				BufRateScale.kr(bufnum) * posRate * (1 - (posInv*2)),
+				BufRateScale.kr(bufnum) * (posRate + (posRate * 0.05 * flux)), //* (1 - (posInv*2)),
 				b_frames * start, b_frames * end, b_frames * start
 			);
 			pos = pos * b_frames.reciprocal;
 
 			// add randomness to position pointer, make sure it remains within limits
-			disp = grnDisp * BufDur.kr(bufnum).reciprocal * 0.5; // grnDisp (secs) normalized 0-1
+			// disp = grnDisp * BufDur.kr(bufnum).reciprocal * 0.5; // grnDisp (secs) normalized 0-1
+			disp = LFDNoise3.kr( fluxRate ).range(minDisp, maxDisp) * BufDur.kr(bufnum).reciprocal * 0.5;
 			pos = pos + TRand.ar(disp.neg, disp, trig);
 			pos = pos.wrap(start , end);
-
+			pos.poll;
 			/* granulator */
 			sig = GrainBufJ.ar(1, trig, grainDur, buffer, pitch , pos, 1, interp: 1, grainAmp: amp_scale);
 
@@ -238,9 +257,11 @@ GrainScanner {
 			// out = sig * (1 - auxmix_lagged).sqrt;
 			// aux = sig * auxmix_lagged.sqrt;
 			out = sig;
+			panPos = panCenter + panOffset;
+			out = PanAz.ar(4, out, (panPos + (0.25 * flux)).wrap(-1,1));
 
 			// send signals to outputs
-			Out.ar( outbus,		out );
+			Out.ar( outbus,		out * globalAmp);
 			// Out.ar( outbus_aux,	aux );
 		})
 	}

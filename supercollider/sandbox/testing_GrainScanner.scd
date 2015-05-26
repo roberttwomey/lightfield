@@ -250,11 +250,37 @@ g.free
 i = GrainScanner(0, g.buffers)
 i.play
 i.gui
-i.scanRange(rand(g.bufDur), 1)
+// i.scanRange(rand(g.bufDur), 1)
+i.scanRange(g.clusterFramesByDist.choose.choose.postln, rrand(1.5, 4))
+
+i.free
+
+j = GrainScanner(0, g.buffers)
+j.play
+j.gui
+j.scanRange(rand(g.bufDur), 1)
+j.scanRange(g.clusterFramesByDist.choose.choose.postln, rrand(1.5, 4))
+j.free
+
+// both instances from one cluster
+(var cl;
+cl = g.clusterFramesByDist[0..6].choose;
+[i,j].do(_.scanRange(cl.choose.postln, rrand(2.5, 6)))
+)
 
 q = 4.collect{GrainScanner(0, g.buffers)}
 q.do(_.gui)
 q.do(_.free)
+
+
+// mamnually grabbing presets from GrainScanner1's
+\grainDur,
+\minDisp
+\maxDisp
+\density
+\fluxRate
+
+
 
 /* SCRATCH
 
