@@ -247,6 +247,40 @@ g.gui
 g.release
 g.free
 
+
+// GRAINSCANNER1
+
+~grns = 3.collect{ GrainScanner(0, g.buffers) }
+~grns.do(_.gui)
+
+
+// set all params together
+~grns.do(_.fluxRate_(0.4))
+~grns.do(_.maxDisp_(2.1))
+
+// so all instances can choose a scmir frame
+(
+~grns.do{|grn|
+	grn.newMomentFunc = {
+		// g.clusterFramesByDist[0..6].choose.choose.postln
+		g.clusterFramesByDist.choose.choose.postln
+	}
+}
+)
+
+// How to note the soundfile used in the preset?
+
+// mamnually grabbing presets from GrainScanner1's
+\grainDur,
+\minDisp
+\maxDisp
+\density
+\fluxRate
+start
+end
+t_posReset
+
+
 i = GrainScanner(0, g.buffers)
 i.play
 i.gui
@@ -273,12 +307,14 @@ q.do(_.gui)
 q.do(_.free)
 
 
-// mamnually grabbing presets from GrainScanner1's
-\grainDur,
-\minDisp
-\maxDisp
-\density
-\fluxRate
+
+
+
+[i,j].do{|x|x.synths.do(_.minDisp_(2.5))}
+[i,j].do{|x|x.synths.do(_.maxDisp_(2.5))}
+[i,j].do{|x|x.synths.do(_.grainDur_(2.5))}
+[i,j].do{|x|x.synths.do(_.density_(13))}
+[i,j].do{|x|x.synths.do(_.fluxRate_(5.reciprocal))}
 
 
 

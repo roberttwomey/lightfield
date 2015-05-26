@@ -4,7 +4,8 @@ GrainScanner {
 	// copyArgs
 	var <outbus, bufferOrPath;
 	var server, <sf, <buffers, <group, <synths, <bufDur, <view, <bufferPath;
-	var <grnDurSpec, <grnRateSpec, <grnRandSpec, <pntrRateSpec, <grnDispSpec;
+	var <grnDurSpec, <grnRateSpec, <grnRandSpec, <pntrRateSpec, <grnDispSpec, <densitySpec, <fluxRateSpec;
+	var <>newMomentFunc;
 
 	*new { |outbus=0, bufferOrPath|
 		^super.newCopyArgs( outbus, bufferOrPath ).init;
@@ -13,11 +14,13 @@ GrainScanner {
 	init {
 		server = Server.default;
 
-		grnDurSpec = ControlSpec(0.01, 8, warp: 3, step: 0.01, default: 1.3);
-		grnRateSpec = ControlSpec(4.reciprocal, 70, warp: 3, step:0.01, default:10);
-		grnRandSpec = ControlSpec(0, 1, warp: 4, step: 0.01, default: 0.0);
-		pntrRateSpec = ControlSpec(0.05, 3, warp: 0, step: 0.01, default: 1);
-		grnDispSpec = ControlSpec(0, 5, warp: 3, step: 0.01, default: 1.5);
+		grnDurSpec = ControlSpec(0.01, 8, warp: 3, default: 1.3);
+		grnRateSpec = ControlSpec(4.reciprocal, 70, warp: 3, default:10);
+		grnRandSpec = ControlSpec(0, 1, warp: 4, default: 0.0);
+		pntrRateSpec = ControlSpec(0.05, 3, warp: 0, default: 1);
+		grnDispSpec = ControlSpec(0, 5, warp: 3, default: 1.5);
+		densitySpec = ControlSpec(4.reciprocal, 25, warp: 3, default:13);
+		fluxRateSpec = ControlSpec(12.reciprocal, 1, warp: 3, default:0.2);
 
 		fork{
 			var cond = Condition();
@@ -129,6 +132,11 @@ GrainScanner {
 	grnDisp_ {|dispSecs| synths.do(_.grnDisp_(dispSecs)); this.changed(\grnDisp, dispSecs); }
 	// speed of the grain position pointer in the buffer, 1 is realtime, 0.5 half-speed, etc
 	pntrRate_ {|rateScale| synths.do(_.posRate_(rateScale)); this.changed(\pntrRate, rateScale); }
+
+	minDisp_ {|dispSecs| synths.do(_.minDisp_(dispSecs)); this.changed(\minDisp, dispSecs); }
+	maxDisp_ {|dispSecs| synths.do(_.maxDisp_(dispSecs)); this.changed(\maxDisp, dispSecs); }
+	density_ {|numGrains| synths.do(_.density_(numGrains)); this.changed(\density, numGrains); }
+	fluxRate_ {|rate| synths.do(_.fluxRate_(rate)); this.changed(\fluxRate, rate); }
 
 	// TODO:
 	// align to the moment in secs
@@ -244,7 +252,7 @@ GrainScanner {
 			disp = LFDNoise3.kr( fluxRate ).range(minDisp, maxDisp) * BufDur.kr(bufnum).reciprocal * 0.5;
 			pos = pos + TRand.ar(disp.neg, disp, trig);
 			pos = pos.wrap(start , end);
-			pos.poll;
+
 			/* granulator */
 			sig = GrainBufJ.ar(1, trig, grainDur, buffer, pitch , pos, 1, interp: 1, grainAmp: amp_scale);
 
@@ -287,54 +295,54 @@ GrainScannerView {
 
 		controls.putPairs([
 			\grnDur, ()
-			.numBox_( NumberBox()
+			.numBox_( NumberBox().maxDecimals_(3)
 				.action_({ |bx|scanner.grnDur_(bx.value) })
 				.value_(scanner.grnDurSpec.default)
 			)
-			.knob_(	Knob().keystep_(0.0001)
+			.knob_(	Knob().step_(0.001)
 				.action_({|knb|
 					scanner.grnDur_(scanner.grnDurSpec.map(knb.value)) })
 				.value_(scanner.grnDurSpec.unmap(scanner.grnDurSpec.default))
 			),
 
 			\grnRate, ()
-			.numBox_( NumberBox()
+			.numBox_( NumberBox().maxDecimals_(3)
 				.action_({ |bx|
 					scanner.grnRate_(bx.value) })
 				.value_(scanner.grnRateSpec.default)
 			)
-			.knob_(	Knob().keystep_(0.0001)
+			.knob_(	Knob().step_(0.001)
 				.action_({|knb|
 					scanner.grnRate_(scanner.grnRateSpec.map(knb.value)) })
 				.value_(scanner.grnRateSpec.unmap(scanner.grnRateSpec.default))
 			),
 
 			\grnRand, ()
-			.numBox_( NumberBox()
+			.numBox_( NumberBox().maxDecimals_(3)
 				.action_({ |bx|
 					scanner.grnRand_(bx.value) })
 				.value_(scanner.grnRandSpec.default)
 			)
-			.knob_(	Knob().keystep_(0.0001)
+			.knob_(	Knob().step_(0.001)
 				.action_({|knb|
 					scanner.grnRand_(scanner.grnRandSpec.map(knb.value)) })
 				.value_(scanner.grnRandSpec.unmap(scanner.grnRandSpec.default))
 			),
 
 			\pntrRate, ()
-			.numBox_( NumberBox()
+			.numBox_( NumberBox().maxDecimals_(3)
 				.action_({ |bx|
 					scanner.pntrRate_(bx.value) })
 				.value_(scanner.pntrRateSpec.default)
 			)
-			.knob_(	Knob().keystep_(0.0001)
+			.knob_(	Knob().step_(0.001)
 				.action_({|knb|
 					scanner.pntrRate_(scanner.pntrRateSpec.map(knb.value)) })
 				.value_(scanner.pntrRateSpec.unmap(scanner.pntrRateSpec.default))
 			),
 
 			\grnDisp, ()
-			.numBox_( NumberBox()
+			.numBox_( NumberBox().maxDecimals_(3)
 				.action_({ |bx|
 					scanner.grnDisp_(bx.value) })
 				.value_(scanner.grnDispSpec.default)
@@ -344,6 +352,45 @@ GrainScannerView {
 					scanner.grnDisp_(scanner.grnDispSpec.map(sldr.value)) })
 				.value_(scanner.grnDispSpec.unmap(scanner.grnDispSpec.default))
 			),
+
+			\minDisp, ()
+			.numBox_( NumberBox().maxDecimals_(3)
+				.action_({ |bx|
+					scanner.minDisp_(bx.value) })
+				.value_(scanner.synths[0].minDisp)
+			),
+
+			\maxDisp, ()
+			.numBox_( NumberBox().maxDecimals_(3)
+				.action_({ |bx|
+					scanner.maxDisp_(bx.value) })
+				.value_(scanner.synths[0].maxDisp)
+			),
+
+			\density, ()
+			.numBox_( NumberBox().maxDecimals_(3)
+				.action_({ |bx|
+					scanner.density_(bx.value) })
+				.value_(scanner.densitySpec.default)
+			)
+			.knob_(	Knob().step_(0.001)
+				.action_({|knb|
+					scanner.density_(scanner.densitySpec.map(knb.value)) })
+				.value_(scanner.densitySpec.unmap(scanner.densitySpec.default))
+			),
+
+			\fluxRate, ()
+			.numBox_( NumberBox().maxDecimals_(3)
+				.action_({ |bx|
+					scanner.fluxRate_(bx.value) })
+				.value_(scanner.fluxRateSpec.default)
+			)
+			.knob_(	Knob().step_(0.001)
+				.action_({|knb|
+					scanner.fluxRate_(scanner.fluxRateSpec.map(knb.value)) })
+				.value_(scanner.fluxRateSpec.unmap(scanner.fluxRateSpec.default))
+			),
+
 
 			\fadeIO, ()
 			.button_(
@@ -366,7 +413,12 @@ GrainScannerView {
 
 			\newPos, ()
 			.button_( Button().states_([[""]]).action_({ |but|
-				scanner.scanRange(scanner.bufDur.rand, rrand(2.0, 6.0)) }) )
+				scanner.scanRange(
+					scanner.newMomentFunc.notNil.if(
+						{ scanner.newMomentFunc.value },
+						{ scanner.bufDur.rand }),
+					rrand(2.5, 6.0))
+			}) )
 			.txt_( StaticText().string_("New moment") ),
 
 		]);
@@ -384,17 +436,34 @@ GrainScannerView {
 				),
 
 				HLayout(
-					VLayout(
-						[controls[\grnDisp].slider.orientation_(\vertical).minHeight_(150), a: \left],
-						[controls[\grnDisp].numBox.fixedWidth_(35), a: \left],
-					),
+					// 	// VLayout(
+					// 	// 	[controls[\grnDisp].slider.orientation_(\vertical).minHeight_(150), a: \left],
+					// 	// 	[controls[\grnDisp].numBox.fixedWidth_(35), a: \left],
+					// 	// ),
 					VLayout( *[\newPos, \syncPntr, \fadeIO].collect({ |key|
 						HLayout(
 							[controls[key].button.fixedWidth_(35), a: \left],
 							[controls[key].txt.align_(\left), a: \left ]
 						)
-					}) ++ [nil, [StaticText().string_("pntr Dispersion").align_(\left), a: \bottom]]
-					), nil
+					})
+					// ++ [nil, [StaticText().string_("pntr Dispersion").align_(\left), a: \bottom]]
+					),
+					nil,
+					VLayout( *[\minDisp, \maxDisp].collect({ |key|
+						VLayout(
+							StaticText().string_(key.asString).align_(\center),
+							controls[key].numBox.fixedWidth_(35),
+						)
+					})
+					),
+					VLayout( *[\density, \fluxRate].collect({ |key|
+						VLayout(
+							StaticText().string_(key.asString).align_(\center),
+							controls[key].knob.mode_(\vert).fixedWidth_(35),
+							controls[key].numBox.fixedWidth_(35),
+						)
+					})
+					),
 				),
 			)
 		)
@@ -423,6 +492,17 @@ GrainScannerView {
 				\grnDisp, {
 					controls.grnDisp.numBox.value_(args[0]);
 					controls.grnDisp.slider.value_(scanner.grnDispSpec.unmap(args[0])); },
+
+				\minDisp, {
+					controls.minDisp.numBox.value_(args[0]) },
+				\maxDisp, {
+					controls.maxDisp.numBox.value_(args[0]) },
+				\density, {
+					controls.density.numBox.value_(args[0]);
+					controls.density.knob.value_(scanner.densitySpec.unmap(args[0])); },
+				\fluxRate, {
+					controls.fluxRate.numBox.value_(args[0]);
+					controls.fluxRate.knob.value_(scanner.fluxRateSpec.unmap(args[0])); },
 			)
 		});
 	}
