@@ -188,18 +188,26 @@ s.boot
 
 g = GrainScanner2( 0, p )
 
+// add as many scanners as are needed
 g.addScanner(2)
 
 g.prepareNewDataSet(p)
 
 g.storePreset(\test1)
 g.storePreset(\test2)
+
 g.storePreset(\crow)
 g.storePreset(\crow2)
 g.presets[\test1]
+g.presets[\test2].params.size
+
+g.storePreset(\test3)
 
 g.recallPreset(\test1)
 g.recallPreset(\test2)
+g.recallPreset(\test3)
+
+g.removePreset()
 
 // give it the cluser and "beat" data
 // g.initClusterData( k, ~data.beatdata)
@@ -261,13 +269,14 @@ i.presets[\int_sparse].bufName
 i.presets[\int_sparse].params.do{|set| set.do(_.postln); "".postln}
 
 i.recallPreset(\int_sparse)
-i.recallPreset(\int_sparse2)
+i.recallPreset(\int_sparse2, 5)
+i.recallPreset(\int_sparse, 5)
 
 i.updatePreset
 
 i.free(freeBufs: true)
 
-~grns = 3.collect{ GrainScanner(0, g.buffers) }
+~grns = 3.collect{ GrainScanner1(0, g.buffers) }
 ~grns.do(_.gui)
 
 

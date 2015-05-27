@@ -2,64 +2,32 @@
 // stores presets for multiple instances, etc.
 GrainScanner1 {
 	// copyArgs
-	var numScanners, initbuffers, outbus, initGUI;
+	var numScanners, initBufOrPath, outbus, initGUI;
 	var <scanners, <buffers, <bufferPath, <lastRecalledPreset, loadSuccessful, <server;
 
-	*new {|numScanners, buffers, outbus = 0, initGUI = true|
-		^super.newCopyArgs(numScanners, buffers, outbus, initGUI).init;
+	*new {|numScanners, bufOrPath, outbus = 0, initGUI = true|
+		^super.newCopyArgs(numScanners, bufOrPath, outbus, initGUI).init;
 	}
 
 	init {
 
 		fork({
-			var cond = Condition();
+			var bufcond = Condition();
 			loadSuccessful = true; // init load test
 			server = Server.default;
 
-			block{ |break|
-				case
-				// buffers is a string (path) to soundfile to assign to buffers
-				{ initbuffers.isKindOf(String) }{
-					this.prepareBuffers(initbuffers, cond);
-					cond.wait;
-				}
-				// this assumes mutiple channels of mono buffers from the same file path
-				{ initbuffers.isKindOf(Array) }{
-					var failtest;
-					failtest = initbuffers.collect({|elem| elem.isKindOf(Buffer)}).includes(false);
-					failtest.if({
-						"one or more elements in the array provided is not a buffer".error;
-						loadSuccessful = false;
-					},{
-						buffers = initbuffers;
-						bufferPath = buffers[0].path;
-					});
-					}
-				{ initbuffers.isKindOf(Buffer) }{
-					case
-					// use the mono buffer
-					{ initbuffers.numChannels == 1 }{
-						"using mono buffer provided".postln;
-						bufferPath = initbuffers.path;
-						buffers = [initbuffers];
-					}
-					// split into mono buffers
-					{ initbuffers.numChannels > 1 }{
-						"loading buffer anew as single channel buffers".postln;
-						this.prepareBuffers(initbuffers.path, cond);
-						cond.wait;
-					}
-				};
+			this.initBuffer( initBufOrPath, bufcond );
+			bufcond.wait;
 
-				// catch failed buffer load
-				loadSuccessful.if({
-					scanners = numScanners.collect{ GrainScan1(outbus, buffers) };
+			// catch failed buffer load
+			loadSuccessful.if({
+				scanners = numScanners.collect{ GrainScan1(outbus, buffers) };
 
-					initGUI.if{ 0.3.wait; scanners.do(_.gui) };
+				initGUI.if{ 0.3.wait; scanners.do(_.gui) };
 
-					Archive.global[\grainScanner1] ?? { this.prInitArchive };
-				},{error("GrainScanner1 failed to load, check your provided buffer/path")});
-			}
+				Archive.global[\grainScanner1] ?? { this.prInitArchive };
+			},{error("GrainScanner1 failed to load, check your provided buffer/path")});
+
 		}, AppClock )
 	}
 
@@ -93,6 +61,13 @@ GrainScanner1 {
 			);
 			postf("Preset % stored\n", name);
 		}
+	}
+
+	resume { |fadeTime = 4|
+		scanners.do(_.play(fadeTime));
+	}
+	release { |fadeTime = 4|
+		scanners.do(_.release(fadeTime));
 	}
 
 	recallPreset { |name, fadeTime = 0.1|
@@ -145,6 +120,13 @@ GrainScanner1 {
 		}
 	}
 
+	removePreset { |name|
+		this.presets[name.asSymbol].notNil.if(
+			{ this.presets.removeAt(name.asSymbol); postf("Preset % removed\n", name) },
+			{ warn("Preset not found.. didn't remove!") }
+		);
+	}
+
 	free { |freeBufs=false|
 		scanners.do(_.free);
 		freeBufs.if(buffers.do(_.free));
@@ -155,6 +137,42 @@ GrainScanner1 {
 	}
 
 	presets { ^Archive.global[\grainScanner1] }
+
+	initBuffer { |bufOrPath, finishCond|
+		case
+		// buffers is a string (path) to soundfile to assign to buffers
+		{ bufOrPath.isKindOf(String) }{
+			this.prepareBuffers(bufOrPath, finishCond);
+		}
+		// this assumes mutiple channels of mono buffers from the same file path
+		{ bufOrPath.isKindOf(Array) }{
+			var failtest;
+			failtest = bufOrPath.collect({|elem| elem.isKindOf(Buffer)}).includes(false);
+			failtest.if({
+				"one or more elements in the array provided is not a buffer".error;
+				loadSuccessful = false;
+			},{
+				buffers = bufOrPath;
+				bufferPath = buffers[0].path;
+			});
+			finishCond.test_(true).signal;
+		}
+		{ bufOrPath.isKindOf(Buffer) }{
+			case
+			// use the mono buffer
+			{ bufOrPath.numChannels == 1 }{
+				"using mono buffer provided".postln;
+				bufferPath = bufOrPath.path;
+				buffers = [bufOrPath];
+				finishCond.test_(true).signal;
+			}
+			// split into mono buffers
+			{ bufOrPath.numChannels > 1 }{
+				"loading buffer anew as single channel buffers".postln;
+				this.prepareBuffers(bufOrPath.path, finishCond);
+			}
+		};
+	}
 
 	prepareBuffers { |path, finishCond|
 
@@ -188,6 +206,38 @@ GrainScanner1 {
 				finishCond.test_(true).signal;
 			}
 		}
+	}
+
+	swapBuffer { |newBufOrPath|
+		var curBuffers = buffers;
+		fork({
+			var bufcond = Condition();
+			loadSuccessful = true; // init load test
+			server = Server.default;
+
+			this.initBuffer( initBufOrPath, bufcond );
+			bufcond.wait;
+
+			// catch failed buffer load
+			loadSuccessful.if({
+				// send the new buffer to the synths
+				scanners.do{ |scnr|
+					// TODO: this is a temporary constraint to
+					// protect from synth/buffer channel mismatch
+					(scnr.synths.size == buffers.size).if({
+						scnr.synths.do{|synth, i|
+							synth.buf_(buffers[i]).bufnum_(buffers[i].bufnum)
+						}
+					},{
+						error("mismatch between number of scanner synths and buffer channels.");
+						buffers.do_(_.free);
+					});
+				};
+				// free the old buffers
+				curBuffers.do(_.free);
+			},{ error("Failed to swap buffers, check your provided buffer/path")});
+
+		}, AppClock )
 	}
 }
 
@@ -296,8 +346,11 @@ GrainScan1 {
 	initSynths {
 		var pancen = rrand(-1,1.0);
 		synths = buffers.collect{|buf, i|
-			grnSynthDef.note(target: group).buffer_(buf).bufnum_(buf.bufnum).outbus_(outbus+i).grainDur_(2.7)
-			.panCenter_(pancen).panOffset_(i)
+			grnSynthDef.note(target: group)
+				.outbus_(outbus)
+				.buffer_(buf).bufnum_(buf.bufnum)
+				.grainDur_(2.7)
+				.panCenter_(pancen).panOffset_(i)
 		}
 	}
 
@@ -635,10 +688,10 @@ GrainScan1View {
 			\newPos, ()
 			.button_( Button().states_([[""]]).action_({ |but|
 				scanner.scanRange(
-					scanner.newMomentFunc.notNil.if(
+					*scanner.newMomentFunc.notNil.if(
 						{ scanner.newMomentFunc.value },
-						{ scanner.bufDur.rand }),
-					rrand(2.5, 6.0))
+						{ [scanner.bufDur.rand, rrand(3.5, 8.0)] }),
+				)
 			}) )
 			.txt_( StaticText().string_("New moment") ),
 

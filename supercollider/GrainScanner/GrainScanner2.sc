@@ -248,6 +248,9 @@ GrainScanner2 {
 		}
 	}
 
+	play { |fadeTime| scanners.do(_.play(fadeTime)); }
+	release { |fadeTime| scanners.do(_.play(fadeTime)); }
+
 	// --------------------------------------------------
 	/* PRESETS */
 	// --------------------------------------------------
@@ -329,6 +332,13 @@ GrainScanner2 {
 			postf("Updating preset %\n", lastRecalledPreset);
 			this.storePreset( lastRecalledPreset, overwrite: true )
 		}
+	}
+
+	removePreset { |name|
+		this.presets[name.asSymbol].notNil.if(
+			{ this.presets.removeAt(name.asSymbol); postf("Preset % removed\n", name) },
+			{ warn("Preset not found.. didn't remove!") }
+		);
 	}
 
 	loadGlobalSynthLib {

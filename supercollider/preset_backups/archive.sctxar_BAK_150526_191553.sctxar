@@ -1,0 +1,4345 @@
+var o, p;
+o = [
+	Archive.prNew,  IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  
+	Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  
+	Array.prNew(32),  "discovery_yellow_EDIT.WAV",  Array.prNew(2),  IdentityDictionary.prNew,  
+	Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  
+	Array.prNew(32),  "around_the_dining_room_morning_EDIT.WAV",  Array.prNew(2),  IdentityDictionary.prNew,  
+	Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  
+	Array.prNew(32),  "discovery_yellow_EDIT.WAV",  Array.prNew(2),  IdentityDictionary.prNew,  
+	Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  
+	Array.prNew(32),  "discovery_yellow_EDIT.WAV",  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  "discovery_yellow_EDIT.WAV",  
+	Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  
+	Array.prNew(128),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	"Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  Array.prNew(64),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  "stone_rub_res_compr.wav",  
+	IdentityDictionary.prNew,  Array.prNew(64),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(1),  "Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  
+	Array.prNew(64),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(1),  "stone_rub_res_compr.wav",  IdentityDictionary.prNew,  Array.prNew(64),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	"Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  Array.prNew(64),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  "Glass_Break_05_m_compr.wav",  
+	IdentityDictionary.prNew,  Array.prNew(64),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(1),  "Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  
+	Array.prNew(64),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(1),  "Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  Array.prNew(64),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	"Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  Array.prNew(64),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  "Glass_Break_05_m_compr.wav",  
+	IdentityDictionary.prNew,  Array.prNew(64),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(1),  "train_hiss_ATS.wav",  IdentityDictionary.prNew,  
+	Array.prNew(64),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(1),  "Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  Array.prNew(64),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	"rummage_metal_compr.wav",  IdentityDictionary.prNew,  Array.prNew(64),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  "Glass_Break_05_m_compr.wav",  
+	IdentityDictionary.prNew,  Array.prNew(64),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(1),  "Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  
+	Array.prNew(64),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(2),  "Glass_Break_05_m_compr.wav",  "rummage_metal_compr.wav",  IdentityDictionary.prNew,  
+	Array.prNew(64),  Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  
+	Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  
+	Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  
+	Array.prNew(2),  Array.prNew(2),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(2),  "Glass_Break_05_m_compr.wav",  "rummage_wood_long_compr.wav",  IdentityDictionary.prNew,  
+	Array.prNew(64),  Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  
+	Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  
+	Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  
+	Array.prNew(2),  Array.prNew(2),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(1),  "Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  Array.prNew(64),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	"Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  Array.prNew(64),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(1),  "train_clank_HPF.wav",  IdentityDictionary.prNew,  
+	Array.prNew(64),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(1),  "Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  Array.prNew(64),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	"rummage_metal_compr.wav",  IdentityDictionary.prNew,  Array.prNew(64),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  "noise_oscillations.aiff",  
+	IdentityDictionary.prNew,  Array.prNew(64),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(1),  "Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  
+	Array.prNew(64),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(1),  "Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  Array.prNew(64),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	"Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  Array.prNew(64),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  "Glass_Break_05_m_compr.wav",  
+	IdentityDictionary.prNew,  Array.prNew(64),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(1),  "rushing_drain_mono.wav",  IdentityDictionary.prNew,  
+	Array.prNew(64),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(1),  "Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  Array.prNew(64),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	"Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  Array.prNew(64),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  "Glass_Break_05_m_compr.wav",  
+	IdentityDictionary.prNew,  Array.prNew(64),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(1),  "Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  
+	Array.prNew(64),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(1),  "Glass_Break_05_m_compr.wav",  IdentityDictionary.prNew,  Array.prNew(64),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	"train_clank_HPF.wav",  IdentityDictionary.prNew,  Array.prNew(64),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  "Glass_Break_05_m_compr.wav",  
+	IdentityDictionary.prNew,  Array.prNew(64),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  
+	Array.prNew(1),  Array.prNew(1),  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  
+	Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  IdentityDictionary.prNew,  
+	Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(2),  
+	Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  
+	Array.prNew(2),  IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  
+	Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  IdentityDictionary.prNew,  
+	Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(2),  
+	Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  
+	Array.prNew(2),  IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  
+	Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  IdentityDictionary.prNew,  
+	Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(2),  
+	Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  
+	Array.prNew(2),  IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  
+	Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  IdentityDictionary.prNew,  
+	Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(2),  
+	Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  
+	Array.prNew(2),  IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  
+	Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  IdentityDictionary.prNew,  
+	Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(2),  Array.prNew(2),  
+	Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  Array.prNew(2),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(2),  IdentityDictionary.prNew,  
+	Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(2),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  
+	Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(3),  IdentityDictionary.prNew,  Array.prNew(32),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(2),  IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(3),  IdentityDictionary.prNew,  Array.prNew(32),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(2),  IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  
+	Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(2),  IdentityDictionary.prNew,  Array.prNew(32),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  IdentityDictionary.prNew,  
+	Array.prNew(32),  Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  
+	Array.prNew(1),  IdentityDictionary.prNew,  Array.prNew(32),  Array.prNew(1),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  
+	IdentityDictionary.prNew,  Array.prNew(32),  "around_the_dining_room_morning_EDIT.WAV",  Array.prNew(3),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  
+	"around_the_dining_room_morning_EDIT.WAV",  Array.prNew(3),  IdentityDictionary.prNew,  Array.prNew(32),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  
+	IdentityDictionary.prNew,  Array.prNew(32),  "around_the_dining_room_morning_EDIT.WAV",  Array.prNew(3),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  
+	"around_the_dining_room_morning_EDIT.WAV",  Array.prNew(3),  IdentityDictionary.prNew,  Array.prNew(32),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  
+	IdentityDictionary.prNew,  Array.prNew(32),  "around_the_dining_room_morning_EDIT.WAV",  Array.prNew(3),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32),  
+	"around_the_dining_room_morning_EDIT.WAV",  Array.prNew(3),  IdentityDictionary.prNew,  Array.prNew(32),  
+	IdentityDictionary.prNew,  Array.prNew(32),  IdentityDictionary.prNew,  Array.prNew(32)
+];
+p = [
+	// Archive
+	0, [ dictionary: o[1] ],  
+	// IdentityDictionary
+	1, [ array: o[2],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: false ],  
+	// Array
+	2, [ 'mbcPresets',  o[3],  'grainScanner2',  o[5],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'grainFaderStates',  o[43],  nil,  nil,  
+		nil,  nil,  'motorDriverStates',  o[711],  
+		'first',  o[803],  'test1',  o[810],  
+		nil,  nil,  nil,  nil,  
+		'roverPresets',  o[820],  'grainScanner1',  o[982] ],  
+	// IdentityDictionary
+	3, [ array: o[4],  size: 0,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	4, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	5, [ array: o[6],  size: 5,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	6, [ nil,  nil,  'crow2',  o[7],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'test3',  o[15],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'crow',  o[23],  'test1',  o[31],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'test2',  o[37] ],  
+	// IdentityDictionary
+	7, [ array: o[8],  size: 2,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	8, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'bufName',  o[9],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[10],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	10, [ o[11],  o[13] ],  
+	// IdentityDictionary
+	11, [ array: o[12],  size: 10,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	12, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'clusterSpread',  0.001206,  
+		'grnRand',  0.006934,  'distFrmCen',  0.254000,  
+		'grnRate',  9.448666,  'pan',  -0.804000,  
+		'spread',  0.147148,  'amp',  1.207717,  
+		'grnDisp',  0.000000,  'grnDur',  1.367954,  
+		'cluster',  7,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	13, [ array: o[14],  size: 10,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	14, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'clusterSpread',  0.002381,  
+		'grnRand',  0.228553,  'distFrmCen',  0.826000,  
+		'grnRate',  14.744082,  'pan',  0.280000,  
+		'spread',  0.028527,  'amp',  0.445212,  
+		'grnDisp',  0.909100,  'grnDur',  3.318713,  
+		'cluster',  5,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	15, [ array: o[16],  size: 2,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	16, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'bufName',  o[17],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[18],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	18, [ o[19],  o[21] ],  
+	// IdentityDictionary
+	19, [ array: o[20],  size: 10,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	20, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'clusterSpread',  0.100000,  
+		'grnRand',  0.000000,  'distFrmCen',  0,  
+		'grnRate',  11.087417,  'pan',  1.000000,  
+		'spread',  0.258946,  'amp',  1,  
+		'grnDisp',  0.030000,  'grnDur',  0.563454,  
+		'cluster',  3,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	21, [ array: o[22],  size: 10,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	22, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'clusterSpread',  0.165771,  
+		'grnRand',  0.000000,  'distFrmCen',  0.320000,  
+		'grnRate',  10,  'pan',  0.006000,  
+		'spread',  0.108658,  'amp',  1,  
+		'grnDisp',  0.301247,  'grnDur',  2.199658,  
+		'cluster',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	23, [ array: o[24],  size: 2,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	24, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'bufName',  o[25],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[26],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	26, [ o[27],  o[29] ],  
+	// IdentityDictionary
+	27, [ array: o[28],  size: 10,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	28, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'clusterSpread',  0.001206,  
+		'grnRand',  0.006934,  'distFrmCen',  0.254000,  
+		'grnRate',  9.448666,  'pan',  -0.804000,  
+		'spread',  0.147148,  'amp',  1.207717,  
+		'grnDisp',  0.000000,  'grnDur',  1.367954,  
+		'cluster',  7,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	29, [ array: o[30],  size: 10,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	30, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'clusterSpread',  0.001871,  
+		'grnRand',  0.137403,  'distFrmCen',  0.826000,  
+		'grnRate',  14.744082,  'pan',  1.000000,  
+		'spread',  0.537339,  'amp',  2.108860,  
+		'grnDisp',  0.365482,  'grnDur',  1.022824,  
+		'cluster',  3,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	31, [ array: o[32],  size: 2,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	32, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'bufName',  o[33],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[34],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	34, [ o[35] ],  
+	// IdentityDictionary
+	35, [ array: o[36],  size: 7,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	36, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'clusterSpread',  0.600000,  
+		'grnRand',  0.300000,  'distFrmCen',  0.500000,  
+		'grnRate',  2.000000,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'grnDisp',  0.400000,  'grnDur',  0.100000,  
+		'cluster',  4,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	37, [ array: o[38],  size: 2,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	38, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'bufName',  o[39],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[40],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	40, [ o[41] ],  
+	// IdentityDictionary
+	41, [ array: o[42],  size: 10,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	42, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'clusterSpread',  0.600000,  
+		'grnRand',  0.300000,  'distFrmCen',  0.500000,  
+		'grnRate',  2.000000,  'pan',  0.700000,  
+		'spread',  0.800000,  'amp',  0.901571,  
+		'grnDisp',  0.400000,  'grnDur',  0.100000,  
+		'cluster',  4,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	43, [ array: o[44],  size: 35,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	44, [ 'piano04',  o[45],  'test8',  o[64],  
+		'piano35',  o[83],  nil,  nil,  
+		nil,  nil,  'test9',  o[102],  
+		'test3',  o[121],  'trumpet01',  o[140],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'bass12',  o[159],  
+		nil,  nil,  nil,  nil,  
+		'bass01',  o[178],  'trumpet12',  o[197],  
+		nil,  nil,  'piano01',  o[216],  
+		nil,  nil,  nil,  nil,  
+		'test12',  o[235],  'trumpet02',  o[254],  
+		'test7',  o[273],  'trumpet118',  o[292],  
+		nil,  nil,  'bass02',  o[311],  
+		'test6',  o[330],  'test2',  o[350],  
+		'trumpet03',  o[370],  'test5',  o[389],  
+		'test10',  o[407],  'bass03',  o[426],  
+		'test4',  o[445],  'test13',  o[464],  
+		'bass10',  o[483],  'bass118',  o[502],  
+		'piano02',  o[521],  'trumpet10',  o[540],  
+		nil,  nil,  'test1',  o[559],  
+		nil,  nil,  'trumpet35',  o[578],  
+		nil,  nil,  'test03',  o[597],  
+		'piano12',  o[616],  'piano118',  o[635],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'trumpet04',  o[654],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'test11',  o[673],  
+		nil,  nil,  'bass35',  o[692] ],  
+	// IdentityDictionary
+	45, [ array: o[46],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	46, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[47],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[49],  
+		nil,  nil,  'balanceAmp',  o[63] ],  
+	// Array
+	47, [ o[48] ],  
+	// IdentityDictionary
+	49, [ array: o[50],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	50, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[51],  'amp',  o[52],  
+		'grainRate',  o[53],  'start',  o[54],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[55],  nil,  nil,  
+		'grainDur',  o[56],  'end',  o[57],  
+		'auxmix',  o[58],  'grainRand',  o[59],  
+		'posDisp',  o[60],  nil,  nil,  
+		'posInv',  o[61],  'posRate',  o[62],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	51, [ 0 ],  
+	// Array
+	52, [ 1 ],  
+	// Array
+	53, [ 10 ],  
+	// Array
+	54, [ 0 ],  
+	// Array
+	55, [ 1 ],  
+	// Array
+	56, [ 0.040000 ],  
+	// Array
+	57, [ 1 ],  
+	// Array
+	58, [ 0 ],  
+	// Array
+	59, [ 0 ],  
+	// Array
+	60, [ 0.010000 ],  
+	// Array
+	61, [ 0 ],  
+	// Array
+	62, [ 1 ],  
+	// Array
+	63, [ 1 ],  
+	// IdentityDictionary
+	64, [ array: o[65],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	65, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[66],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[68],  
+		nil,  nil,  'balanceAmp',  o[82] ],  
+	// Array
+	66, [ o[67] ],  
+	// IdentityDictionary
+	68, [ array: o[69],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	69, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[70],  'amp',  o[71],  
+		'grainRate',  o[72],  'start',  o[73],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[74],  nil,  nil,  
+		'grainDur',  o[75],  'end',  o[76],  
+		'auxmix',  o[77],  'grainRand',  o[78],  
+		'posDisp',  o[79],  nil,  nil,  
+		'posInv',  o[80],  'posRate',  o[81],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	70, [ 1 ],  
+	// Array
+	71, [ 0.604730 ],  
+	// Array
+	72, [ 2.995253 ],  
+	// Array
+	73, [ 0.000000 ],  
+	// Array
+	74, [ 1.350236 ],  
+	// Array
+	75, [ 1.247622 ],  
+	// Array
+	76, [ 0.990000 ],  
+	// Array
+	77, [ 0.193460 ],  
+	// Array
+	78, [ 0.134986 ],  
+	// Array
+	79, [ 0.000000 ],  
+	// Array
+	80, [ 1.000000 ],  
+	// Array
+	81, [ 0.676400 ],  
+	// Array
+	82, [ 1 ],  
+	// IdentityDictionary
+	83, [ array: o[84],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	84, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[85],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[87],  
+		nil,  nil,  'balanceAmp',  o[101] ],  
+	// Array
+	85, [ o[86] ],  
+	// IdentityDictionary
+	87, [ array: o[88],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	88, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[89],  'amp',  o[90],  
+		'grainRate',  o[91],  'start',  o[92],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[93],  nil,  nil,  
+		'grainDur',  o[94],  'end',  o[95],  
+		'auxmix',  o[96],  'grainRand',  o[97],  
+		'posDisp',  o[98],  nil,  nil,  
+		'posInv',  o[99],  'posRate',  o[100],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	89, [ 0 ],  
+	// Array
+	90, [ 1 ],  
+	// Array
+	91, [ 10 ],  
+	// Array
+	92, [ 0 ],  
+	// Array
+	93, [ 1 ],  
+	// Array
+	94, [ 0.040000 ],  
+	// Array
+	95, [ 1 ],  
+	// Array
+	96, [ 0 ],  
+	// Array
+	97, [ 0 ],  
+	// Array
+	98, [ 0.010000 ],  
+	// Array
+	99, [ 0 ],  
+	// Array
+	100, [ 1 ],  
+	// Array
+	101, [ 1 ],  
+	// IdentityDictionary
+	102, [ array: o[103],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	103, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[104],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[106],  
+		nil,  nil,  'balanceAmp',  o[120] ],  
+	// Array
+	104, [ o[105] ],  
+	// IdentityDictionary
+	106, [ array: o[107],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	107, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[108],  'amp',  o[109],  
+		'grainRate',  o[110],  'start',  o[111],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[112],  nil,  nil,  
+		'grainDur',  o[113],  'end',  o[114],  
+		'auxmix',  o[115],  'grainRand',  o[116],  
+		'posDisp',  o[117],  nil,  nil,  
+		'posInv',  o[118],  'posRate',  o[119],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	108, [ 1 ],  
+	// Array
+	109, [ 0.260806 ],  
+	// Array
+	110, [ 2.240117 ],  
+	// Array
+	111, [ 0.450000 ],  
+	// Array
+	112, [ 1.992806 ],  
+	// Array
+	113, [ 0.326828 ],  
+	// Array
+	114, [ 0.570000 ],  
+	// Array
+	115, [ 0.057221 ],  
+	// Array
+	116, [ 0.134986 ],  
+	// Array
+	117, [ 0.000000 ],  
+	// Array
+	118, [ 1.000000 ],  
+	// Array
+	119, [ 1.567600 ],  
+	// Array
+	120, [ 1.000000 ],  
+	// IdentityDictionary
+	121, [ array: o[122],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	122, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[123],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[125],  
+		nil,  nil,  'balanceAmp',  o[139] ],  
+	// Array
+	123, [ o[124] ],  
+	// IdentityDictionary
+	125, [ array: o[126],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	126, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[127],  'amp',  o[128],  
+		'grainRate',  o[129],  'start',  o[130],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[131],  nil,  nil,  
+		'grainDur',  o[132],  'end',  o[133],  
+		'auxmix',  o[134],  'grainRand',  o[135],  
+		'posDisp',  o[136],  nil,  nil,  
+		'posInv',  o[137],  'posRate',  o[138],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	127, [ 1 ],  
+	// Array
+	128, [ 2.787248 ],  
+	// Array
+	129, [ 3.067440 ],  
+	// Array
+	130, [ 0.000000 ],  
+	// Array
+	131, [ 2.291487 ],  
+	// Array
+	132, [ 2.960215 ],  
+	// Array
+	133, [ 1.006195 ],  
+	// Array
+	134, [ 0.618529 ],  
+	// Array
+	135, [ 0.141342 ],  
+	// Array
+	136, [ 0.777375 ],  
+	// Array
+	137, [ 1.000000 ],  
+	// Array
+	138, [ 0.100382 ],  
+	// Array
+	139, [ 1 ],  
+	// IdentityDictionary
+	140, [ array: o[141],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	141, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[142],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[144],  
+		nil,  nil,  'balanceAmp',  o[158] ],  
+	// Array
+	142, [ o[143] ],  
+	// IdentityDictionary
+	144, [ array: o[145],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	145, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[146],  'amp',  o[147],  
+		'grainRate',  o[148],  'start',  o[149],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[150],  nil,  nil,  
+		'grainDur',  o[151],  'end',  o[152],  
+		'auxmix',  o[153],  'grainRand',  o[154],  
+		'posDisp',  o[155],  nil,  nil,  
+		'posInv',  o[156],  'posRate',  o[157],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	146, [ 0 ],  
+	// Array
+	147, [ 1 ],  
+	// Array
+	148, [ 10 ],  
+	// Array
+	149, [ 0 ],  
+	// Array
+	150, [ 1 ],  
+	// Array
+	151, [ 0.040000 ],  
+	// Array
+	152, [ 1 ],  
+	// Array
+	153, [ 0 ],  
+	// Array
+	154, [ 0 ],  
+	// Array
+	155, [ 0.010000 ],  
+	// Array
+	156, [ 0 ],  
+	// Array
+	157, [ 1 ],  
+	// Array
+	158, [ 1 ],  
+	// IdentityDictionary
+	159, [ array: o[160],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	160, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[161],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[163],  
+		nil,  nil,  'balanceAmp',  o[177] ],  
+	// Array
+	161, [ o[162] ],  
+	// IdentityDictionary
+	163, [ array: o[164],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	164, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[165],  'amp',  o[166],  
+		'grainRate',  o[167],  'start',  o[168],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[169],  nil,  nil,  
+		'grainDur',  o[170],  'end',  o[171],  
+		'auxmix',  o[172],  'grainRand',  o[173],  
+		'posDisp',  o[174],  nil,  nil,  
+		'posInv',  o[175],  'posRate',  o[176],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	165, [ 0 ],  
+	// Array
+	166, [ 1 ],  
+	// Array
+	167, [ 10 ],  
+	// Array
+	168, [ 0 ],  
+	// Array
+	169, [ 1 ],  
+	// Array
+	170, [ 0.040000 ],  
+	// Array
+	171, [ 1 ],  
+	// Array
+	172, [ 0 ],  
+	// Array
+	173, [ 0 ],  
+	// Array
+	174, [ 0.010000 ],  
+	// Array
+	175, [ 0 ],  
+	// Array
+	176, [ 1 ],  
+	// Array
+	177, [ 1 ],  
+	// IdentityDictionary
+	178, [ array: o[179],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	179, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[180],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[182],  
+		nil,  nil,  'balanceAmp',  o[196] ],  
+	// Array
+	180, [ o[181] ],  
+	// IdentityDictionary
+	182, [ array: o[183],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	183, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[184],  'amp',  o[185],  
+		'grainRate',  o[186],  'start',  o[187],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[188],  nil,  nil,  
+		'grainDur',  o[189],  'end',  o[190],  
+		'auxmix',  o[191],  'grainRand',  o[192],  
+		'posDisp',  o[193],  nil,  nil,  
+		'posInv',  o[194],  'posRate',  o[195],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	184, [ 0 ],  
+	// Array
+	185, [ 1 ],  
+	// Array
+	186, [ 10 ],  
+	// Array
+	187, [ 0 ],  
+	// Array
+	188, [ 1 ],  
+	// Array
+	189, [ 0.040000 ],  
+	// Array
+	190, [ 1 ],  
+	// Array
+	191, [ 0 ],  
+	// Array
+	192, [ 0 ],  
+	// Array
+	193, [ 0.010000 ],  
+	// Array
+	194, [ 0 ],  
+	// Array
+	195, [ 1 ],  
+	// Array
+	196, [ 1 ],  
+	// IdentityDictionary
+	197, [ array: o[198],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	198, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[199],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[201],  
+		nil,  nil,  'balanceAmp',  o[215] ],  
+	// Array
+	199, [ o[200] ],  
+	// IdentityDictionary
+	201, [ array: o[202],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	202, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[203],  'amp',  o[204],  
+		'grainRate',  o[205],  'start',  o[206],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[207],  nil,  nil,  
+		'grainDur',  o[208],  'end',  o[209],  
+		'auxmix',  o[210],  'grainRand',  o[211],  
+		'posDisp',  o[212],  nil,  nil,  
+		'posInv',  o[213],  'posRate',  o[214],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	203, [ 0 ],  
+	// Array
+	204, [ 1 ],  
+	// Array
+	205, [ 10 ],  
+	// Array
+	206, [ 0 ],  
+	// Array
+	207, [ 1 ],  
+	// Array
+	208, [ 0.040000 ],  
+	// Array
+	209, [ 1 ],  
+	// Array
+	210, [ 0 ],  
+	// Array
+	211, [ 0 ],  
+	// Array
+	212, [ 0.010000 ],  
+	// Array
+	213, [ 0 ],  
+	// Array
+	214, [ 1 ],  
+	// Array
+	215, [ 1 ],  
+	// IdentityDictionary
+	216, [ array: o[217],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	217, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[218],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[220],  
+		nil,  nil,  'balanceAmp',  o[234] ],  
+	// Array
+	218, [ o[219] ],  
+	// IdentityDictionary
+	220, [ array: o[221],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	221, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[222],  'amp',  o[223],  
+		'grainRate',  o[224],  'start',  o[225],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[226],  nil,  nil,  
+		'grainDur',  o[227],  'end',  o[228],  
+		'auxmix',  o[229],  'grainRand',  o[230],  
+		'posDisp',  o[231],  nil,  nil,  
+		'posInv',  o[232],  'posRate',  o[233],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	222, [ 0 ],  
+	// Array
+	223, [ 1 ],  
+	// Array
+	224, [ 10 ],  
+	// Array
+	225, [ 0 ],  
+	// Array
+	226, [ 1 ],  
+	// Array
+	227, [ 0.040000 ],  
+	// Array
+	228, [ 1 ],  
+	// Array
+	229, [ 0 ],  
+	// Array
+	230, [ 0 ],  
+	// Array
+	231, [ 0.010000 ],  
+	// Array
+	232, [ 0 ],  
+	// Array
+	233, [ 1 ],  
+	// Array
+	234, [ 1 ],  
+	// IdentityDictionary
+	235, [ array: o[236],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	236, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[237],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[239],  
+		nil,  nil,  'balanceAmp',  o[253] ],  
+	// Array
+	237, [ o[238] ],  
+	// IdentityDictionary
+	239, [ array: o[240],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	240, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[241],  'amp',  o[242],  
+		'grainRate',  o[243],  'start',  o[244],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[245],  nil,  nil,  
+		'grainDur',  o[246],  'end',  o[247],  
+		'auxmix',  o[248],  'grainRand',  o[249],  
+		'posDisp',  o[250],  nil,  nil,  
+		'posInv',  o[251],  'posRate',  o[252],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	241, [ 1 ],  
+	// Array
+	242, [ 0.378411 ],  
+	// Array
+	243, [ 3.755220 ],  
+	// Array
+	244, [ 0.174564 ],  
+	// Array
+	245, [ 2.665003 ],  
+	// Array
+	246, [ 0.592220 ],  
+	// Array
+	247, [ 0.881439 ],  
+	// Array
+	248, [ 0.870773 ],  
+	// Array
+	249, [ 0.062503 ],  
+	// Array
+	250, [ 0.481017 ],  
+	// Array
+	251, [ 1.000000 ],  
+	// Array
+	252, [ 0.521874 ],  
+	// Array
+	253, [ 1 ],  
+	// IdentityDictionary
+	254, [ array: o[255],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	255, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[256],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[258],  
+		nil,  nil,  'balanceAmp',  o[272] ],  
+	// Array
+	256, [ o[257] ],  
+	// IdentityDictionary
+	258, [ array: o[259],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	259, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[260],  'amp',  o[261],  
+		'grainRate',  o[262],  'start',  o[263],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[264],  nil,  nil,  
+		'grainDur',  o[265],  'end',  o[266],  
+		'auxmix',  o[267],  'grainRand',  o[268],  
+		'posDisp',  o[269],  nil,  nil,  
+		'posInv',  o[270],  'posRate',  o[271],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	260, [ 0 ],  
+	// Array
+	261, [ 1 ],  
+	// Array
+	262, [ 10 ],  
+	// Array
+	263, [ 0 ],  
+	// Array
+	264, [ 1 ],  
+	// Array
+	265, [ 0.040000 ],  
+	// Array
+	266, [ 1 ],  
+	// Array
+	267, [ 0 ],  
+	// Array
+	268, [ 0 ],  
+	// Array
+	269, [ 0.010000 ],  
+	// Array
+	270, [ 0 ],  
+	// Array
+	271, [ 1 ],  
+	// Array
+	272, [ 1 ],  
+	// IdentityDictionary
+	273, [ array: o[274],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	274, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[275],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[277],  
+		nil,  nil,  'balanceAmp',  o[291] ],  
+	// Array
+	275, [ o[276] ],  
+	// IdentityDictionary
+	277, [ array: o[278],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	278, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[279],  'amp',  o[280],  
+		'grainRate',  o[281],  'start',  o[282],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[283],  nil,  nil,  
+		'grainDur',  o[284],  'end',  o[285],  
+		'auxmix',  o[286],  'grainRand',  o[287],  
+		'posDisp',  o[288],  nil,  nil,  
+		'posInv',  o[289],  'posRate',  o[290],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	279, [ 1 ],  
+	// Array
+	280, [ 0.484969 ],  
+	// Array
+	281, [ 39.308328 ],  
+	// Array
+	282, [ 0.000000 ],  
+	// Array
+	283, [ 1.117336 ],  
+	// Array
+	284, [ 0.575943 ],  
+	// Array
+	285, [ 0.420000 ],  
+	// Array
+	286, [ 0.000000 ],  
+	// Array
+	287, [ 0.016529 ],  
+	// Array
+	288, [ 0.000000 ],  
+	// Array
+	289, [ 1.000000 ],  
+	// Array
+	290, [ 0.219300 ],  
+	// Array
+	291, [ 1 ],  
+	// IdentityDictionary
+	292, [ array: o[293],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	293, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[294],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[296],  
+		nil,  nil,  'balanceAmp',  o[310] ],  
+	// Array
+	294, [ o[295] ],  
+	// IdentityDictionary
+	296, [ array: o[297],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	297, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[298],  'amp',  o[299],  
+		'grainRate',  o[300],  'start',  o[301],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[302],  nil,  nil,  
+		'grainDur',  o[303],  'end',  o[304],  
+		'auxmix',  o[305],  'grainRand',  o[306],  
+		'posDisp',  o[307],  nil,  nil,  
+		'posInv',  o[308],  'posRate',  o[309],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	298, [ 0 ],  
+	// Array
+	299, [ 1 ],  
+	// Array
+	300, [ 10 ],  
+	// Array
+	301, [ 0 ],  
+	// Array
+	302, [ 1 ],  
+	// Array
+	303, [ 0.040000 ],  
+	// Array
+	304, [ 1 ],  
+	// Array
+	305, [ 0 ],  
+	// Array
+	306, [ 0 ],  
+	// Array
+	307, [ 0.010000 ],  
+	// Array
+	308, [ 0 ],  
+	// Array
+	309, [ 1 ],  
+	// Array
+	310, [ 1 ],  
+	// IdentityDictionary
+	311, [ array: o[312],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	312, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[313],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[315],  
+		nil,  nil,  'balanceAmp',  o[329] ],  
+	// Array
+	313, [ o[314] ],  
+	// IdentityDictionary
+	315, [ array: o[316],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	316, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[317],  'amp',  o[318],  
+		'grainRate',  o[319],  'start',  o[320],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[321],  nil,  nil,  
+		'grainDur',  o[322],  'end',  o[323],  
+		'auxmix',  o[324],  'grainRand',  o[325],  
+		'posDisp',  o[326],  nil,  nil,  
+		'posInv',  o[327],  'posRate',  o[328],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	317, [ 0 ],  
+	// Array
+	318, [ 1 ],  
+	// Array
+	319, [ 10 ],  
+	// Array
+	320, [ 0 ],  
+	// Array
+	321, [ 1 ],  
+	// Array
+	322, [ 0.040000 ],  
+	// Array
+	323, [ 1 ],  
+	// Array
+	324, [ 0 ],  
+	// Array
+	325, [ 0 ],  
+	// Array
+	326, [ 0.010000 ],  
+	// Array
+	327, [ 0 ],  
+	// Array
+	328, [ 1 ],  
+	// Array
+	329, [ 1 ],  
+	// IdentityDictionary
+	330, [ array: o[331],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	331, [ 'numStored',  2,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[332],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[335],  
+		nil,  nil,  'balanceAmp',  o[349] ],  
+	// Array
+	332, [ o[333],  o[334] ],  
+	// IdentityDictionary
+	335, [ array: o[336],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	336, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[337],  'amp',  o[338],  
+		'grainRate',  o[339],  'start',  o[340],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[341],  nil,  nil,  
+		'grainDur',  o[342],  'end',  o[343],  
+		'auxmix',  o[344],  'grainRand',  o[345],  
+		'posDisp',  o[346],  nil,  nil,  
+		'posInv',  o[347],  'posRate',  o[348],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	337, [ 1,  1 ],  
+	// Array
+	338, [ 0.778106,  0.996343 ],  
+	// Array
+	339, [ 19.798327,  30.379529 ],  
+	// Array
+	340, [ 0.630735,  0.149012 ],  
+	// Array
+	341, [ 3.964365,  1.648567 ],  
+	// Array
+	342, [ 1.877212,  0.691400 ],  
+	// Array
+	343, [ 1.004268,  0.775262 ],  
+	// Array
+	344, [ 0.000000,  0.000000 ],  
+	// Array
+	345, [ 0.988544,  0.376695 ],  
+	// Array
+	346, [ 0.051216,  0.000000 ],  
+	// Array
+	347, [ 1.000000,  1.000000 ],  
+	// Array
+	348, [ -0.254900,  1.462959 ],  
+	// Array
+	349, [ 0.832105,  0.554618 ],  
+	// IdentityDictionary
+	350, [ array: o[351],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	351, [ 'numStored',  2,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[352],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[355],  
+		nil,  nil,  'balanceAmp',  o[369] ],  
+	// Array
+	352, [ o[353],  o[354] ],  
+	// IdentityDictionary
+	355, [ array: o[356],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	356, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[357],  'amp',  o[358],  
+		'grainRate',  o[359],  'start',  o[360],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[361],  nil,  nil,  
+		'grainDur',  o[362],  'end',  o[363],  
+		'auxmix',  o[364],  'grainRand',  o[365],  
+		'posDisp',  o[366],  nil,  nil,  
+		'posInv',  o[367],  'posRate',  o[368],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	357, [ 1,  1 ],  
+	// Array
+	358, [ 3.071607,  8.759758 ],  
+	// Array
+	359, [ 12.359453,  6.715263 ],  
+	// Array
+	360, [ 0.815500,  0.273677 ],  
+	// Array
+	361, [ 0.771109,  0.986480 ],  
+	// Array
+	362, [ 0.048864,  0.047986 ],  
+	// Array
+	363, [ 0.692144,  0.562443 ],  
+	// Array
+	364, [ 0.717699,  0.000000 ],  
+	// Array
+	365, [ 0.000000,  0.000000 ],  
+	// Array
+	366, [ 0.010213,  0.011628 ],  
+	// Array
+	367, [ 0.000000,  1.000000 ],  
+	// Array
+	368, [ 1.164128,  0.723724 ],  
+	// Array
+	369, [ 0.699508,  0.714625 ],  
+	// IdentityDictionary
+	370, [ array: o[371],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	371, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[372],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[374],  
+		nil,  nil,  'balanceAmp',  o[388] ],  
+	// Array
+	372, [ o[373] ],  
+	// IdentityDictionary
+	374, [ array: o[375],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	375, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[376],  'amp',  o[377],  
+		'grainRate',  o[378],  'start',  o[379],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[380],  nil,  nil,  
+		'grainDur',  o[381],  'end',  o[382],  
+		'auxmix',  o[383],  'grainRand',  o[384],  
+		'posDisp',  o[385],  nil,  nil,  
+		'posInv',  o[386],  'posRate',  o[387],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	376, [ 0 ],  
+	// Array
+	377, [ 1 ],  
+	// Array
+	378, [ 10 ],  
+	// Array
+	379, [ 0 ],  
+	// Array
+	380, [ 1 ],  
+	// Array
+	381, [ 0.040000 ],  
+	// Array
+	382, [ 1 ],  
+	// Array
+	383, [ 0 ],  
+	// Array
+	384, [ 0 ],  
+	// Array
+	385, [ 0.010000 ],  
+	// Array
+	386, [ 0 ],  
+	// Array
+	387, [ 1 ],  
+	// Array
+	388, [ 1 ],  
+	// IdentityDictionary
+	389, [ array: o[390],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	390, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[391],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[393],  
+		nil,  nil,  'balanceAmp',  o[406] ],  
+	// Array
+	391, [ o[392] ],  
+	// IdentityDictionary
+	393, [ array: o[394],  size: 11,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	394, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[395],  'amp',  o[396],  
+		'grainRate',  o[397],  'start',  o[398],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[399],  nil,  nil,  
+		'grainDur',  o[400],  'end',  o[401],  
+		'auxmix',  o[402],  'grainRand',  o[403],  
+		'posDisp',  o[404],  nil,  nil,  
+		nil,  nil,  'posRate',  o[405],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	395, [ 1 ],  
+	// Array
+	396, [ 1.347137 ],  
+	// Array
+	397, [ 11.850536 ],  
+	// Array
+	398, [ 0.120000 ],  
+	// Array
+	399, [ 3.552080 ],  
+	// Array
+	400, [ 1.864192 ],  
+	// Array
+	401, [ 0.540000 ],  
+	// Array
+	402, [ 0.000000 ],  
+	// Array
+	403, [ 0.253444 ],  
+	// Array
+	404, [ 0.031880 ],  
+	// Array
+	405, [ 0.169300 ],  
+	// Array
+	406, [ 1 ],  
+	// IdentityDictionary
+	407, [ array: o[408],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	408, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[409],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[411],  
+		nil,  nil,  'balanceAmp',  o[425] ],  
+	// Array
+	409, [ o[410] ],  
+	// IdentityDictionary
+	411, [ array: o[412],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	412, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[413],  'amp',  o[414],  
+		'grainRate',  o[415],  'start',  o[416],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[417],  nil,  nil,  
+		'grainDur',  o[418],  'end',  o[419],  
+		'auxmix',  o[420],  'grainRand',  o[421],  
+		'posDisp',  o[422],  nil,  nil,  
+		'posInv',  o[423],  'posRate',  o[424],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	413, [ 1 ],  
+	// Array
+	414, [ 1.485219 ],  
+	// Array
+	415, [ 1.679573 ],  
+	// Array
+	416, [ 0.564965 ],  
+	// Array
+	417, [ 1.463613 ],  
+	// Array
+	418, [ 1.351746 ],  
+	// Array
+	419, [ 0.777750 ],  
+	// Array
+	420, [ 0.000000 ],  
+	// Array
+	421, [ 0.072625 ],  
+	// Array
+	422, [ 0.000000 ],  
+	// Array
+	423, [ 1.000000 ],  
+	// Array
+	424, [ 1.574727 ],  
+	// Array
+	425, [ 1 ],  
+	// IdentityDictionary
+	426, [ array: o[427],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	427, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[428],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[430],  
+		nil,  nil,  'balanceAmp',  o[444] ],  
+	// Array
+	428, [ o[429] ],  
+	// IdentityDictionary
+	430, [ array: o[431],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	431, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[432],  'amp',  o[433],  
+		'grainRate',  o[434],  'start',  o[435],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[436],  nil,  nil,  
+		'grainDur',  o[437],  'end',  o[438],  
+		'auxmix',  o[439],  'grainRand',  o[440],  
+		'posDisp',  o[441],  nil,  nil,  
+		'posInv',  o[442],  'posRate',  o[443],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	432, [ 0 ],  
+	// Array
+	433, [ 1 ],  
+	// Array
+	434, [ 10 ],  
+	// Array
+	435, [ 0 ],  
+	// Array
+	436, [ 1 ],  
+	// Array
+	437, [ 0.040000 ],  
+	// Array
+	438, [ 1 ],  
+	// Array
+	439, [ 0 ],  
+	// Array
+	440, [ 0 ],  
+	// Array
+	441, [ 0.010000 ],  
+	// Array
+	442, [ 0 ],  
+	// Array
+	443, [ 1 ],  
+	// Array
+	444, [ 1 ],  
+	// IdentityDictionary
+	445, [ array: o[446],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	446, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[447],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[449],  
+		nil,  nil,  'balanceAmp',  o[463] ],  
+	// Array
+	447, [ o[448] ],  
+	// IdentityDictionary
+	449, [ array: o[450],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	450, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[451],  'amp',  o[452],  
+		'grainRate',  o[453],  'start',  o[454],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[455],  nil,  nil,  
+		'grainDur',  o[456],  'end',  o[457],  
+		'auxmix',  o[458],  'grainRand',  o[459],  
+		'posDisp',  o[460],  nil,  nil,  
+		'posInv',  o[461],  'posRate',  o[462],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	451, [ 1 ],  
+	// Array
+	452, [ 1.241521 ],  
+	// Array
+	453, [ 31.954772 ],  
+	// Array
+	454, [ 0.630000 ],  
+	// Array
+	455, [ 1.693553 ],  
+	// Array
+	456, [ 0.708497 ],  
+	// Array
+	457, [ 0.810000 ],  
+	// Array
+	458, [ 0.000000 ],  
+	// Array
+	459, [ 0.800000 ],  
+	// Array
+	460, [ 0.000000 ],  
+	// Array
+	461, [ 0 ],  
+	// Array
+	462, [ 0.420100 ],  
+	// Array
+	463, [ 1 ],  
+	// IdentityDictionary
+	464, [ array: o[465],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	465, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[466],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[468],  
+		nil,  nil,  'balanceAmp',  o[482] ],  
+	// Array
+	466, [ o[467] ],  
+	// IdentityDictionary
+	468, [ array: o[469],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	469, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[470],  'amp',  o[471],  
+		'grainRate',  o[472],  'start',  o[473],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[474],  nil,  nil,  
+		'grainDur',  o[475],  'end',  o[476],  
+		'auxmix',  o[477],  'grainRand',  o[478],  
+		'posDisp',  o[479],  nil,  nil,  
+		'posInv',  o[480],  'posRate',  o[481],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	470, [ 1 ],  
+	// Array
+	471, [ 0.323448 ],  
+	// Array
+	472, [ 9.446337 ],  
+	// Array
+	473, [ 0.171141 ],  
+	// Array
+	474, [ 1.670652 ],  
+	// Array
+	475, [ 0.280556 ],  
+	// Array
+	476, [ 0.441965 ],  
+	// Array
+	477, [ 0.064581 ],  
+	// Array
+	478, [ 0.000000 ],  
+	// Array
+	479, [ 0.000000 ],  
+	// Array
+	480, [ 1.000000 ],  
+	// Array
+	481, [ 1.143388 ],  
+	// Array
+	482, [ 1 ],  
+	// IdentityDictionary
+	483, [ array: o[484],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	484, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[485],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[487],  
+		nil,  nil,  'balanceAmp',  o[501] ],  
+	// Array
+	485, [ o[486] ],  
+	// IdentityDictionary
+	487, [ array: o[488],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	488, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[489],  'amp',  o[490],  
+		'grainRate',  o[491],  'start',  o[492],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[493],  nil,  nil,  
+		'grainDur',  o[494],  'end',  o[495],  
+		'auxmix',  o[496],  'grainRand',  o[497],  
+		'posDisp',  o[498],  nil,  nil,  
+		'posInv',  o[499],  'posRate',  o[500],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	489, [ 0 ],  
+	// Array
+	490, [ 1 ],  
+	// Array
+	491, [ 10 ],  
+	// Array
+	492, [ 0 ],  
+	// Array
+	493, [ 1 ],  
+	// Array
+	494, [ 0.040000 ],  
+	// Array
+	495, [ 1 ],  
+	// Array
+	496, [ 0 ],  
+	// Array
+	497, [ 0 ],  
+	// Array
+	498, [ 0.010000 ],  
+	// Array
+	499, [ 0 ],  
+	// Array
+	500, [ 1 ],  
+	// Array
+	501, [ 1 ],  
+	// IdentityDictionary
+	502, [ array: o[503],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	503, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[504],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[506],  
+		nil,  nil,  'balanceAmp',  o[520] ],  
+	// Array
+	504, [ o[505] ],  
+	// IdentityDictionary
+	506, [ array: o[507],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	507, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[508],  'amp',  o[509],  
+		'grainRate',  o[510],  'start',  o[511],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[512],  nil,  nil,  
+		'grainDur',  o[513],  'end',  o[514],  
+		'auxmix',  o[515],  'grainRand',  o[516],  
+		'posDisp',  o[517],  nil,  nil,  
+		'posInv',  o[518],  'posRate',  o[519],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	508, [ 0 ],  
+	// Array
+	509, [ 1 ],  
+	// Array
+	510, [ 10 ],  
+	// Array
+	511, [ 0 ],  
+	// Array
+	512, [ 1 ],  
+	// Array
+	513, [ 0.040000 ],  
+	// Array
+	514, [ 1 ],  
+	// Array
+	515, [ 0 ],  
+	// Array
+	516, [ 0 ],  
+	// Array
+	517, [ 0.010000 ],  
+	// Array
+	518, [ 0 ],  
+	// Array
+	519, [ 1 ],  
+	// Array
+	520, [ 1 ],  
+	// IdentityDictionary
+	521, [ array: o[522],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	522, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[523],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[525],  
+		nil,  nil,  'balanceAmp',  o[539] ],  
+	// Array
+	523, [ o[524] ],  
+	// IdentityDictionary
+	525, [ array: o[526],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	526, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[527],  'amp',  o[528],  
+		'grainRate',  o[529],  'start',  o[530],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[531],  nil,  nil,  
+		'grainDur',  o[532],  'end',  o[533],  
+		'auxmix',  o[534],  'grainRand',  o[535],  
+		'posDisp',  o[536],  nil,  nil,  
+		'posInv',  o[537],  'posRate',  o[538],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	527, [ 0 ],  
+	// Array
+	528, [ 1 ],  
+	// Array
+	529, [ 10 ],  
+	// Array
+	530, [ 0 ],  
+	// Array
+	531, [ 1 ],  
+	// Array
+	532, [ 0.040000 ],  
+	// Array
+	533, [ 1 ],  
+	// Array
+	534, [ 0 ],  
+	// Array
+	535, [ 0 ],  
+	// Array
+	536, [ 0.010000 ],  
+	// Array
+	537, [ 0 ],  
+	// Array
+	538, [ 1 ],  
+	// Array
+	539, [ 1 ],  
+	// IdentityDictionary
+	540, [ array: o[541],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	541, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[542],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[544],  
+		nil,  nil,  'balanceAmp',  o[558] ],  
+	// Array
+	542, [ o[543] ],  
+	// IdentityDictionary
+	544, [ array: o[545],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	545, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[546],  'amp',  o[547],  
+		'grainRate',  o[548],  'start',  o[549],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[550],  nil,  nil,  
+		'grainDur',  o[551],  'end',  o[552],  
+		'auxmix',  o[553],  'grainRand',  o[554],  
+		'posDisp',  o[555],  nil,  nil,  
+		'posInv',  o[556],  'posRate',  o[557],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	546, [ 0 ],  
+	// Array
+	547, [ 1 ],  
+	// Array
+	548, [ 10 ],  
+	// Array
+	549, [ 0 ],  
+	// Array
+	550, [ 1 ],  
+	// Array
+	551, [ 0.040000 ],  
+	// Array
+	552, [ 1 ],  
+	// Array
+	553, [ 0 ],  
+	// Array
+	554, [ 0 ],  
+	// Array
+	555, [ 0.010000 ],  
+	// Array
+	556, [ 0 ],  
+	// Array
+	557, [ 1 ],  
+	// Array
+	558, [ 1 ],  
+	// IdentityDictionary
+	559, [ array: o[560],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	560, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[561],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[563],  
+		nil,  nil,  'balanceAmp',  o[577] ],  
+	// Array
+	561, [ o[562] ],  
+	// IdentityDictionary
+	563, [ array: o[564],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	564, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[565],  'amp',  o[566],  
+		'grainRate',  o[567],  'start',  o[568],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[569],  nil,  nil,  
+		'grainDur',  o[570],  'end',  o[571],  
+		'auxmix',  o[572],  'grainRand',  o[573],  
+		'posDisp',  o[574],  nil,  nil,  
+		'posInv',  o[575],  'posRate',  o[576],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	565, [ 1 ],  
+	// Array
+	566, [ 2.104902 ],  
+	// Array
+	567, [ 2.231004 ],  
+	// Array
+	568, [ 0.420000 ],  
+	// Array
+	569, [ 1.707753 ],  
+	// Array
+	570, [ 1.014894 ],  
+	// Array
+	571, [ 0.450000 ],  
+	// Array
+	572, [ 0.596979 ],  
+	// Array
+	573, [ 0.096042 ],  
+	// Array
+	574, [ 0.049287 ],  
+	// Array
+	575, [ 0.000000 ],  
+	// Array
+	576, [ 3.839500 ],  
+	// Array
+	577, [ 1 ],  
+	// IdentityDictionary
+	578, [ array: o[579],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	579, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[580],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[582],  
+		nil,  nil,  'balanceAmp',  o[596] ],  
+	// Array
+	580, [ o[581] ],  
+	// IdentityDictionary
+	582, [ array: o[583],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	583, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[584],  'amp',  o[585],  
+		'grainRate',  o[586],  'start',  o[587],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[588],  nil,  nil,  
+		'grainDur',  o[589],  'end',  o[590],  
+		'auxmix',  o[591],  'grainRand',  o[592],  
+		'posDisp',  o[593],  nil,  nil,  
+		'posInv',  o[594],  'posRate',  o[595],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	584, [ 0 ],  
+	// Array
+	585, [ 1 ],  
+	// Array
+	586, [ 10 ],  
+	// Array
+	587, [ 0 ],  
+	// Array
+	588, [ 1 ],  
+	// Array
+	589, [ 0.040000 ],  
+	// Array
+	590, [ 1 ],  
+	// Array
+	591, [ 0 ],  
+	// Array
+	592, [ 0 ],  
+	// Array
+	593, [ 0.010000 ],  
+	// Array
+	594, [ 0 ],  
+	// Array
+	595, [ 1 ],  
+	// Array
+	596, [ 1 ],  
+	// IdentityDictionary
+	597, [ array: o[598],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	598, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[599],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[601],  
+		nil,  nil,  'balanceAmp',  o[615] ],  
+	// Array
+	599, [ o[600] ],  
+	// IdentityDictionary
+	601, [ array: o[602],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	602, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[603],  'amp',  o[604],  
+		'grainRate',  o[605],  'start',  o[606],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[607],  nil,  nil,  
+		'grainDur',  o[608],  'end',  o[609],  
+		'auxmix',  o[610],  'grainRand',  o[611],  
+		'posDisp',  o[612],  nil,  nil,  
+		'posInv',  o[613],  'posRate',  o[614],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	603, [ 1 ],  
+	// Array
+	604, [ 2.787248 ],  
+	// Array
+	605, [ 3.067440 ],  
+	// Array
+	606, [ 0.000000 ],  
+	// Array
+	607, [ 2.291487 ],  
+	// Array
+	608, [ 0.249559 ],  
+	// Array
+	609, [ 1.006195 ],  
+	// Array
+	610, [ 0.239782 ],  
+	// Array
+	611, [ 0.141342 ],  
+	// Array
+	612, [ 0.777375 ],  
+	// Array
+	613, [ 0.000000 ],  
+	// Array
+	614, [ 1.875000 ],  
+	// Array
+	615, [ 1 ],  
+	// IdentityDictionary
+	616, [ array: o[617],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	617, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[618],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[620],  
+		nil,  nil,  'balanceAmp',  o[634] ],  
+	// Array
+	618, [ o[619] ],  
+	// IdentityDictionary
+	620, [ array: o[621],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	621, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[622],  'amp',  o[623],  
+		'grainRate',  o[624],  'start',  o[625],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[626],  nil,  nil,  
+		'grainDur',  o[627],  'end',  o[628],  
+		'auxmix',  o[629],  'grainRand',  o[630],  
+		'posDisp',  o[631],  nil,  nil,  
+		'posInv',  o[632],  'posRate',  o[633],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	622, [ 0 ],  
+	// Array
+	623, [ 1 ],  
+	// Array
+	624, [ 10 ],  
+	// Array
+	625, [ 0 ],  
+	// Array
+	626, [ 1 ],  
+	// Array
+	627, [ 0.040000 ],  
+	// Array
+	628, [ 1 ],  
+	// Array
+	629, [ 0 ],  
+	// Array
+	630, [ 0 ],  
+	// Array
+	631, [ 0.010000 ],  
+	// Array
+	632, [ 0 ],  
+	// Array
+	633, [ 1 ],  
+	// Array
+	634, [ 1 ],  
+	// IdentityDictionary
+	635, [ array: o[636],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	636, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[637],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[639],  
+		nil,  nil,  'balanceAmp',  o[653] ],  
+	// Array
+	637, [ o[638] ],  
+	// IdentityDictionary
+	639, [ array: o[640],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	640, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[641],  'amp',  o[642],  
+		'grainRate',  o[643],  'start',  o[644],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[645],  nil,  nil,  
+		'grainDur',  o[646],  'end',  o[647],  
+		'auxmix',  o[648],  'grainRand',  o[649],  
+		'posDisp',  o[650],  nil,  nil,  
+		'posInv',  o[651],  'posRate',  o[652],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	641, [ 0 ],  
+	// Array
+	642, [ 1 ],  
+	// Array
+	643, [ 10 ],  
+	// Array
+	644, [ 0 ],  
+	// Array
+	645, [ 1 ],  
+	// Array
+	646, [ 0.040000 ],  
+	// Array
+	647, [ 1 ],  
+	// Array
+	648, [ 0 ],  
+	// Array
+	649, [ 0 ],  
+	// Array
+	650, [ 0.010000 ],  
+	// Array
+	651, [ 0 ],  
+	// Array
+	652, [ 1 ],  
+	// Array
+	653, [ 1 ],  
+	// IdentityDictionary
+	654, [ array: o[655],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	655, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[656],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[658],  
+		nil,  nil,  'balanceAmp',  o[672] ],  
+	// Array
+	656, [ o[657] ],  
+	// IdentityDictionary
+	658, [ array: o[659],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	659, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[660],  'amp',  o[661],  
+		'grainRate',  o[662],  'start',  o[663],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[664],  nil,  nil,  
+		'grainDur',  o[665],  'end',  o[666],  
+		'auxmix',  o[667],  'grainRand',  o[668],  
+		'posDisp',  o[669],  nil,  nil,  
+		'posInv',  o[670],  'posRate',  o[671],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	660, [ 0 ],  
+	// Array
+	661, [ 1 ],  
+	// Array
+	662, [ 10 ],  
+	// Array
+	663, [ 0 ],  
+	// Array
+	664, [ 1 ],  
+	// Array
+	665, [ 0.040000 ],  
+	// Array
+	666, [ 1 ],  
+	// Array
+	667, [ 0 ],  
+	// Array
+	668, [ 0 ],  
+	// Array
+	669, [ 0.010000 ],  
+	// Array
+	670, [ 0 ],  
+	// Array
+	671, [ 1 ],  
+	// Array
+	672, [ 1 ],  
+	// IdentityDictionary
+	673, [ array: o[674],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	674, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[675],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[677],  
+		nil,  nil,  'balanceAmp',  o[691] ],  
+	// Array
+	675, [ o[676] ],  
+	// IdentityDictionary
+	677, [ array: o[678],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	678, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[679],  'amp',  o[680],  
+		'grainRate',  o[681],  'start',  o[682],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[683],  nil,  nil,  
+		'grainDur',  o[684],  'end',  o[685],  
+		'auxmix',  o[686],  'grainRand',  o[687],  
+		'posDisp',  o[688],  nil,  nil,  
+		'posInv',  o[689],  'posRate',  o[690],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	679, [ 1 ],  
+	// Array
+	680, [ 0.237635 ],  
+	// Array
+	681, [ 14.853117 ],  
+	// Array
+	682, [ 0.180000 ],  
+	// Array
+	683, [ 1.596285 ],  
+	// Array
+	684, [ 0.315169 ],  
+	// Array
+	685, [ 0.630000 ],  
+	// Array
+	686, [ 0.059946 ],  
+	// Array
+	687, [ 0.077135 ],  
+	// Array
+	688, [ 0.029428 ],  
+	// Array
+	689, [ 1.000000 ],  
+	// Array
+	690, [ 1.567600 ],  
+	// Array
+	691, [ 1 ],  
+	// IdentityDictionary
+	692, [ array: o[693],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	693, [ 'numStored',  1,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'fileName',  o[694],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[696],  
+		nil,  nil,  'balanceAmp',  o[710] ],  
+	// Array
+	694, [ o[695] ],  
+	// IdentityDictionary
+	696, [ array: o[697],  size: 12,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	697, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'gate',  o[698],  'amp',  o[699],  
+		'grainRate',  o[700],  'start',  o[701],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'pitch',  o[702],  nil,  nil,  
+		'grainDur',  o[703],  'end',  o[704],  
+		'auxmix',  o[705],  'grainRand',  o[706],  
+		'posDisp',  o[707],  nil,  nil,  
+		'posInv',  o[708],  'posRate',  o[709],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	698, [ 0 ],  
+	// Array
+	699, [ 1 ],  
+	// Array
+	700, [ 10 ],  
+	// Array
+	701, [ 0 ],  
+	// Array
+	702, [ 1 ],  
+	// Array
+	703, [ 0.040000 ],  
+	// Array
+	704, [ 1 ],  
+	// Array
+	705, [ 0 ],  
+	// Array
+	706, [ 0 ],  
+	// Array
+	707, [ 0.010000 ],  
+	// Array
+	708, [ 0 ],  
+	// Array
+	709, [ 1 ],  
+	// Array
+	710, [ 1 ],  
+	// IdentityDictionary
+	711, [ array: o[712],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	712, [ nil,  nil,  'test5',  o[713],  
+		'test8',  o[723],  nil,  nil,  
+		'test4',  o[733],  'test9',  o[743],  
+		'test3',  o[753],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'test7',  o[763],  'test1',  o[773],  
+		nil,  nil,  nil,  nil,  
+		'test6',  o[783],  'test2',  o[793] ],  
+	// IdentityDictionary
+	713, [ array: o[714],  size: 3,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	714, [ 'lfoParams',  o[715],  'ctlSrcDex',  o[721],  
+		nil,  nil,  'staticVal',  o[722],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	715, [ array: o[716],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	716, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'ugen',  o[717],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'high',  o[718],  nil,  nil,  
+		'freq',  o[719],  nil,  nil,  
+		'low',  o[720],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	717, [ 'LFDNoise3',  'LFDNoise3' ],  
+	// Array
+	718, [ 74.938547,  -14.413408 ],  
+	// Array
+	719, [ 0.285714,  0.243902 ],  
+	// Array
+	720, [ -25.061453,  -54.413408 ],  
+	// Array
+	721, [ 1,  1 ],  
+	// Array
+	722, [ -0.000000,  0.000000 ],  
+	// IdentityDictionary
+	723, [ array: o[724],  size: 3,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	724, [ 'lfoParams',  o[725],  'ctlSrcDex',  o[731],  
+		nil,  nil,  'staticVal',  o[732],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	725, [ array: o[726],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	726, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'ugen',  o[727],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'high',  o[728],  nil,  nil,  
+		'freq',  o[729],  nil,  nil,  
+		'low',  o[730],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	727, [ 'SinOsc',  'LFDNoise3' ],  
+	// Array
+	728, [ 6.055866,  -44.865922 ],  
+	// Array
+	729, [ 0.018868,  0.178571 ],  
+	// Array
+	730, [ -129.944134,  -66.865922 ],  
+	// Array
+	731, [ 1,  1 ],  
+	// Array
+	732, [ 30.000000,  0.000000 ],  
+	// IdentityDictionary
+	733, [ array: o[734],  size: 3,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	734, [ 'lfoParams',  o[735],  'ctlSrcDex',  o[741],  
+		nil,  nil,  'staticVal',  o[742],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	735, [ array: o[736],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	736, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'ugen',  o[737],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'high',  o[738],  nil,  nil,  
+		'freq',  o[739],  nil,  nil,  
+		'low',  o[740],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	737, [ 'SinOsc',  'SinOsc' ],  
+	// Array
+	738, [ 74.938547,  -14.413408 ],  
+	// Array
+	739, [ 0.022222,  0.043478 ],  
+	// Array
+	740, [ -25.061453,  -54.413408 ],  
+	// Array
+	741, [ 1,  1 ],  
+	// Array
+	742, [ -0.000000,  0.000000 ],  
+	// IdentityDictionary
+	743, [ array: o[744],  size: 3,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	744, [ 'lfoParams',  o[745],  'ctlSrcDex',  o[751],  
+		nil,  nil,  'staticVal',  o[752],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	745, [ array: o[746],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	746, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'ugen',  o[747],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'high',  o[748],  nil,  nil,  
+		'freq',  o[749],  nil,  nil,  
+		'low',  o[750],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	747, [ 'SinOsc',  'LFDNoise3' ],  
+	// Array
+	748, [ 130.175978,  -30.958101 ],  
+	// Array
+	749, [ 0.014085,  0.178571 ],  
+	// Array
+	750, [ -102.824022,  -53.958101 ],  
+	// Array
+	751, [ 1,  1 ],  
+	// Array
+	752, [ 30.000000,  0.000000 ],  
+	// IdentityDictionary
+	753, [ array: o[754],  size: 3,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	754, [ 'lfoParams',  o[755],  'ctlSrcDex',  o[761],  
+		nil,  nil,  'staticVal',  o[762],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	755, [ array: o[756],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	756, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'ugen',  o[757],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'high',  o[758],  nil,  nil,  
+		'freq',  o[759],  nil,  nil,  
+		'low',  o[760],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	757, [ 'SinOsc',  'SinOsc' ],  
+	// Array
+	758, [ 37.500000,  72.500000 ],  
+	// Array
+	759, [ 0.022222,  0.043478 ],  
+	// Array
+	760, [ -77.500000,  69.500000 ],  
+	// Array
+	761, [ 1,  1 ],  
+	// Array
+	762, [ -0.000000,  0.000000 ],  
+	// IdentityDictionary
+	763, [ array: o[764],  size: 3,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	764, [ 'lfoParams',  o[765],  'ctlSrcDex',  o[771],  
+		nil,  nil,  'staticVal',  o[772],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	765, [ array: o[766],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	766, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'ugen',  o[767],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'high',  o[768],  nil,  nil,  
+		'freq',  o[769],  nil,  nil,  
+		'low',  o[770],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	767, [ 'LFDNoise3',  'SinOsc' ],  
+	// Array
+	768, [ 65.310056,  69.500000 ],  
+	// Array
+	769, [ 0.161290,  0.018519 ],  
+	// Array
+	770, [ 10.310056,  -69.500000 ],  
+	// Array
+	771, [ 1,  1 ],  
+	// Array
+	772, [ 30.000000,  0.000000 ],  
+	// IdentityDictionary
+	773, [ array: o[774],  size: 3,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	774, [ 'lfoParams',  o[775],  'ctlSrcDex',  o[781],  
+		nil,  nil,  'staticVal',  o[782],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	775, [ array: o[776],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	776, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'ugen',  o[777],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'high',  o[778],  nil,  nil,  
+		'freq',  o[779],  nil,  nil,  
+		'low',  o[780],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	777, [ 'SinOsc',  'SinOsc' ],  
+	// Array
+	778, [ -39.860335,  -59.910615 ],  
+	// Array
+	779, [ 0.022222,  0.050000 ],  
+	// Array
+	780, [ -125.860335,  -67.910615 ],  
+	// Array
+	781, [ 1,  1 ],  
+	// Array
+	782, [ -0.001000,  45.001000 ],  
+	// IdentityDictionary
+	783, [ array: o[784],  size: 3,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	784, [ 'lfoParams',  o[785],  'ctlSrcDex',  o[791],  
+		nil,  nil,  'staticVal',  o[792],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	785, [ array: o[786],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	786, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'ugen',  o[787],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'high',  o[788],  nil,  nil,  
+		'freq',  o[789],  nil,  nil,  
+		'low',  o[790],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	787, [ 'LFDNoise3',  'SinOsc' ],  
+	// Array
+	788, [ 52.310056,  15.145251 ],  
+	// Array
+	789, [ 0.285714,  0.058824 ],  
+	// Array
+	790, [ 23.310056,  -42.854749 ],  
+	// Array
+	791, [ 1,  1 ],  
+	// Array
+	792, [ 30.000000,  0.000000 ],  
+	// IdentityDictionary
+	793, [ array: o[794],  size: 3,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	794, [ 'lfoParams',  o[795],  'ctlSrcDex',  o[801],  
+		nil,  nil,  'staticVal',  o[802],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	795, [ array: o[796],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	796, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'ugen',  o[797],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'high',  o[798],  nil,  nil,  
+		'freq',  o[799],  nil,  nil,  
+		'low',  o[800],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	797, [ 'SinOsc',  'SinOsc' ],  
+	// Array
+	798, [ 72.483240,  -9.837989 ],  
+	// Array
+	799, [ 0.076923,  0.090909 ],  
+	// Array
+	800, [ -6.516760,  -51.837989 ],  
+	// Array
+	801, [ 1,  1 ],  
+	// Array
+	802, [ -0.000000,  0.000000 ],  
+	// IdentityDictionary
+	803, [ array: o[804],  size: 1,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	804, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'mixers',  o[805] ],  
+	// IdentityDictionary
+	805, [ array: o[806],  size: 1,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	806, [ nil,  nil,  nil,  nil,  
+		'nil',  o[807],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	807, [ o[808] ],  
+	// IdentityDictionary
+	808, [ array: o[809],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	809, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1.000000,  
+		'max',  1.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		'rate',  2.634404,  nil,  nil,  
+		nil,  nil,  'signal',  'LFDNoise3',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	810, [ array: o[811],  size: 3,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	811, [ 'lfoParams',  o[812],  'ctlSrcDex',  o[818],  
+		nil,  nil,  'staticVal',  o[819],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	812, [ array: o[813],  size: 4,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	813, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'ugen',  o[814],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'high',  o[815],  nil,  nil,  
+		'freq',  o[816],  nil,  nil,  
+		'low',  o[817],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	814, [ 'SinOsc',  'SinOsc' ],  
+	// Array
+	815, [ 30.000000,  35.000000 ],  
+	// Array
+	816, [ 0.050000,  0.050000 ],  
+	// Array
+	817, [ -30.000000,  5.000000 ],  
+	// Array
+	818, [ 1,  1 ],  
+	// Array
+	819, [ -5.520000,  17.449000 ],  
+	// IdentityDictionary
+	820, [ array: o[821],  size: 7,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	821, [ nil,  nil,  'sixth',  o[822],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'fourth',  o[841],  
+		nil,  nil,  nil,  nil,  
+		'basement',  o[862],  nil,  nil,  
+		'second',  o[883],  'third',  o[908],  
+		'fifth',  o[933],  'projTest',  o[954] ],  
+	// IdentityDictionary
+	822, [ array: o[823],  size: 1,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	823, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'mixers',  o[824] ],  
+	// IdentityDictionary
+	824, [ array: o[825],  size: 5,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	825, [ '/focus',  o[826],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  '/xcount',  o[829],  
+		'/ycount',  o[832],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'/ystart',  o[835],  nil,  nil,  
+		'/xstart',  o[838],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	826, [ o[827] ],  
+	// IdentityDictionary
+	827, [ array: o[828],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	828, [ 'offset',  0.300000,  nil,  nil,  
+		nil,  nil,  'min',  -1.400000,  
+		'max',  1.300000,  'val',  0,  
+		'scale',  0.680000,  'mix',  0.992327,  
+		nil,  nil,  nil,  nil,  
+		'freq',  10.935911,  'signal',  'LFPar',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	829, [ o[830] ],  
+	// IdentityDictionary
+	830, [ array: o[831],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	831, [ 'offset',  0.120000,  nil,  nil,  
+		nil,  nil,  'min',  -2.300000,  
+		'max',  0.500000,  'val',  0,  
+		'scale',  0.900000,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.137350,  'signal',  'LFCub',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	832, [ o[833] ],  
+	// IdentityDictionary
+	833, [ array: o[834],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	834, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1.000000,  
+		'max',  1.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.333333,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	835, [ o[836] ],  
+	// IdentityDictionary
+	836, [ array: o[837],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	837, [ 'offset',  -0.140000,  nil,  nil,  
+		nil,  nil,  'min',  -1.000000,  
+		'max',  3.000000,  'val',  0,  
+		'scale',  0.500000,  'mix',  0.300000,  
+		nil,  nil,  nil,  nil,  
+		'freq',  5.122293,  'signal',  'LFDNoise1',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	838, [ o[839] ],  
+	// IdentityDictionary
+	839, [ array: o[840],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	840, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1,  
+		'max',  3.000000,  'val',  3.000000,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  1,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	841, [ array: o[842],  size: 1,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	842, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'mixers',  o[843] ],  
+	// IdentityDictionary
+	843, [ array: o[844],  size: 5,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	844, [ '/focus',  o[845],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  '/xcount',  o[848],  
+		'/ycount',  o[851],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'/ystart',  o[854],  nil,  nil,  
+		'/xstart',  o[859],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	845, [ o[846] ],  
+	// IdentityDictionary
+	846, [ array: o[847],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	847, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1.000000,  
+		'max',  1.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.783778,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	848, [ o[849] ],  
+	// IdentityDictionary
+	849, [ array: o[850],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	850, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1.000000,  
+		'max',  1.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  2.491128,  'signal',  'LFDNoise0',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	851, [ o[852] ],  
+	// IdentityDictionary
+	852, [ array: o[853],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	853, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1.000000,  
+		'max',  1.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.333333,  'signal',  'LFTri',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	854, [ o[855],  o[857] ],  
+	// IdentityDictionary
+	855, [ array: o[856],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	856, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1,  
+		'max',  1,  'val',  0.600000,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  1,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	857, [ array: o[858],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	858, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1.000000,  
+		'max',  1.000000,  'val',  -3.000000,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.333333,  'signal',  'LFPar',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	859, [ o[860] ],  
+	// IdentityDictionary
+	860, [ array: o[861],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	861, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1,  
+		'max',  1,  'val',  1.000000,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  1,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	862, [ array: o[863],  size: 1,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	863, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'mixers',  o[864] ],  
+	// IdentityDictionary
+	864, [ array: o[865],  size: 5,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	865, [ '/focus',  o[866],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  '/xcount',  o[869],  
+		'/ycount',  o[872],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'/ystart',  o[875],  nil,  nil,  
+		'/xstart',  o[880],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	866, [ o[867] ],  
+	// IdentityDictionary
+	867, [ array: o[868],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	868, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -30.000000,  
+		'max',  15.000000,  'val',  0,  
+		'scale',  0.500000,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.093801,  'signal',  'SinOsc',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	869, [ o[870] ],  
+	// IdentityDictionary
+	870, [ array: o[871],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	871, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1,  
+		'max',  1,  'val',  14.000000,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  1,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	872, [ o[873] ],  
+	// IdentityDictionary
+	873, [ array: o[874],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	874, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1,  
+		'max',  1,  'val',  5.000000,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  1,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	875, [ o[876],  o[878] ],  
+	// IdentityDictionary
+	876, [ array: o[877],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	877, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  0.000000,  
+		'max',  25.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.333333,  'signal',  'LFDNoise0',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	878, [ array: o[879],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	879, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1.000000,  
+		'max',  1.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.333333,  'signal',  'LFPar',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	880, [ o[881] ],  
+	// IdentityDictionary
+	881, [ array: o[882],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	882, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  0.000000,  
+		'max',  6.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.333333,  'signal',  'LFDNoise0',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	883, [ array: o[884],  size: 1,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	884, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'mixers',  o[885] ],  
+	// IdentityDictionary
+	885, [ array: o[886],  size: 5,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	886, [ '/focus',  o[887],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  '/xcount',  o[890],  
+		'/ycount',  o[893],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'/ystart',  o[900],  nil,  nil,  
+		'/xstart',  o[905],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	887, [ o[888] ],  
+	// IdentityDictionary
+	888, [ array: o[889],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	889, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1.000000,  
+		'max',  1.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.783778,  'signal',  'LFDNoise3',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	890, [ o[891] ],  
+	// IdentityDictionary
+	891, [ array: o[892],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	892, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1,  
+		'max',  15.000000,  'val',  15.000000,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  1,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	893, [ o[894],  o[896],  o[898] ],  
+	// IdentityDictionary
+	894, [ array: o[895],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	895, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1.000000,  
+		'max',  1.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.763607,  'signal',  'LFPar',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	896, [ array: o[897],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	897, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1.000000,  
+		'max',  1.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.763607,  'signal',  'LFPar',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	898, [ array: o[899],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	899, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -2.000000,  
+		'max',  3.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.950600,  'signal',  'LFDNoise1',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	900, [ o[901],  o[903] ],  
+	// IdentityDictionary
+	901, [ array: o[902],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	902, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -0.300000,  
+		'max',  0.300000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  3.166625,  'signal',  'LFDNoise3',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	903, [ array: o[904],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	904, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1.100000,  
+		'max',  1.100000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.148688,  'signal',  'LFCub',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	905, [ o[906] ],  
+	// IdentityDictionary
+	906, [ array: o[907],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	907, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -0.110000,  
+		'max',  0.100000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  2.491128,  'signal',  'LFTri',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	908, [ array: o[909],  size: 1,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	909, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'mixers',  o[910] ],  
+	// IdentityDictionary
+	910, [ array: o[911],  size: 5,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	911, [ '/focus',  o[912],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  '/xcount',  o[915],  
+		'/ycount',  o[918],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'/ystart',  o[921],  nil,  nil,  
+		'/xstart',  o[928],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	912, [ o[913] ],  
+	// IdentityDictionary
+	913, [ array: o[914],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	914, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1.000000,  
+		'max',  1.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.783778,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	915, [ o[916] ],  
+	// IdentityDictionary
+	916, [ array: o[917],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	917, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1,  
+		'max',  1,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  1,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	918, [ o[919] ],  
+	// IdentityDictionary
+	919, [ array: o[920],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	920, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1.000000,  
+		'max',  1.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.333333,  'signal',  'LFTri',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	921, [ o[922],  o[924],  o[926] ],  
+	// IdentityDictionary
+	922, [ array: o[923],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	923, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -0.300000,  
+		'max',  0.300000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  3.166625,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	924, [ array: o[925],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	925, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1,  
+		'max',  1,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  1,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	926, [ array: o[927],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	927, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1.000000,  
+		'max',  1.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.333333,  'signal',  'LFPar',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	928, [ o[929],  o[931] ],  
+	// IdentityDictionary
+	929, [ array: o[930],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	930, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -0.110000,  
+		'max',  0.100000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  2.491128,  'signal',  'LFTri',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	931, [ array: o[932],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	932, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1,  
+		'max',  1,  'val',  1.000000,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  1,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	933, [ array: o[934],  size: 1,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	934, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'mixers',  o[935] ],  
+	// IdentityDictionary
+	935, [ array: o[936],  size: 5,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	936, [ '/focus',  o[937],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  '/xcount',  o[940],  
+		'/ycount',  o[943],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'/ystart',  o[946],  nil,  nil,  
+		'/xstart',  o[949],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	937, [ o[938] ],  
+	// IdentityDictionary
+	938, [ array: o[939],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	939, [ 'offset',  0.300000,  nil,  nil,  
+		nil,  nil,  'min',  -1.400000,  
+		'max',  1.300000,  'val',  0,  
+		'scale',  0.680000,  'mix',  0.992327,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.171084,  'signal',  'LFPar',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	940, [ o[941] ],  
+	// IdentityDictionary
+	941, [ array: o[942],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	942, [ 'offset',  0.120000,  nil,  nil,  
+		nil,  nil,  'min',  -2.300000,  
+		'max',  0.500000,  'val',  0,  
+		'scale',  0.900000,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.137350,  'signal',  'LFCub',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	943, [ o[944] ],  
+	// IdentityDictionary
+	944, [ array: o[945],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	945, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1.000000,  
+		'max',  1.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.763607,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	946, [ o[947] ],  
+	// IdentityDictionary
+	947, [ array: o[948],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	948, [ 'offset',  0.460000,  nil,  nil,  
+		nil,  nil,  'min',  -1.000000,  
+		'max',  3.000000,  'val',  0,  
+		'scale',  1.960000,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  5.122293,  'signal',  'LFDNoise1',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	949, [ o[950],  o[952] ],  
+	// IdentityDictionary
+	950, [ array: o[951],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	951, [ 'offset',  0.880000,  nil,  nil,  
+		nil,  nil,  'min',  -0.110000,  
+		'max',  -1.900000,  'val',  2.000000,  
+		'scale',  0.840000,  'mix',  0.980000,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.453591,  'signal',  'LFDNoise3',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	952, [ array: o[953],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	953, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1,  
+		'max',  3.000000,  'val',  3.000000,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  1,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	954, [ array: o[955],  size: 1,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	955, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'mixers',  o[956] ],  
+	// IdentityDictionary
+	956, [ array: o[957],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	957, [ '/focus',  o[958],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'/yscroll',  o[961],  '/xcount',  o[964],  
+		'/ycount',  o[967],  '/zoom',  o[970],  
+		nil,  nil,  nil,  nil,  
+		'/ystart',  o[973],  nil,  nil,  
+		'/xstart',  o[976],  '/xscroll',  o[979],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	958, [ o[959] ],  
+	// IdentityDictionary
+	959, [ array: o[960],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	960, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -37.000000,  
+		'max',  0.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.083109,  'signal',  'LFDNoise3',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	961, [ o[962] ],  
+	// IdentityDictionary
+	962, [ array: o[963],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	963, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1,  
+		'max',  1,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  1,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	964, [ o[965] ],  
+	// IdentityDictionary
+	965, [ array: o[966],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	966, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  4.000000,  
+		'max',  10.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.066667,  'signal',  'LFDNoise3',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	967, [ o[968] ],  
+	// IdentityDictionary
+	968, [ array: o[969],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	969, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  4.000000,  
+		'max',  10.000000,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.066667,  'signal',  'LFDNoise3',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	970, [ o[971] ],  
+	// IdentityDictionary
+	971, [ array: o[972],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	972, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1,  
+		'max',  1,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  1,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	973, [ o[974] ],  
+	// IdentityDictionary
+	974, [ array: o[975],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	975, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  4.000000,  
+		'max',  8.000000,  'val',  33.000000,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.066667,  'signal',  'LFDNoise3',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	976, [ o[977] ],  
+	// IdentityDictionary
+	977, [ array: o[978],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	978, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  0.000000,  
+		'max',  6.000000,  'val',  0,  
+		'scale',  1,  'mix',  0.500000,  
+		nil,  nil,  nil,  nil,  
+		'freq',  0.066667,  'signal',  'LFDNoise3',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	979, [ o[980] ],  
+	// IdentityDictionary
+	980, [ array: o[981],  size: 8,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	981, [ 'offset',  0,  nil,  nil,  
+		nil,  nil,  'min',  -1,  
+		'max',  1,  'val',  0,  
+		'scale',  1,  'mix',  1,  
+		nil,  nil,  nil,  nil,  
+		'freq',  1,  'signal',  'static',  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	982, [ array: o[983],  size: 6,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	983, [ 'int_sparse2',  o[984],  'int_chat2',  o[994],  
+		nil,  nil,  'int_swell1',  o[1004],  
+		nil,  nil,  'int_chat1',  o[1014],  
+		'int_swell2',  o[1024],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'int_chat3',  o[1034],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	984, [ array: o[985],  size: 2,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	985, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'bufName',  o[986],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[987],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	987, [ o[988],  o[990],  o[992] ],  
+	// IdentityDictionary
+	988, [ array: o[989],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	989, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  0.951039,  'density',  13,  
+		'start',  0.741126,  'end',  0.748757,  
+		nil,  nil,  'grnDur',  1.756961,  
+		'fluxRate',  0.545656,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	990, [ array: o[991],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	991, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  2.289958,  'density',  13,  
+		'start',  0.011391,  'end',  0.020630,  
+		nil,  nil,  'grnDur',  2.700000,  
+		'fluxRate',  0.435559,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	992, [ array: o[993],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	993, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  1.206736,  'density',  13,  
+		'start',  0.252029,  'end',  0.259469,  
+		nil,  nil,  'grnDur',  2.700000,  
+		'fluxRate',  0.200000,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	994, [ array: o[995],  size: 2,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	995, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'bufName',  o[996],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[997],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	997, [ o[998],  o[1000],  o[1002] ],  
+	// IdentityDictionary
+	998, [ array: o[999],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	999, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  0.277559,  'density',  2.551264,  
+		'start',  0.527618,  'end',  0.538892,  
+		nil,  nil,  'grnDur',  3.192266,  
+		'fluxRate',  0.200000,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	1000, [ array: o[1001],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1001, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  2.058638,  'density',  17.744510,  
+		'start',  0.046783,  'end',  0.052269,  
+		nil,  nil,  'grnDur',  1.460910,  
+		'fluxRate',  0.200000,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	1002, [ array: o[1003],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1003, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  1.231489,  'density',  13,  
+		'start',  0.799041,  'end',  0.805494,  
+		nil,  nil,  'grnDur',  2.700000,  
+		'fluxRate',  0.200000,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	1004, [ array: o[1005],  size: 2,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1005, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'bufName',  o[1006],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[1007],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	1007, [ o[1008],  o[1010],  o[1012] ],  
+	// IdentityDictionary
+	1008, [ array: o[1009],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1009, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  0.265874,  'density',  13,  
+		'start',  0.741126,  'end',  0.748757,  
+		nil,  nil,  'grnDur',  1.756961,  
+		'fluxRate',  0.545656,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	1010, [ array: o[1011],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1011, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  2.605463,  'density',  13,  
+		'start',  0.011391,  'end',  0.020630,  
+		nil,  nil,  'grnDur',  2.700000,  
+		'fluxRate',  0.435559,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	1012, [ array: o[1013],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1013, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  2.427670,  'density',  13,  
+		'start',  0.252029,  'end',  0.259469,  
+		nil,  nil,  'grnDur',  2.700000,  
+		'fluxRate',  0.621176,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	1014, [ array: o[1015],  size: 2,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1015, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'bufName',  o[1016],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[1017],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	1017, [ o[1018],  o[1020],  o[1022] ],  
+	// IdentityDictionary
+	1018, [ array: o[1019],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1019, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  1,  'density',  9.359327,  
+		'start',  0.558619,  'end',  0.570031,  
+		nil,  nil,  'grnDur',  1.674128,  
+		'fluxRate',  0.200000,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	1020, [ array: o[1021],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1021, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  1,  'density',  13,  
+		'start',  0.296489,  'end',  0.306735,  
+		nil,  nil,  'grnDur',  2.700000,  
+		'fluxRate',  0.200000,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	1022, [ array: o[1023],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1023, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  1,  'density',  13,  
+		'start',  0.784394,  'end',  0.793080,  
+		nil,  nil,  'grnDur',  2.700000,  
+		'fluxRate',  0.172047,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	1024, [ array: o[1025],  size: 2,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1025, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'bufName',  o[1026],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[1027],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	1027, [ o[1028],  o[1030],  o[1032] ],  
+	// IdentityDictionary
+	1028, [ array: o[1029],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1029, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  0.744975,  'density',  13,  
+		'start',  0.537920,  'end',  0.548623,  
+		nil,  nil,  'grnDur',  2.018462,  
+		'fluxRate',  0.163698,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	1030, [ array: o[1031],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1031, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  2.605463,  'density',  15.322286,  
+		'start',  0.236238,  'end',  0.247404,  
+		nil,  nil,  'grnDur',  1.193251,  
+		'fluxRate',  0.435559,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	1032, [ array: o[1033],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1033, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  2.090930,  'density',  13,  
+		'start',  0.643436,  'end',  0.656117,  
+		nil,  nil,  'grnDur',  2.700000,  
+		'fluxRate',  0.621176,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	1034, [ array: o[1035],  size: 2,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1035, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		'bufName',  o[1036],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'params',  o[1037],  
+		nil,  nil,  nil,  nil ],  
+	// Array
+	1037, [ o[1038],  o[1040],  o[1042] ],  
+	// IdentityDictionary
+	1038, [ array: o[1039],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1039, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  0.547328,  'density',  13,  
+		'start',  0.933512,  'end',  0.944252,  
+		nil,  nil,  'grnDur',  1.018536,  
+		'fluxRate',  0.163698,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	1040, [ array: o[1041],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1041, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  1.000000,  'density',  13,  
+		'start',  0.110800,  'end',  0.120919,  
+		nil,  nil,  'grnDur',  1.193251,  
+		'fluxRate',  0.435559,  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// IdentityDictionary
+	1042, [ array: o[1043],  size: 9,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	1043, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  'minDisp',  0.010000,  
+		'grnRand',  0,  'maxDisp',  2.500000,  
+		'amp',  0.289496,  'density',  13,  
+		'start',  0.401081,  'end',  0.409025,  
+		nil,  nil,  'grnDur',  2.700000,  
+		'fluxRate',  0.621176,  nil,  nil,  
+		nil,  nil,  nil,  nil ]
+];
+prUnarchive(o,p);
