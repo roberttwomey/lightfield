@@ -167,6 +167,18 @@ GrainScanner2 {
 
 	gui { scanners.do(_.gui) }
 
+
+	play { |fadeTime| scanners.do(_.play(fadeTime)); }
+
+	release { |fadeTime = 4|
+		scanners.do(_.release(fadeTime));
+	}
+
+	resume { |fadeTime = 4|
+		scanners.do(_.play(fadeTime));
+	}
+
+
 	free {
 		scanners.do(_.free);
 		grnGroup.freeAll;
@@ -247,9 +259,6 @@ GrainScanner2 {
 			finishCond !? { finishCond.test_(true).signal };
 		}
 	}
-
-	play { |fadeTime| scanners.do(_.play(fadeTime)); }
-	release { |fadeTime| scanners.do(_.play(fadeTime)); }
 
 	// --------------------------------------------------
 	/* PRESETS */
@@ -618,6 +627,7 @@ GrainScan2 {
 		index = (numFramesInCluster - 1 * ptr).round;
 		^clusterFramesByDist[curCluster][index]
 	}
+
 
 	free {
 		grnResponder.free;

@@ -130,8 +130,7 @@ p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_porch_13min_EDIT.WAV";
 s.boot
 g = GrainScanner2( 0, p )
 
-// add as many scanners as are needed
-3.do{|i|g.addScanner(i)}
+3.do{|i|g.addScanner(i)} // add scanners
 
 g.scanners.do{|scnr| scnr.synths.do(_.fadein_(0.5))}
 g.scanners.do{|scnr| scnr.synths.do(_.fadeout_(0.5))}
@@ -181,11 +180,29 @@ g.storePreset(\sea_surr7)
 g.storePreset(\sea_surr8)
 
 
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/garden_morning2_EDIT.WAV";
+g.prepareNewDataSet(p)
+
+g.storePreset(\garden_surr1)
+g.storePreset(\garden_surr2)
+g.storePreset(\garden_surr3)
+g.storePreset(\garden_surr4)
+g.storePreset(\garden_surr5)
+
+
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_porch_13min_EDIT.WAV";
+g.prepareNewDataSet(p)
+
+g.storePreset(\nightCD_surr)
+g.storePreset(\nightCD_surr1)
+g.storePreset(\nightCD_surr2)
+g.storePreset(\nightCD_surr3)
+g.storePreset(\nightCD_surr4)
 
 
 // ---------------
 // RECALL
-g.recallPreset(\cliff1_surr, 4)
+g.recallPreset(\garden_surr3, 4)
 
 
 g.backupPreset
