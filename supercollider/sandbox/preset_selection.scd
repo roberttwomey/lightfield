@@ -159,13 +159,36 @@ g.storePreset(\yellow_surr4)
 g.storePreset(\yellow_surr5)
 g.storePreset(\yellow_surr6)
 
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_central_dist_clear_EDIT.WAV";
+g.prepareNewDataSet(p)
+
+g.storePreset(\night_surr_tone)
+g.storePreset(\night_surr)
+g.storePreset(\night_surr1)
+g.storePreset(\night_surr2)
+
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/carkeek_seaside_train_EDIT.WAV";
+g.prepareNewDataSet(p)
+
+g.storePreset(\sea_surr)
+g.storePreset(\sea_surr2)
+g.storePreset(\sea_surr3)
+g.storePreset(\sea_surr4)
+g.storePreset(\sea_surr5)
+g.storePreset(\sea_surr5)
+g.storePreset(\sea_surr6)
+g.storePreset(\sea_surr7)
+g.storePreset(\sea_surr8)
+
+
+
 
 // ---------------
 // RECALL
 g.recallPreset(\cliff1_surr, 4)
 
 
-
+g.backupPreset
 
 // ---------------
 // INVENTORY
