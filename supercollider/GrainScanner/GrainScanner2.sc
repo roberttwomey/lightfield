@@ -26,7 +26,7 @@ GrainScanner2 {
 			grnRateSpec = ControlSpec(4.reciprocal, 70, warp: 3, default:10);
 			grnRandSpec = ControlSpec(0, 1, warp: 4, default: 0.0);
 			grnDispSpec = ControlSpec(0, 5, warp: 3, default: 0.03);
-			ampSpec = ControlSpec(-90, 16, warp: 'db', default: 0.0);
+			ampSpec = ControlSpec(-inf, 16, warp: 'db', default: 0.0);
 
 			// cluster specs
 			clusterSpreadSpec = ControlSpec(0, 0.5, warp: 3, default: 0.05);
@@ -314,6 +314,7 @@ GrainScanner2 {
 							\pan,			scanner.synths[0].pan,
 							\spread,		scanner.synths[0].spread,
 							\amp,			scanner.synths[0].amp,
+							\gate, 			scanner.synths[0].gate,
 						]);
 					}
 				])
@@ -489,18 +490,24 @@ GrainScan2 {
 				{synth.gate_(1); synth.run}
 			);
 		});
+		this.changed(\gate, 1);
 		playing = true;
 	}
 
 	release { |fadeOutTime|
 		fadeOutTime !? { synths.do(_.fadeout_(fadeOutTime)) };
 		synths.do({|synth|
-			synth.isPlaying.not.if({
-				"synth isn't playing, can't release".warn},{synth.gate_(0)}) });
+			synth.isPlaying.not.if(
+				{ "synth isn't playing, can't release".warn },
+				{ synth.gate_(0) })
+		});
+		this.changed(\gate, 0);
 		playing = false;
 		// pause after fadetime
 		fork{ synths[0].fadeout.wait; playing.not.if{synths.do(_.pause)} };
 	}
+
+	gate_ { |gate| synths.do(_.gate_(gate)); this.changed(\gate, gate); }
 
 	grnDur_ { |dur| synths.do(_.grainDur_(dur)); this.changed(\grnDur, dur); }
 
@@ -893,6 +900,9 @@ GrainScan2View {
 				\cluster, {
 					controls[\newCluster].numBox.value_( val );
 				},
+				\gate, {
+					controls[\fadeIO].button.value_(val);
+				}
 			)
 		});
 	}

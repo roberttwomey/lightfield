@@ -142,12 +142,29 @@ g.scanners.do{|scnr| scnr.synths.do(_.ctllag_(0.05))}
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_1_EDIT.WAV";
 g.prepareNewDataSet(p)
 
+g.storePreset(\cliff1_surr)
+g.storePreset(\cliff1_surr2)
+g.storePreset(\cliff1_stutt)
+g.storePreset(\cliff1_stutt2)
+g.storePreset(\cliff1_stutt3)
+
+
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_yellow_EDIT.WAV";
+g.prepareNewDataSet(p)
+
 g.storePreset(\yellow_surr_crow)
+g.storePreset(\yellow_surr2)
+g.storePreset(\yellow_surr3)
+g.storePreset(\yellow_surr4)
+g.storePreset(\yellow_surr5)
+g.storePreset(\yellow_surr6)
 
 
 // ---------------
 // RECALL
-g.recallPreset(\yellow_surr_crow, 4)
+g.recallPreset(\cliff1_surr, 4)
+
+
 
 
 // ---------------
