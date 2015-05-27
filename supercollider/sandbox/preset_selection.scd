@@ -38,34 +38,47 @@ x = GrainScanner1( 3, p )
 
 // see below for loading scmir frames for "moment" frame locations
 
+// ---------------
+// STORE
 
 x.storePreset(\int_chat1)
 x.storePreset(\int_chat2)
 x.storePreset(\int_chat3)
 x.storePreset(\int_chat4)
+x.storePreset(\int_chat5)
 
 x.storePreset(\int_swell1)
 x.storePreset(\int_swell2)
 x.storePreset(\int_swell3)
 x.storePreset(\int_swell4)
+x.storePreset(\int_swell5)
+x.storePreset(\int_swell6)
 
 x.storePreset(\int_event1)
 x.storePreset(\int_event2)
 x.storePreset(\int_event3)
 x.storePreset(\int_event4)
 x.storePreset(\int_event5)
+x.storePreset(\int_event6)
 
 
 
-
-x.recallPreset(\int_chat1, 5)
+// ---------------
+// RECALL
+x.recallPreset(\int_event6, 5)
 x.recallPreset(\int_event4, 5)
 
-
+// ---------------
+// UPDATE
 x.updatePreset
 
-x.presets.keys
+// ---------------
+// BACKUP
+x.backupPreset
 
+// ---------------
+// INVENTORY
+x.listPresets
 
 // careful!
 // x.removePreset(\int_sparse)
@@ -88,17 +101,65 @@ x.scanners.do{|scnr|
 	scnr.newMomentFunc = {
 		var whichClust = 8.rand;
 		postf("cluster: %\n", whichClust);
-		// [g.bufDur.rand, rrand(2.5, 1)].postln
-		[g.clusterFramesByDist[whichClust].choose, rrand(3.5, 8)].postln
-		// [428.90496322703, rrand(3.5, 8)].postln
+		// [g.bufDur.rand, rrand(22.5, 1)].postln;
+		// [g.clusterFramesByDist[whichClust].choose, rrand(3.5, 8)].postln
+		// [99.583129, rrand(3.5, 8)].postln
+		[435.30303620114, rrand(3.5, 8)].postln
 	}
 }
 )
 g.free
 
+
+
+
 /////////////////////////
 /*  EXTERIORS  */
 /////////////////////////
+
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/carkeek_seaside_train_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_yellow_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_1_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_2_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/garden_morning1_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/garden_morning2_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_central_dist_clear_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_porch_13min_EDIT.WAV";
+
+// initialize a grain scanner
+s.boot
+g = GrainScanner2( 0, p )
+
+// add as many scanners as are needed
+3.do{|i|g.addScanner(i)}
+
+g.scanners.do{|scnr| scnr.synths.do(_.fadein_(0.5))}
+g.scanners.do{|scnr| scnr.synths.do(_.fadeout_(0.5))}
+g.scanners.do{|scnr| scnr.synths.do(_.ctllag_(0.05))}
+g.scanners.do{|scnr| scnr.synths.do(_.ctllag_(0.05))}
+
+
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_1_EDIT.WAV";
+g.prepareNewDataSet(p)
+
+g.storePreset(\yellow_surr_crow)
+
+
+// ---------------
+// RECALL
+g.recallPreset(\yellow_surr_crow, 4)
+
+
+// ---------------
+// INVENTORY
+g.listPresets
+
+// careful!
+// g.removePreset(\test1)
+
+g.free
+
+
 
 
 // TODO:

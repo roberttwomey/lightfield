@@ -260,7 +260,35 @@ GrainScanner2 {
 	}
 
 	presets { ^Archive.global[\grainScanner2] }
+	listPresets { ^this.presets.keys.asArray.sort.do(_.postln) }
 
+	*archive { ^Archive.global[\grainScanner2] }
+	*presets { ^Archive.global[\grainScanner2] }
+	*listPresets { ^this.class.presets.keys.asArray.sort.do(_.postln) }
+
+	backupPreset {
+		format( "cp %% %%%",
+			Archive.archiveDir,
+			"/archive.sctxar",
+			"~/Desktop/archive.sctxar_BAK_",
+			Date.getDate.stamp,
+			".sctxar"
+		).replace(
+			" Support","\\ Support"
+		).unixCmd
+	}
+
+	*backupPreset {
+		format( "cp %% %%%",
+			Archive.archiveDir,
+			"/archive.sctxar",
+			"~/Desktop/archive.sctxar_BAK_",
+			Date.getDate.stamp,
+			".sctxar"
+		).replace(
+			" Support","\\ Support"
+		).unixCmd
+	}
 	storePreset { |name, overwrite=false|
 		block{ |break|
 			(this.presets[name.asSymbol].notNil and: overwrite.not).if {

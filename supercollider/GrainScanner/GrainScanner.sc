@@ -137,6 +137,35 @@ GrainScanner1 {
 	}
 
 	presets { ^Archive.global[\grainScanner1] }
+	listPresets { ^this.presets.keys.asArray.sort.do(_.postln) }
+
+	*archive { ^Archive.global[\grainScanner1] }
+	*presets { ^Archive.global[\grainScanner1] }
+	*listPresets { ^this.class.presets.keys.asArray.sort.do(_.postln) }
+
+	backupPreset {
+		format( "cp %% %%%",
+			Archive.archiveDir,
+			"/archive.sctxar",
+			"~/Desktop/archive.sctxar_BAK_",
+			Date.getDate.stamp,
+			".sctxar"
+		).replace(
+			" Support","\\ Support"
+		).unixCmd
+	}
+
+	*backupPreset {
+		format( "cp %% %%%",
+			Archive.archiveDir,
+			"/archive.sctxar",
+			"~/Desktop/archive.sctxar_BAK_",
+			Date.getDate.stamp,
+			".sctxar"
+		).replace(
+			" Support","\\ Support"
+		).unixCmd
+	}
 
 	initBuffer { |bufOrPath, finishCond|
 		case
