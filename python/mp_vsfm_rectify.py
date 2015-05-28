@@ -116,10 +116,11 @@ def readCamerasV2File(camerasfile, cameraloc_img):
     
     # plot to screen
     
-    xcents.append(avgxcenter)
-    ycents.append(avgycenter)
-    scatter(xcents, ycents)
-    savefig(cameraloc_img)
+    # xcents.append(avgxcenter)
+    # ycents.append(avgycenter)
+    # scatter(xcents, ycents)
+    # savefig(cameraloc_img)
+
     # show()
 
     xcents = np.array(xcents)
@@ -459,7 +460,7 @@ def generate_full_res_textures(files, img_path, contactimg_file, reorder = None,
                         
                         sys.stdout.flush()
 
-            base, ext = contactimg_file.split("tex.")
+            base, ext = contactimg_file.split(".")
             this_texture_file = base + "tile-" +str(tilenum) + "."+ ext
 
             print "writing contact image", tile_img.shape, "to", os.path.basename(this_texture_file)
@@ -692,9 +693,10 @@ def generate_laptop_texture(files, img_path, contactimg_file, reorder = None, sk
                 
                 sys.stdout.flush()
 
-    base, ext = contactimg_file.split("tex.")
-    this_texture_file = base + "laptop." + ext
-
+    # base, ext = contactimg_file.split("tex.")
+    # this_texture_file = base + "laptop." + ext
+    this_texture_file = contactimg_file
+    
     print "writing contact image", tile_img.shape, "to", os.path.basename(this_texture_file)
 
     cv2.imwrite(this_texture_file, tile_img)
@@ -901,18 +903,21 @@ if __name__ == '__main__':
     warpedpath = os.path.join(datapath, 'warped')    
     thumbpath = os.path.join(datapath, 'thumbs')
     
+    
+    texroot = "/Volumes/Work/Projects/lightfield/data/textures/"
+    
     # outputs
     if do_laptop:
-        texturepath = "/home/rtwomey/code/lightfield/data/laptop_textures"
+        texturepath = os.path.join(texroot, "laptop")
     elif do_single:
-        texturepath = "/home/rtwomey/code/lightfield/data/single_textures"
+        texturepath = os.path.join(texroot, "single")
     elif do_fullres:
-        texturepath = "/home/rtwomey/code/lightfield/data/tiled_textures"
+        texturepath = os.path.join(texroot, "tiled")
     else:
-        texturepath = "/home/rtwomey/code/lightfield/data/textures"
+        texturepath = texroot
         
     camerapos = os.path.join(texturepath, scene_name+'.xml')
-    contactimg_file = os.path.join(texturepath, scene_name+'_tex.jpg')
+    contactimg_file = os.path.join(texturepath, scene_name+'.jpg')#'_tex.jpg')
     cameraloc_img = os.path.join(texturepath, scene_name+'_cameras.png')
 
     # camerapos = os.path.join(datapath, scene_name+'.xml')
@@ -1024,8 +1029,8 @@ if __name__ == '__main__':
     # make contact sheet        
     if do_fullres:
         texture_files = generate_full_res_textures(image_files, warpedpath, contactimg_file, reorder, skip)
-        base, ext = os.path.splitext(camerapos)
-        camerapos = base + "_tile" + ext
+        # base, ext = os.path.splitext(camerapos)
+        # camerapos = base + "_tile" + ext
     elif do_single:
         texture_files = generate_single_texture(image_files, warpedpath, contactimg_file, reorder, skip)
         # single textures are named scene.xml, scene_cameras.png, scene_tex.jpg
@@ -1033,8 +1038,8 @@ if __name__ == '__main__':
         # camerapos = base + "" + ext        
     elif do_laptop:
         texture_files = generate_laptop_texture(image_files, warpedpath, contactimg_file, reorder, skip)
-        base, ext = os.path.splitext(camerapos)
-        camerapos = base + "_laptop" + ext
+        # base, ext = os.path.splitext(camerapos)
+        # camerapos = base + "_laptop" + ext
         
     else:
         texture_files = generate_contact_sheet(image_files, reorder, skip)

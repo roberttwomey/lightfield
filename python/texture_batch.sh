@@ -18,7 +18,9 @@ export DISPLAY=:0
 # python mp_vsfm_rectify.py --laptop 20x10 ~/code/lightfield/data/shoots/ballard_wall/undistorted/*.jpg
 # python mp_vsfm_rectify.py --laptop 16x14 ~/code/lightfield/data/shoots/precise/undistorted/*.jpg
 # python mp_vsfm_rectify.py --reorder wrap --laptop 20x15 ~/code/lightfield/data/shoots/towers/undistorted/*.jpg
-# python mp_vsfm_rectify.py --reorder wrap --laptop 15x20 ~/code/lightfield/data/shoots/tivon1/undistorted/*.jpg
+# python mp_vsfm_rectify.py --reorder wrap --laptop 20x15 ~/code/lightfield/data/shoots/tivon1/undistorted/*.jpg
+
+# python mp_vsfm_rectify.py --reorder wrap --laptop 20x15 /Volumes/LIGHTBOX/shoots/tivon1/undistorted/*.jpg
 
 
 # # ==== max res single texture versions

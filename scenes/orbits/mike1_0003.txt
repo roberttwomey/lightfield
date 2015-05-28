@@ -1,4 +1,4 @@
-./textures/mike1_sm.xml
+./textures/mike1.xml
 0.00049633
 0,0
 0,14

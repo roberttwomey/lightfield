@@ -425,7 +425,7 @@ ControlMixFaderView {
 
 ControlMixMaster {
 	// copyArgs
-	var broadcastTags, broadcastNetAddr, broadcastRate, server;
+	var broadcastTags, <broadcastNetAddr, broadcastRate, server;
 	var <win, <mixers, <lastUpdated, <presetWin, <canvas, <globalFadeTime = 0.0;
 
 	*new { |broadcastTags="/myControlVal", broadcastNetAddr, broadcastRate=30, server|
@@ -637,8 +637,8 @@ ControlMixMaster {
 
 		faderStates.do{ |fDict, fDex|
 
-			"\tUpdating Control".postln;
-			fDict.keysValuesDo({|k,v| [k,v].postln;});
+			//"\tUpdating Control".postln;
+			//fDict.keysValuesDo({|k,v| [k,v].postln;});
 
 			ctlFade = mixer.ctlFades[fDex];
 
@@ -718,7 +718,8 @@ ControlMixMaster {
 
 			p[\mixers].keysValuesDo({ |ptag, faderStates|
 				var recalled=false;
-				postf("recalling mixer %\n", ptag.asString);
+				// QUIET
+				// postf("recalling mixer %\n", ptag.asString);
 
 				fork({ var cond = Condition();
 					mixers.do{ |mixer, i|

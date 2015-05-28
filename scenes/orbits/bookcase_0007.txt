@@ -1,4 +1,4 @@
-./textures/bookcase_sm.xml
+./textures/bookcase.xml
 -0.0571808
 0.0332031,-0.934896
 7,0

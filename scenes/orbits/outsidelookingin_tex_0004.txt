@@ -1,4 +1,4 @@
-./textures/outsidelookingin_tex.xml
+./textures/outsidelookingin.xml
 -0.0139038
 -0.0666667,-0.169524
 0,0

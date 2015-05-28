@@ -1,68 +1,5 @@
-// test file for ControlMixer
-c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount"], NetAddr("localhost", 57120) )
-c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount"], NetAddr("192.168.0.102", 12345) )
-c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("192.168.0.102", 12345) )
-
-c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("refocuser.local", 12345) )
-
-c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("localhost", 57120) )
-
-// test fade
-// test snapshot loading
-
-c = ControlMixMaster( ["focus", "fade", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("localhost", 12345))
-
+// control mixer
 c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("refocuser.local", 12345))
-
-
-c.broadcastNetAddr
-~fader = ControlFade(0.1);
-~fader.broadcast( c.broadcastNetAddr, '/fade', 30 );
-~fader.fadeTime_(3)
-~fader.plot
-~fader.value_(0)
-~fader.value_(1.0)
-
-
-//// main routine ////
-
-~fader=ControlFade(0.1);
-~fader.broadcast( c.broadcastNetAddr, '/fade', 30 );
-~fader.fadeTime_(3)
-~fader.value_(0.0)
-(
-var presets = [
-	\mike1_1, 25.0, 25.0,
-	\mike1_2, 25.0, 25.0,
-	\mike1_3, 25.0, 25.0,
-	\mike1_4, 25.0, 25.0,
-	\mike1_5_fruitbowl, 40.0, 40.0,
-	\mike1_rover_mirror, 25.0, 25.0,
-	\mike1_rover_rover, 25.0, 25.0].clump(3);
-
-r = Task ({
-	var name, fade, waittime;
-	c.loadScene("./textures/mike1_sm.xml");
-
-	inf.do { |i|
-		~fader.value_(0.0);
-		presets.do { |eventarray|
-
-			eventarray.postln;
-			#name, fade, waittime = eventarray;
-			// [name, fade, waittime].postln;
-			// name.postln;
-			c.recallPreset(name, fade);
-			waittime.wait;
-		};
-		~fader.value_(1.0);
-
-	}
-})
-)
-r.play
-r.run
-r.stop
 
 c.backupPreset
 
@@ -105,7 +42,7 @@ c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/diningroom3_0008
 
 // outtakes
 <scene>./textures/cliffside.xml</scene>
-<scene>./textures/tunnel.xml</scene>
+<scene>./textures/tunnel.xml<	/scene>
 <scene>./textures/yellowcliff.xml</scene>
 
 
@@ -138,6 +75,7 @@ c.loadScene("./textures/yellowcliff.xml")
 
 // c.loadScene("./textures/carkeek_med_tile.xml")
 
+
 // presets
 c.storePreset( \mike2)
 
@@ -151,9 +89,12 @@ c.storePreset( \mike1_5_weird)
 c.storePreset( \mike1_parallax_left)
 
 
-c.loadScene("./textures/yellowcliff_sm.xml")
-c.storePreset( \yellowcliff_close)
-c.storePreset( \yellowcliff_bush)
+c.loadScene("./textures/yellowcliff.xml")
+// c.storePreset( \yellowcliff_close)
+// c.storePreset( \yellowcliff_bush)
+c.recallPreset(\yellowcliff_close)
+c.recallPreset(\yellowcliff_bush)
+
 
 // oops I deleted this:
 // c.storePreset( \tivon1 )

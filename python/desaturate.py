@@ -33,8 +33,8 @@ def readImageFilenames(dir_name):
 
 def desaturate(img, percent = 0.8):
     """
-    Convert BGR image to YCrCb. Equlize based on Intensity. 
-    Return equalized BGR image.
+    Convert BGR image to HSV. Desaturate S value.
+    Return desaturated BGR image.
     """
     
     hsb = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
