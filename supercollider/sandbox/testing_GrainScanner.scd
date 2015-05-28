@@ -1,5 +1,28 @@
 (
-~load = { |path,auto_segment=true|
+~loadFromFile = { |path,auto_segment=true|
+	var scmirZTestFile, data;
+
+	"Loading SCMIR data".postln;
+
+	scmirZTestFile = PathName(path).pathOnly++PathName(path).fileNameWithoutExtension++".scmirZ";
+
+	if ( File.exists(scmirZTestFile))
+	{
+		"Found scMIR Analysis File...loading".postln;
+		data = SCMIRAudioFile.newFromZ(scmirZTestFile);
+		"SCMIR data loaded".postln;
+		data;
+	} {
+		Error("No analysis found at this path");
+		nil;
+	};
+}
+)
+
+
+// This method for performing the analysis if none exists already
+(
+~loadOrProcess = { |path,auto_segment=true|
 	var name, event=(), buffer, analysis, frames, beatdata, segments;
 	var blind_segment_grain_size=0.1, scmirZTestFile;
 
@@ -18,7 +41,8 @@
 		//analysis.load; // << newFromZ calls this already!!
 	} {
 		"New file...beginning analysis".postln;
-		analysis = SCMIRAudioFile(path, [[MFCC,4],[SpecCentroid],[Chromagram]]);
+		// analysis = SCMIRAudioFile(path, [[MFCC,4],[SpecCentroid],[Chromagram]]);
+		analysis = SCMIRAudioFile(path, [[MFCC,4],[SpecCentroid],[Chromagram, 6], [FFTCrest]]);
 		analysis.extractFeatures();
 		analysis.extractBeats();
 		analysis.save(scmirZTestFile);
@@ -55,7 +79,7 @@ File.exists(~mirPath)
 
 //-run analysis function [path,auto-segment]
 // auto-segment
-~data = ~load.(p, true)
+~data = ~loadOrProcess.(p, true)
 
 // clustering
 // define vectors
@@ -115,22 +139,30 @@ fork{ k.reset.update; "done".postln }
 // --------------------------------
 s.boot;
 // p = "/Users/admin/src/rover/data/AUDIO/discovery_cliffside_CLIP.WAV"
-p = "/Users/admin/src/rover/data/AUDIO/EDITS/around_the_dining_room_morning_EDIT.WAV";
-p = "/Users/admin/src/rover/data/AUDIO/EDITS/carkeek_seaside_train_EDIT.WAV";
+// p = "/Users/admin/src/rover/data/AUDIO/sandwich_fridge_rover.wav"
 // p = "/Users/admin/src/rover/data/AUDIO/EDITS/dark_trees_shoot_EDIT.WAV";
 // p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_capture_EDIT.WAV";
 // p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_capture2_EDIT.WAV";
+// p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_CLIP.WAV";
+
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/around_the_dining_room_morning_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/carkeek_seaside_train_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_yellow_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_1_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_2_EDIT.WAV";
-// p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_CLIP.WAV";
-p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_yellow_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/garden_morning1_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/garden_morning2_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_central_dist_clear_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_porch_13min_EDIT.WAV";
 
-~data = ~load.(p, true)
+
+(
+~data = ~loadOrProcess.(p, true);
+"done".postln;
+)
+~data.beatdata
+
 
 // clustering
 // define vectors
@@ -148,16 +180,42 @@ fork{ k.reset.update; "done".postln }
 
 
 ~kMeansPath = PathName(p).pathOnly ++ PathName(p).fileNameWithoutExtension++"_KMEANS"++".scmirZ";
-// k.save(~kMeansPath)
+k.save(~kMeansPath)
 ~recalledK = KMeansMod().load(~kMeansPath)
 
 // initialize a grain scanner
 s.boot
 
 g = GrainScanner2( 0, p )
+
+// add as many scanners as are needed
+g.addScanner(2)
+
+g.prepareNewDataSet(p)
+
+g.storePreset(\test1)
+g.storePreset(\test2)
+
+g.storePreset(\crow)
+g.storePreset(\crow2)
+g.presets[\test1]
+g.presets[\test2].params.size
+
+g.storePreset(\test3)
+
+g.recallPreset(\test1)
+g.recallPreset(\test2)
+g.recallPreset(\test3)
+
+g.removePreset()
+
 // give it the cluser and "beat" data
 // g.initClusterData( k, ~data.beatdata)
 g.initClusterData( ~recalledK, ~data.beatdata )
+
+g.addScanner
+g.scanners[0].gui
+
 g.cluster_( 0 )
 
 g.gui
@@ -197,14 +255,103 @@ g.gui
 g.release
 g.free
 
+
+// GRAINSCANNER1
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/around_the_dining_room_morning_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_EDIT.WAV";
+
+i = GrainScanner1( 3, p )
+
+i.storePreset(\int_sparse)
+i.storePreset(\int_sparse2)
+
+i.presets[\int_sparse].bufName
+i.presets[\int_sparse].params.do{|set| set.do(_.postln); "".postln}
+
+i.recallPreset(\int_sparse)
+i.recallPreset(\int_sparse2, 5)
+i.recallPreset(\int_sparse, 5)
+
+i.updatePreset
+
+i.free(freeBufs: true)
+
+~grns = 3.collect{ GrainScanner1(0, g.buffers) }
+~grns.do(_.gui)
+
+
+// set all params together
+~grns.do(_.fluxRate_(0.4))
+~grns.do(_.maxDisp_(2.1))
+
+// so all instances can choose a scmir frame
+(
+~grns.do{|grn|
+	grn.newMomentFunc = {
+		// g.clusterFramesByDist[0..6].choose.choose.postln
+		g.clusterFramesByDist.choose.choose.postln
+	}
+}
+)
+
+// How to note the soundfile used in the preset?
+
+// mamnually grabbing presets from GrainScanner1's
+Archive.global.put(\grainScanner1, IdentityDictionary(know: true))
+
+Archive.global[\grainScanner1].put(
+
+IdentityDictionary(know: true).putPairs([
+\grainDur, scnr.grainDur
+\grainRand, scnr.grainRand
+\minDisp, scnr.minDisp
+\maxDisp, scnr.maxDisp
+\density, scnr.density
+\fluxRate, scnr.fluxRate
+\start, scnr.start
+\end, scnr.end
+
+	t_posReset
+
+PathName(.buffer).filename
+
+
 i = GrainScanner(0, g.buffers)
 i.play
 i.gui
-i.scanRange(rand(g.bufDur), 1)
+// i.scanRange(rand(g.bufDur), 1)
+i.scanRange(g.clusterFramesByDist.choose.choose.postln, rrand(1.5, 4))
+
+i.free
+
+j = GrainScanner(0, g.buffers)
+j.play
+j.gui
+j.scanRange(rand(g.bufDur), 1)
+j.scanRange(g.clusterFramesByDist.choose.choose.postln, rrand(1.5, 4))
+j.free
+
+// both instances from one cluster
+(var cl;
+cl = g.clusterFramesByDist[0..6].choose;
+[i,j].do(_.scanRange(cl.choose.postln, rrand(2.5, 6)))
+)
 
 q = 4.collect{GrainScanner(0, g.buffers)}
 q.do(_.gui)
 q.do(_.free)
+
+
+
+
+
+[i,j].do{|x|x.synths.do(_.minDisp_(2.5))}
+[i,j].do{|x|x.synths.do(_.maxDisp_(2.5))}
+[i,j].do{|x|x.synths.do(_.grainDur_(2.5))}
+[i,j].do{|x|x.synths.do(_.density_(13))}
+[i,j].do{|x|x.synths.do(_.fluxRate_(5.reciprocal))}
+
+
 
 /* SCRATCH
 

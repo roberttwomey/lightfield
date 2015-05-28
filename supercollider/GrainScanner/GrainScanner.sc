@@ -1,10 +1,283 @@
-GrainScanner {
+// a master class that holds multiple GrainScan1's,
+// stores presets for multiple instances, etc.
+GrainScanner1 {
+	// copyArgs
+	var numScanners, initBufOrPath, outbus, initGUI;
+	var <scanners, <buffers, <bufferPath, <lastRecalledPreset, loadSuccessful, <server;
+
+	*new {|numScanners, bufOrPath, outbus = 0, initGUI = true|
+		^super.newCopyArgs(numScanners, bufOrPath, outbus, initGUI).init;
+	}
+
+	init {
+
+		fork({
+			var bufcond = Condition();
+			loadSuccessful = true; // init load test
+			server = Server.default;
+
+			this.initBuffer( initBufOrPath, bufcond );
+			bufcond.wait;
+
+			// catch failed buffer load
+			loadSuccessful.if({
+				scanners = numScanners.collect{ GrainScan1(outbus, buffers) };
+
+				initGUI.if{ 0.3.wait; scanners.do(_.gui) };
+
+				Archive.global[\grainScanner1] ?? { this.prInitArchive };
+			},{error("GrainScanner1 failed to load, check your provided buffer/path")});
+
+		}, AppClock )
+	}
+
+	storePreset { |name, overwrite=false|
+		block{ |break|
+			(this.presets[name.asSymbol].notNil and: overwrite.not).if {
+				warn("NOT CREATING PRESET. Preset already exists! Choose another name or explicitly overwrite with flag");
+				break.()
+			};
+
+			this.presets.put( name.asSymbol,
+				IdentityDictionary(know: true).putPairs([
+					\bufName, PathName(scanners[0].synths[0].buffer.path).fileName,
+
+					\params, scanners.collect{ |scanner, i|
+						IdentityDictionary(know: true).putPairs([
+							// NOTE: these keys must match the class setters
+							// so they can be recalled with this.perform(key++'_', val)
+							\grnDur,		scanner.synths[0].grainDur,
+							\grnRand,		scanner.synths[0].grainRand,
+							\minDisp,		scanner.synths[0].minDisp,
+							\maxDisp,		scanner.synths[0].maxDisp,
+							\density,		scanner.synths[0].density,
+							\fluxRate,		scanner.synths[0].fluxRate,
+							\start,			scanner.synths[0].start,
+							\end,			scanner.synths[0].end,
+							\amp,			scanner.synths[0].amp,
+						]);
+					}
+				])
+			);
+			postf("Preset % stored\n", name);
+		}
+	}
+
+	resume { |fadeTime = 4|
+		scanners.do(_.play(fadeTime));
+	}
+	release { |fadeTime = 4|
+		scanners.do(_.release(fadeTime));
+	}
+
+	recallPreset { |name, fadeTime = 0.1|
+		var preset = this.presets[name.asSymbol];
+
+		fork{
+			block { |break|
+				var curFileName;
+				preset ??	{ "Preset not found.".warn; break.() };
+
+				// TODO: check the number of scanners used in this
+				// preset vs. how many are currently runnin and adjust accordingly
+
+				// check if the preset uses a different buffer...
+				curFileName = PathName(buffers[0].path).fileName;
+				if(curFileName != preset.bufName, {
+					warn("Preset file doens't match the buffer currently loaded");
+					// TODO: load the requested preset buffer
+					break.()
+				});
+
+				// recall the synth settings
+				fork({
+					var panCen = rrand(-1.0,1.0);
+
+					preset[\params].do{|dict, index|
+						scanners[index].synths.do{ |synth, j|
+							synth
+							.ctllag_(fadeTime)
+							.panCenter_((panCen + (scanners.size.reciprocal * index)).wrap(-1,1))
+							.panOffset_(j) // 180 deg offset from one another (stereo sources)
+						};
+						dict.keysValuesDo({ |k,v|
+							scanners[index].perform((k++'_').asSymbol, v);
+						})
+					};
+					lastRecalledPreset = name.asSymbol;
+					fadeTime.wait;
+					// reallign the gran pointer for the new preset
+					scanners.do{|scnr| scnr.synths.do(_.t_posReset_(1)) };
+				}, AppClock);
+			}
+		}
+	}
+
+	updatePreset {
+		lastRecalledPreset !? {
+			postf("Updating preset %\n", lastRecalledPreset);
+			this.storePreset( lastRecalledPreset, overwrite: true )
+		}
+	}
+
+	removePreset { |name|
+		this.presets[name.asSymbol].notNil.if(
+			{ this.presets.removeAt(name.asSymbol); postf("Preset % removed\n", name) },
+			{ warn("Preset not found.. didn't remove!") }
+		);
+	}
+
+	free { |freeBufs=false|
+		scanners.do(_.free);
+		freeBufs.if(buffers.do(_.free));
+	}
+
+	prInitArchive {
+		^Archive.global.put(\grainScanner1, IdentityDictionary(know: true));
+	}
+
+	presets { ^Archive.global[\grainScanner1] }
+	listPresets { ^this.presets.keys.asArray.sort.do(_.postln) }
+
+	*archive { ^Archive.global[\grainScanner1] }
+	*presets { ^Archive.global[\grainScanner1] }
+	*listPresets { ^this.class.presets.keys.asArray.sort.do(_.postln) }
+
+	backupPreset {
+		format( "cp %% %%%",
+			Archive.archiveDir,
+			"/archive.sctxar",
+			"~/Desktop/archive.sctxar_BAK_",
+			Date.getDate.stamp,
+			".sctxar"
+		).replace(
+			" Support","\\ Support"
+		).unixCmd
+	}
+
+	*backupPreset {
+		format( "cp %% %%%",
+			Archive.archiveDir,
+			"/archive.sctxar",
+			"~/Desktop/archive.sctxar_BAK_",
+			Date.getDate.stamp,
+			".sctxar"
+		).replace(
+			" Support","\\ Support"
+		).unixCmd
+	}
+
+	initBuffer { |bufOrPath, finishCond|
+		case
+		// buffers is a string (path) to soundfile to assign to buffers
+		{ bufOrPath.isKindOf(String) }{
+			this.prepareBuffers(bufOrPath, finishCond);
+		}
+		// this assumes mutiple channels of mono buffers from the same file path
+		{ bufOrPath.isKindOf(Array) }{
+			var failtest;
+			failtest = bufOrPath.collect({|elem| elem.isKindOf(Buffer)}).includes(false);
+			failtest.if({
+				"one or more elements in the array provided is not a buffer".error;
+				loadSuccessful = false;
+			},{
+				buffers = bufOrPath;
+				bufferPath = buffers[0].path;
+			});
+			finishCond.test_(true).signal;
+		}
+		{ bufOrPath.isKindOf(Buffer) }{
+			case
+			// use the mono buffer
+			{ bufOrPath.numChannels == 1 }{
+				"using mono buffer provided".postln;
+				bufferPath = bufOrPath.path;
+				buffers = [bufOrPath];
+				finishCond.test_(true).signal;
+			}
+			// split into mono buffers
+			{ bufOrPath.numChannels > 1 }{
+				"loading buffer anew as single channel buffers".postln;
+				this.prepareBuffers(bufOrPath.path, finishCond);
+			}
+		};
+	}
+
+	prepareBuffers { |path, finishCond|
+
+		block { |break|
+			var sf;
+			// check the soundfile is valid and get it's metadata
+			sf = SoundFile.new;
+			{sf.openRead(path)}.try({
+				"Soundfile could not be opened".warn;
+				loadSuccessful = false;
+				finishCond.test_(true).signal;
+				break.()
+			});
+			sf.close;
+
+			// load the buffers
+			fork {
+				// one condition for each channel loaded into a Buffer
+				var bufLoadConds = [];
+				buffers = sf.numChannels.collect{|i|
+					var myCond = Condition();
+					bufLoadConds = bufLoadConds.add(myCond);
+					Buffer.readChannel(
+						server, path,
+						channels: i, action: {myCond.test_(true).signal} );
+				};
+				bufLoadConds.do(_.wait); // wait for each channel to load
+
+				"grain scanner1 buffer(s) loaded".postln;
+				bufferPath = path;
+				finishCond.test_(true).signal;
+			}
+		}
+	}
+
+	swapBuffer { |newBufOrPath|
+		var curBuffers = buffers;
+		fork({
+			var bufcond = Condition();
+			loadSuccessful = true; // init load test
+			server = Server.default;
+
+			this.initBuffer( initBufOrPath, bufcond );
+			bufcond.wait;
+
+			// catch failed buffer load
+			loadSuccessful.if({
+				// send the new buffer to the synths
+				scanners.do{ |scnr|
+					// TODO: this is a temporary constraint to
+					// protect from synth/buffer channel mismatch
+					(scnr.synths.size == buffers.size).if({
+						scnr.synths.do{|synth, i|
+							synth.buf_(buffers[i]).bufnum_(buffers[i].bufnum)
+						}
+					},{
+						error("mismatch between number of scanner synths and buffer channels.");
+						buffers.do_(_.free);
+					});
+				};
+				// free the old buffers
+				curBuffers.do(_.free);
+			},{ error("Failed to swap buffers, check your provided buffer/path")});
+
+		}, AppClock )
+	}
+}
+
+GrainScan1 {
 	classvar <grnSynthDef;
 
 	// copyArgs
 	var <outbus, bufferOrPath;
-	var server, <sf, <buffers, <group, <synths, <bufDur, <view, <bufferPath;
-	var <grnDurSpec, <grnRateSpec, <grnRandSpec, <pntrRateSpec, <grnDispSpec;
+	var server, <buffers, <group, <synths, <bufDur, <view, <bufferPath;
+	var <grnDurSpec, <grnRateSpec, <grnRandSpec, <pntrRateSpec, <grnDispSpec, <densitySpec, <fluxRateSpec, <ampSpec;
+	var <>newMomentFunc;
 
 	*new { |outbus=0, bufferOrPath|
 		^super.newCopyArgs( outbus, bufferOrPath ).init;
@@ -13,11 +286,14 @@ GrainScanner {
 	init {
 		server = Server.default;
 
-		grnDurSpec = ControlSpec(0.01, 8, warp: 3, step: 0.01, default: 1.3);
-		grnRateSpec = ControlSpec(4.reciprocal, 70, warp: 3, step:0.01, default:10);
-		grnRandSpec = ControlSpec(0, 1, warp: 4, step: 0.01, default: 0.0);
-		pntrRateSpec = ControlSpec(0.05, 3, warp: 0, step: 0.01, default: 1);
-		grnDispSpec = ControlSpec(0, 5, warp: 3, step: 0.01, default: 1.5);
+		grnDurSpec = ControlSpec(0.01, 8, warp: 3, default: 1.3);
+		grnRateSpec = ControlSpec(4.reciprocal, 70, warp: 3, default:10);
+		grnRandSpec = ControlSpec(0, 1, warp: 4, default: 0.0);
+		pntrRateSpec = ControlSpec(0.05, 3, warp: 0, default: 1);
+		grnDispSpec = ControlSpec(0, 5, warp: 3, default: 1.5);
+		densitySpec = ControlSpec(4.reciprocal, 25, warp: 3, default:13);
+		fluxRateSpec = ControlSpec(12.reciprocal, 1, warp: 3, default:0.2);
+		ampSpec = ControlSpec(-inf, 12, warp: 'db', default:0);
 
 		fork{
 			var cond = Condition();
@@ -68,6 +344,7 @@ GrainScanner {
 	prepareBuffers { |finishCond|
 
 		block { |break|
+			var sf;
 			// check the soundfile is valid and get it's metadata
 			sf = SoundFile.new;
 			{sf.openRead(bufferPath)}.try({
@@ -89,15 +366,20 @@ GrainScanner {
 						channels: i, action: {myCond.test_(true).signal} );
 				};
 				bufLoadConds.do(_.wait); // wait for each channel to load
-				"grain scanner buffer(s) loaded".postln;
+				"grain scanner1 buffer(s) loaded".postln;
 				finishCond.test_(true).signal;
 			}
 		}
 	}
 
 	initSynths {
+		var pancen = rrand(-1,1.0);
 		synths = buffers.collect{|buf, i|
-			grnSynthDef.note(target: group).buffer_(buf).bufnum_(buf.bufnum).outbus_(outbus+i).grainDur_(1.3)
+			grnSynthDef.note(target: group)
+				.outbus_(outbus)
+				.buffer_(buf).bufnum_(buf.bufnum)
+				.grainDur_(2.7)
+				.panCenter_(pancen).panOffset_(i)
 		}
 	}
 
@@ -127,6 +409,16 @@ GrainScanner {
 	grnDisp_ {|dispSecs| synths.do(_.grnDisp_(dispSecs)); this.changed(\grnDisp, dispSecs); }
 	// speed of the grain position pointer in the buffer, 1 is realtime, 0.5 half-speed, etc
 	pntrRate_ {|rateScale| synths.do(_.posRate_(rateScale)); this.changed(\pntrRate, rateScale); }
+
+	minDisp_ {|dispSecs| synths.do(_.minDisp_(dispSecs)); this.changed(\minDisp, dispSecs); }
+	maxDisp_ {|dispSecs| synths.do(_.maxDisp_(dispSecs)); this.changed(\maxDisp, dispSecs); }
+	density_ {|numGrains| synths.do(_.density_(numGrains)); this.changed(\density, numGrains); }
+	fluxRate_ {|rate| synths.do(_.fluxRate_(rate)); this.changed(\fluxRate, rate); }
+	start_ {|timeNorm| synths.do(_.start_(timeNorm)); this.changed(\start, timeNorm); }
+	end_ {|timeNorm| synths.do(_.end_(timeNorm)); this.changed(\end, timeNorm); }
+
+	amp_ {|amp| synths.do(_.amp_(amp)); this.changed(\amp, amp); }
+
 
 	// TODO:
 	// align to the moment in secs
@@ -165,7 +457,7 @@ GrainScanner {
 	// }
 
 
-	gui { view = GrainScannerView(this); }
+	gui { view = GrainScan1View(this); }
 
 
 	free {
@@ -175,62 +467,88 @@ GrainScanner {
 
 
 	loadSynthLib {
-		grnSynthDef = CtkSynthDef(\grainScanner, {
+		grnSynthDef = CtkSynthDef(\grainScanner1, {
 			arg
 			buffer, bufnum,
 			outbus, 			// main out
-			outbus_aux,		// outbus to reverb
+			outbus_aux,			// outbus to reverb
 			start=0, end=1,		// bounds of grain position in sound file
 			grainRand = 0,		// gaussian trigger: 0 = regular at grainRate, 1 = random around grainRate
 			grainRate = 10, grainDur = 0.04,
 			grnDisp = 0.01,		// position dispersion of the pointer, as percentage of soundfile duration
-			pitch=1,
-			auxmix=0, amp=1,
+			//pitch=1,
+			auxmix=0,
+			amp=1,
 			fadein = 2, fadeout = 2,
-			posRate = 1,	// change the speed of the grain position pointer (can be negative)
-			posInv = 0,		// flag (0/1) to invert the posRate
-			monAmp = 1,		// monitor amp, for headphones
+			posRate = 1,		// change the speed of the grain position pointer (can be negative)
+			// posInv = 0,		// flag (0/1) to invert the posRate
+			monAmp = 1,			// monitor amp, for headphones
 			amp_lag = 0.3,		// time lag on amplitude changes (amp, xfade, mon send, aux send)
 			balance_amp_lag = 0.3,	// time lag on amplitude xfade changes
-			recvUpdate = 0,		// flag to check if next selected buffer is to be input to this instance
 			t_posReset = 0,		// reset the phasor position with a trigger
-			gate = 1;			// gate to start and release the synth
+			gate = 1,			// gate to start and release the synth
+
+			fluxRate = 0.2,		// rate at which density and dispersion change
+			density = 13,		// desity held while modulating duration
+			maxDisp = 2.5,		// dispersion can modulate between max and min dispersion
+			minDisp = 0.01,
+			panCenter = 0,
+			panOffset = 0.5,
+			globalAmp = 1,		// for overall control over all instances
+			ctllag = 0.1, ctlcurve = 0; // fade some of the controls
 
 			var
 			env, grain_dens, amp_scale, trig, b_frames,
-			pos, disp, sig, out, aux, auxmix_lagged;
+			pos, disp, sig, out, aux, auxmix_lagged, frames_start;
+			var
+			panPos, flux, g_rate;
+			var
+			gdur, grand, dens, frate, vol, st, ed;
 
 			// envelope for fading output in and out - re-triggerable
 			env = EnvGen.kr(Env([1,1,0],[fadein, fadeout], \sin, 1), gate, doneAction: 0);
 
-			// calculate grain density
-			grain_dens = grainRate * grainDur;
-			amp_scale = grain_dens.reciprocal.sqrt.clip(0, 1);
+			// lag values
+			#gdur, grand, dens, frate, vol, st, ed = VarLag.kr(
+				[grainDur, grainRand, density, fluxRate, amp, start, end],
+				ctllag, ctlcurve );
 
+			flux = LFDNoise3.kr( frate); // -1>1
+
+			g_rate = dens * (gdur + (gdur * 0.15 * flux)).reciprocal;
+			amp_scale = dens.reciprocal.sqrt.clip(0, 1);
+			trig = GaussTrig.ar(g_rate, grand);
+
+			// // calculate grain density
+			// grain_dens = grainRate * gdur;
+			// amp_scale = grain_dens.reciprocal.sqrt.clip(0, 1);
+			//
 			// gaussian trigger
 			// grainRand = 0 regular at grainRate
 			// grainRand = 1 random around grainRate
-			trig = GaussTrig.ar(grainRate, grainRand);
+			// trig = GaussTrig.ar(grainRate, grainRand);
 
 
 			b_frames = BufFrames.kr(bufnum);
+			frames_start = b_frames * st;
 			// use line to go from start to end in buffer
 			pos = Phasor.ar( t_posReset,
-				BufRateScale.kr(bufnum) * posRate * (1 - (posInv*2)),
-				b_frames * start, b_frames * end, b_frames * start
+				BufRateScale.kr(bufnum) * posRate, // * (posRate + (posRate * 0.05 * flux)), //* (1 - (posInv*2)),
+				frames_start, b_frames * ed, frames_start
 			);
 			pos = pos * b_frames.reciprocal;
 
 			// add randomness to position pointer, make sure it remains within limits
-			disp = grnDisp * BufDur.kr(bufnum).reciprocal * 0.5; // grnDisp (secs) normalized 0-1
+			// disp = grnDisp * BufDur.kr(bufnum).reciprocal * 0.5; // grnDisp (secs) normalized 0-1
+			disp = LFDNoise3.kr( frate ).range(minDisp, maxDisp) * BufDur.kr(bufnum).reciprocal * 0.5;
 			pos = pos + TRand.ar(disp.neg, disp, trig);
-			pos = pos.wrap(start , end);
+			pos = pos.wrap(st , ed);
 
 			/* granulator */
-			sig = GrainBufJ.ar(1, trig, grainDur, buffer, pitch , pos, 1, interp: 1, grainAmp: amp_scale);
+			sig = GrainBufJ.ar(1, trig, gdur, buffer, 1 , pos, 1, interp: 1, grainAmp: amp_scale);
 
 			/* overall amp control */
-			sig = Limiter.ar( sig * Lag.kr(amp, amp_lag) * env, -0.5.dbamp);
+			sig = Limiter.ar( sig * vol * env, -0.5.dbamp);
 
 			/* aux send control */
 			// auxmix_lagged = Lag.kr(auxmix, amp_lag);
@@ -238,21 +556,23 @@ GrainScanner {
 			// out = sig * (1 - auxmix_lagged).sqrt;
 			// aux = sig * auxmix_lagged.sqrt;
 			out = sig;
+			panPos = panCenter + panOffset;
+			out = PanAz.ar(4, out, (panPos + (0.1 * flux)).wrap(-1,1));
 
 			// send signals to outputs
-			Out.ar( outbus,		out );
+			Out.ar( outbus,		out * globalAmp);
 			// Out.ar( outbus_aux,	aux );
 		})
 	}
 }
 
-GrainScannerView {
+GrainScan1View {
 	// copyArgs
 	var scanner;
 	var <win, <controls;
 
-	*new {|aGrainScanner|
-		^super.newCopyArgs( aGrainScanner ).init;
+	*new {|aGrainScan1|
+		^super.newCopyArgs( aGrainScan1 ).init;
 	}
 
 	init {
@@ -266,54 +586,54 @@ GrainScannerView {
 
 		controls.putPairs([
 			\grnDur, ()
-			.numBox_( NumberBox()
+			.numBox_( NumberBox().maxDecimals_(3)
 				.action_({ |bx|scanner.grnDur_(bx.value) })
 				.value_(scanner.grnDurSpec.default)
 			)
-			.knob_(	Knob().keystep_(0.0001)
+			.knob_(	Knob().step_(0.001)
 				.action_({|knb|
 					scanner.grnDur_(scanner.grnDurSpec.map(knb.value)) })
 				.value_(scanner.grnDurSpec.unmap(scanner.grnDurSpec.default))
 			),
 
 			\grnRate, ()
-			.numBox_( NumberBox()
+			.numBox_( NumberBox().maxDecimals_(3)
 				.action_({ |bx|
 					scanner.grnRate_(bx.value) })
 				.value_(scanner.grnRateSpec.default)
 			)
-			.knob_(	Knob().keystep_(0.0001)
+			.knob_(	Knob().step_(0.001)
 				.action_({|knb|
 					scanner.grnRate_(scanner.grnRateSpec.map(knb.value)) })
 				.value_(scanner.grnRateSpec.unmap(scanner.grnRateSpec.default))
 			),
 
 			\grnRand, ()
-			.numBox_( NumberBox()
+			.numBox_( NumberBox().maxDecimals_(3)
 				.action_({ |bx|
 					scanner.grnRand_(bx.value) })
 				.value_(scanner.grnRandSpec.default)
 			)
-			.knob_(	Knob().keystep_(0.0001)
+			.knob_(	Knob().step_(0.001)
 				.action_({|knb|
 					scanner.grnRand_(scanner.grnRandSpec.map(knb.value)) })
 				.value_(scanner.grnRandSpec.unmap(scanner.grnRandSpec.default))
 			),
 
 			\pntrRate, ()
-			.numBox_( NumberBox()
+			.numBox_( NumberBox().maxDecimals_(3)
 				.action_({ |bx|
 					scanner.pntrRate_(bx.value) })
 				.value_(scanner.pntrRateSpec.default)
 			)
-			.knob_(	Knob().keystep_(0.0001)
+			.knob_(	Knob().step_(0.001)
 				.action_({|knb|
 					scanner.pntrRate_(scanner.pntrRateSpec.map(knb.value)) })
 				.value_(scanner.pntrRateSpec.unmap(scanner.pntrRateSpec.default))
 			),
 
 			\grnDisp, ()
-			.numBox_( NumberBox()
+			.numBox_( NumberBox().maxDecimals_(3)
 				.action_({ |bx|
 					scanner.grnDisp_(bx.value) })
 				.value_(scanner.grnDispSpec.default)
@@ -323,6 +643,45 @@ GrainScannerView {
 					scanner.grnDisp_(scanner.grnDispSpec.map(sldr.value)) })
 				.value_(scanner.grnDispSpec.unmap(scanner.grnDispSpec.default))
 			),
+
+			\minDisp, ()
+			.numBox_( NumberBox().maxDecimals_(3)
+				.action_({ |bx|
+					scanner.minDisp_(bx.value) })
+				.value_(scanner.synths[0].minDisp)
+			),
+
+			\maxDisp, ()
+			.numBox_( NumberBox().maxDecimals_(3)
+				.action_({ |bx|
+					scanner.maxDisp_(bx.value) })
+				.value_(scanner.synths[0].maxDisp)
+			),
+
+			\density, ()
+			.numBox_( NumberBox().maxDecimals_(3)
+				.action_({ |bx|
+					scanner.density_(bx.value) })
+				.value_(scanner.densitySpec.default)
+			)
+			.knob_(	Knob().step_(0.001)
+				.action_({|knb|
+					scanner.density_(scanner.densitySpec.map(knb.value)) })
+				.value_(scanner.densitySpec.unmap(scanner.densitySpec.default))
+			),
+
+			\fluxRate, ()
+			.numBox_( NumberBox().maxDecimals_(3)
+				.action_({ |bx|
+					scanner.fluxRate_(bx.value) })
+				.value_(scanner.fluxRateSpec.default)
+			)
+			.knob_(	Knob().step_(0.001)
+				.action_({|knb|
+					scanner.fluxRate_(scanner.fluxRateSpec.map(knb.value)) })
+				.value_(scanner.fluxRateSpec.unmap(scanner.fluxRateSpec.default))
+			),
+
 
 			\fadeIO, ()
 			.button_(
@@ -337,6 +696,18 @@ GrainScannerView {
 			)
 			.txt_( StaticText().string_("Fade in/out") ),
 
+			\amp, ()
+			.numBox_( NumberBox().maxDecimals_(2)
+				.action_({ |bx|
+					scanner.amp_(bx.value.dbamp) })
+				.value_(scanner.ampSpec.default)
+			)
+			.slider_(	Slider()
+				.action_({|sldr|
+					scanner.amp_(scanner.ampSpec.map(sldr.value).dbamp) })
+				.value_(scanner.ampSpec.unmap(scanner.ampSpec.default))
+			),
+
 			// reset the pointer moment loop
 			\syncPntr, ()
 			.button_( Button().states_([[""]]).action_({ |but|
@@ -345,7 +716,12 @@ GrainScannerView {
 
 			\newPos, ()
 			.button_( Button().states_([[""]]).action_({ |but|
-				scanner.scanRange(scanner.bufDur.rand, rrand(2.0, 6.0)) }) )
+				scanner.scanRange(
+					*scanner.newMomentFunc.notNil.if(
+						{ scanner.newMomentFunc.value },
+						{ [scanner.bufDur.rand, rrand(3.5, 8.0)] }),
+				)
+			}) )
 			.txt_( StaticText().string_("New moment") ),
 
 		]);
@@ -363,17 +739,41 @@ GrainScannerView {
 				),
 
 				HLayout(
+					// 	// VLayout(
+					// 	// 	[controls[\grnDisp].slider.orientation_(\vertical).minHeight_(150), a: \left],
+					// 	// 	[controls[\grnDisp].numBox.fixedWidth_(35), a: \left],
+					// 	// ),
 					VLayout(
-						[controls[\grnDisp].slider.orientation_(\vertical).minHeight_(150), a: \left],
-						[controls[\grnDisp].numBox.fixedWidth_(35), a: \left],
+						[controls[\amp].slider.orientation_(\vertical).minHeight_(200), a: \left],
+						[controls[\amp].numBox.fixedWidth_(35), a: \left],
 					),
 					VLayout( *[\newPos, \syncPntr, \fadeIO].collect({ |key|
 						HLayout(
 							[controls[key].button.fixedWidth_(35), a: \left],
 							[controls[key].txt.align_(\left), a: \left ]
 						)
-					}) ++ [nil, [StaticText().string_("pntr Dispersion").align_(\left), a: \bottom]]
-					), nil
+					})
+					// ++ [nil, [StaticText().string_("pntr Dispersion").align_(\left), a: \bottom]]
+					++ [nil, [StaticText().string_("dB").align_(\left), a: \bottom]]
+					),
+					nil,
+					VLayout( *[\minDisp, \maxDisp].collect({ |key|
+						VLayout(
+							StaticText().string_(key.asString).align_(\center),
+							controls[key].numBox.fixedWidth_(35),
+						)
+					}) ++ [nil]
+					),
+					VLayout( *[\density, \fluxRate].collect({ |key|
+						VLayout(
+							StaticText().string_(key.asString).align_(\center),
+							HLayout(
+								controls[key].numBox.fixedWidth_(35),
+								controls[key].knob.mode_(\vert).fixedWidth_(35),
+							)
+						)
+					})
+					),
 				),
 			)
 		)
@@ -402,6 +802,20 @@ GrainScannerView {
 				\grnDisp, {
 					controls.grnDisp.numBox.value_(args[0]);
 					controls.grnDisp.slider.value_(scanner.grnDispSpec.unmap(args[0])); },
+
+				\minDisp, {
+					controls.minDisp.numBox.value_(args[0]) },
+				\maxDisp, {
+					controls.maxDisp.numBox.value_(args[0]) },
+				\density, {
+					controls.density.numBox.value_(args[0]);
+					controls.density.knob.value_(scanner.densitySpec.unmap(args[0])); },
+				\fluxRate, {
+					controls.fluxRate.numBox.value_(args[0]);
+					controls.fluxRate.knob.value_(scanner.fluxRateSpec.unmap(args[0])); },
+				\amp, {
+					controls.amp.numBox.value_(args[0].ampdb);
+					controls.amp.slider.value_(scanner.ampSpec.unmap(args[0].ampdb)); },
 			)
 		});
 	}
