@@ -18,13 +18,8 @@ uniform float fscale;
 uniform float zoom;
 uniform vec2 roll;
 
-//uniform int tilenum;
-
 // camera_positions
 uniform sampler2DRect campos_tex;
-
-// tile numbers where individual cam images are stored
-//uniform sampler2DRect tilepixoffset_tex;
 
 out vec4 fragColor;
 
@@ -39,6 +34,8 @@ void main (void){
 
     // aperture center, used to keep refocused image centered
     vec2 ap_center = 0.5 * ap_size + ap_loc;
+
+    int count = 0;
 
     // grab color from each subimage in arrayed texture
     for (int x=ap_loc.x; x <(ap_loc.x+ap_size.x); x++){
@@ -79,8 +76,11 @@ void main (void){
 //            color += vec4(vec3(maxmask), 1.0); // check lower edge mask
 
 //            color += vec4(vec3(mask), 1.0);// check lower edge mask
+            if(mask > 0.0)
+                count +=1;
 
             color += vec4(mask * texture2DRect(lftex, pos - tilepixoffset));
+
 //            color += vec4(mask * texture2DRect(lftex, pos - tilepixoffset).rgb, mask);
 //            color += mask.xxxx * mask.yyyy * vec4(float(pos.x)/float(size.x), float(pos.y)/float(size.y), 0.0, 1.0);
 
@@ -92,7 +92,7 @@ void main (void){
         }
     }
 
-    color = color / float(ap_size.x*ap_size.y);
+    color = color / float(count);//ap_size.x*ap_size.y);
     fragColor = color;
 }
 

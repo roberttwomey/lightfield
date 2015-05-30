@@ -21,7 +21,7 @@ e.g. tiled for tiled refocuser, laptop for laptop, single for single.
 
  -->
 
-<scene>./textures/outsidelookingin_tile.xml</scene>
+<scene>./textures/carkeek_tile.xml</scene>
 
 <!-- refocuser settings -->
 
