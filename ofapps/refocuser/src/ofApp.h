@@ -34,6 +34,15 @@ public:
     void snapshot();
 
     void keyPressed  (int key);
+    void keyReleased(int key);
+    int mouseXStart, mouseYStart;
+    float xoffsetStart, yoffsetStart;
+    float focusStart, zoomStart;
+    int xcountStart, ycountStart;
+    int xstartStart, ystartStart;
+    bool bPressed;
+    
+    
     void process_OSC(ofxOscMessage m);
 
     ofxOscReceiver receiver;

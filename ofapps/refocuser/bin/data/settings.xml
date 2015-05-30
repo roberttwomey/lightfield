@@ -24,25 +24,46 @@
 
 <!-- laptop textures (512MB max pixel data size)
 
- <scene>./textures/ballard_wall.xml</scene>
- <scene>./textures/bookcase.xml</scene>
- <scene>./textures/carkeek.xml</scene>
- <scene>./textures/carkeek_night.xml</scene>
- <scene>./textures/cliffside.xml</scene>
- <scene>./textures/dark_trees.xml</scene>
- <scene>./textures/diningroom3.xml</scene>f
+ // interiors
+
  <scene>./textures/mike1.xml</scene>
  <scene>./textures/mike2.xml</scene>
  <scene>./textures/mike3.xml</scene>
+ <scene>./textures/diningroom3.xml</scene>f
+
+ 
+ // departures
+ 
+ <scene>./textures/dark_trees.xml</scene>
  <scene>./textures/outsidelookingin.xml</scene>
+ <scene>./textures/carkeek.xml</scene>
+ 
+ <scene>./textures/bookcase.xml</scene>
+
+ 
+ // others
+ 
+ <scene>./textures/ballard_wall.xml</scene>
+ <scene>./textures/carkeek_night.xml</scene>
+ <scene>./textures/cliffside.xml</scene>
  <scene>./textures/precise.xml</scene>
  <scene>./textures/towers.xml</scene>
  <scene>./textures/tunnel.xml</scene>
  <scene>./textures/yellowcliff.xml</scene>
+ 
+ // desaturated
+ <scene>./textures/outsidelookingin_de.xml</scene>
+ <scene>./textures/carkeek_night_de.xml</scene>
+ <scene>./textures/carkeek_de.xml</scene>
+ <scene>./textures/bookcase_de.xml</scene>
+ <scene>./textures/tunnel_de.xml</scene>
+ <scene>./textures/yellowcliff_de.xml</scene>
+
 
  -->
 
-<scene>./textures/outsidelookingin.xml</scene>
+<scene>./textures/tivon1.xml</scene>
+
 
 <!-- refocuser -->
 <!-- these parameters are loaded from the individual scene files-->
