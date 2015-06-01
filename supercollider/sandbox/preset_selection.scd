@@ -33,9 +33,11 @@ p = "/Users/admin/src/rover/data/AUDIO/EDITS/around_the_dining_room_morning_EDIT
 // p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_EDIT.WAV";
 
 s.boot
+~eq = MasterEQ(4);
+
 /* GrainScanner1 with 3 GrainScan1's */
 x = GrainScanner1( 3, p )
-
+x.presetGUI(3)
 // see below for loading scmir frames for "moment" frame locations
 
 // ---------------
@@ -60,6 +62,10 @@ x.storePreset(\int_event3)
 x.storePreset(\int_event4)
 x.storePreset(\int_event5)
 x.storePreset(\int_event6)
+
+
+x.storePreset(\int_humm)
+x.storePreset(\int_cycle)
 
 
 
@@ -102,9 +108,9 @@ x.scanners.do{|scnr|
 		var whichClust = 8.rand;
 		postf("cluster: %\n", whichClust);
 		// [g.bufDur.rand, rrand(22.5, 1)].postln;
-		// [g.clusterFramesByDist[whichClust].choose, rrand(3.5, 8)].postln
-		// [99.583129, rrand(3.5, 8)].postln
-		[435.30303620114, rrand(3.5, 8)].postln
+		[g.clusterFramesByDist[whichClust].choose, rrand(3.5, 6.3)].postln
+		// [5.0583129, rrand(3.5, 4)].postln
+		// [435.30303620114, rrand(3.5, 8)].postln
 	}
 }
 )
@@ -131,6 +137,7 @@ s.boot
 g = GrainScanner2( 0, p )
 
 3.do{|i|g.addScanner(i)} // add scanners
+g.presetGUI(5)
 
 g.scanners.do{|scnr| scnr.synths.do(_.fadein_(0.5))}
 g.scanners.do{|scnr| scnr.synths.do(_.fadeout_(0.5))}
