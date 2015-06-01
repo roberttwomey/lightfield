@@ -485,6 +485,7 @@ def generate_single_texture(files, img_path, contactimg_file, reorder = None, sk
     img_str = re.sub('\d+', '{0:04d}_warp', file_str)
     print img_str
     
+    # check that image file exists
     cam_img = cv2.imread(os.path.join(img_path, img_str.format(1)))
     img_h, img_w, img_chan = cam_img.shape
     print "Input images are", cam_img.shape
@@ -707,38 +708,122 @@ def generate_laptop_texture(files, img_path, contactimg_file, reorder = None, sk
     return output_files
     
     
-def generate_contact_sheet(files, reorder = None, skip = []):
-    global thumbpath, max_texture_size, grid_h, grid_w, num_textures, contactimg_file, thumb_w, thumb_h
+def generate_medium_texture(files, img_path, contactimg_file, reorder = None, skip = []):
+    """Generate medium tiled texture, 2x2 <= max_texture_dimension"""
+    global max_texture_size, grid_h, grid_w, num_textures, thumb_w, thumb_h, x_tiles, y_tiles, x_imgs_per_tile, y_imgs_per_tile
     
+    print ""
+    print "Generating Textures:"
+    
+    file_str = os.path.basename(files[0])
+    img_str = re.sub('\d+', '{0:04d}_warp', file_str)
+    
+    # find first warped image file
+    done = False
+    i = 0
+    while not done:
+        img_file = os.path.join(img_path, img_str.format(i))
+        done = os.path.exists(img_file)
+        i = i + 1
+        
+    # get image file params
+    cam_img = cv2.imread(img_file)
+    img_h, img_w, img_chan = cam_img.shape
+    print "Input images are", cam_img.shape
+    
+    total_w = grid_w * img_w
+    total_h = grid_h * img_h
+    print "Full res texture is", total_w, "x", total_h
+    
+    if total_w > total_h:
+        tile_w = max_texture_size
+        tile_h = int(float(tile_w) / float(total_w) * float(total_h))
+    else:
+        tile_h = max_texture_size
+        tile_w = int(float(tile_h) / float(total_h) * float(total_w))
+    
+    print "Output tile is", tile_w, "x", tile_h
+    
+    x_imgs_per_tile = grid_w / 2
+    y_imgs_per_tile = grid_h / 2
+    print "Images per tile", x_imgs_per_tile, "x", y_imgs_per_tile
 
-    contact_img = np.zeros((tex_h, tex_w, 3), np.uint8)
-    print contact_img.shape
+    thumb_w = int(float(tile_w) / float(x_imgs_per_tile))
+    thumb_h = int(float(tile_h) / float(y_imgs_per_tile))
+    print "Scaled images will be", thumb_w, "x", thumb_h
 
-    for j in range(grid_h):
-      for i in range(part_w):
-          num = (n * part_w) + i + (j * grid_w)
-          if reorder != None:
-              #print num
-              num = reorder[num]
-          if num not in skip:
-              thumbstr = "frame_{0:04d}.jpg".format(num)
-              thumb_file = os.path.join(thumbpath, thumbstr)
-              # print thumb_file
-              if os.path.exists(thumb_file):
-                  thumb_img = cv2.imread(thumb_file)
-                  thumb_h, thumb_w, thumb_chan = thumb_img.shape
-                  x = i * thumb_w
-                  y = j * thumb_h
-                  # print x,y, thumb_w ,thumb_h
-                  # print contact_img.shape
-                  contact_img[y:(y+thumb_h), x:(x+thumb_w)] = thumb_img
-          else:
-              print "skipping {0} in contact sheet".format(num)
+    tile_w = thumb_w * x_imgs_per_tile
+    tile_h = thumb_h * y_imgs_per_tile
+    print "Adjusted output texture is", tile_w, "x", tile_h
 
-    print "writing contact image", contact_img.shape, "to",
+    x_tiles = 2
+    y_tiles = 2
+    print "Number of tiles", x_tiles, "x", y_tiles
 
-    print this_contactimg_file
-    cv2.imwrite(this_contactimg_file, contact_img)
+    output_files = []
+    
+    # iterate over textures
+    for ty in range(y_tiles):
+        for tx in range(x_tiles):
+            tilenum = tx + ty * x_tiles
+            print "generating tile", tilenum, "(", tx, ty,"):",
+            
+            tile_img = np.zeros((tile_h, tile_w, 3), np.uint8)
+            # print "tile res", tile_img.shape
+            
+            # iterate over images in current texture
+            for y_img in range(y_imgs_per_tile):
+                for x_img in range(x_imgs_per_tile):
+
+                    # position of current image/camera view
+                    cam_pos = (x_img + tx * x_imgs_per_tile, y_img + ty * y_imgs_per_tile)
+                    if cam_pos[0] < grid_w and cam_pos[1] < grid_h:
+
+                        # what is our image number
+                        num = cam_pos[0] + cam_pos[1] * grid_w
+                        
+                        # reorder according to acquisition
+                        if reorder != None:
+                          num = reorder[num]
+                          
+                        #print "Camera", cam_pos, "(image",num,")",
+                        sys.stdout.write(".")
+                        if num not in skip:                  
+                            this_img_str = img_str.format(num)
+                            img_file = os.path.join(img_path, this_img_str)              
+                            # print img_file
+
+                            if os.path.exists(img_file):
+                                img = cv2.imread(img_file)
+                                img_h, img_w, img_chan = img.shape
+                                # print img.shape
+                                # x = x_img * img_w
+                                # y = y_img * img_h
+                                # tile_img[y:(y+img_h), x:(x+img_w)] = img
+
+                                thumb_img = cv2.resize(img, (thumb_w, thumb_h))
+                        
+                                x = x_img * thumb_w
+                                y = y_img * thumb_h
+                                tile_img[y:(y+thumb_h), x:(x+thumb_w)] = thumb_img
+
+                            else:
+                                print "*",
+                        else:
+                            print "skipping {0} in contact sheet".format(num)
+                        
+                        sys.stdout.flush()
+
+            base, ext = contactimg_file.split(".")
+            this_texture_file = base + "_tile-" +str(tilenum) + "."+ ext
+
+            print "writing contact image", tile_img.shape, "to", os.path.basename(this_texture_file)
+            cv2.imwrite(this_texture_file, tile_img)
+            
+            output_files.append(os.path.basename(this_texture_file))
+            print "done."
+    
+    return output_files
 
 
 def write_xml_scene(camerapos, texture_files, image_files, camresults, reorder = None, skip = [], do_inverty=False):
@@ -850,6 +935,7 @@ if __name__ == '__main__':
     parser.add_argument('--fullres', dest='dofullres', action='store_true', help='generate full res textures?')
     parser.add_argument('--single', dest='dosingle', action='store_true', help='generate a single texture at opengl max tex resolution')
     parser.add_argument('--laptop', dest='dolaptop', action='store_true', help='generate a single texture at laptop friendly (sub 512MB texture) size')
+    parser.add_argument('--medium', dest='domedium', action='store_true', help='generate a medium size tiled texture (2x2)')
     parser.add_argument('--numtextures', default=1, type=int, help='number of output textures')
     parser.add_argument('--maxtexturesize', default=16384, type=int, help='maximum pixel dimension of output texture')
     parser.add_argument('files', nargs='*', help='glob of input files')
@@ -862,6 +948,7 @@ if __name__ == '__main__':
     do_inverty = args.doinverty
     do_laptop = args.dolaptop
     do_single = args.dosingle
+    do_medium = args.domedium
     order = args.reorder    # reorder images
     gridstr = args.grid     # grid layout
     # file paths
@@ -877,6 +964,7 @@ if __name__ == '__main__':
     print "do full res output?", do_fullres
     print "do small, single texture output?", do_single
     print "do laptop compatible (512MB) texture output?", do_laptop
+    print "do medium sized textures?", do_medium
     print "invert y coordinates?", do_inverty
     print "reorder images?", order
     
@@ -904,7 +992,8 @@ if __name__ == '__main__':
     thumbpath = os.path.join(datapath, 'thumbs')
     
     
-    texroot = "/Volumes/Work/Projects/lightfield/data/textures/"
+    # texroot = "/Volumes/Work/Projects/lightfield/data/textures/"
+    texroot = "/home/rtwomey/code/lightfield/data/textures/"
     
     # outputs
     if do_laptop:
@@ -913,6 +1002,8 @@ if __name__ == '__main__':
         texturepath = os.path.join(texroot, "single")
     elif do_fullres:
         texturepath = os.path.join(texroot, "tiled")
+    elif do_medium:
+        texturepath = os.path.join(texroot, "medium")        
     else:
         texturepath = texroot
         
@@ -1029,18 +1120,12 @@ if __name__ == '__main__':
     # make contact sheet        
     if do_fullres:
         texture_files = generate_full_res_textures(image_files, warpedpath, contactimg_file, reorder, skip)
-        # base, ext = os.path.splitext(camerapos)
-        # camerapos = base + "_tile" + ext
     elif do_single:
         texture_files = generate_single_texture(image_files, warpedpath, contactimg_file, reorder, skip)
-        # single textures are named scene.xml, scene_cameras.png, scene_tex.jpg
-        # base, ext = os.path.splitext(camerapos)
-        # camerapos = base + "" + ext        
     elif do_laptop:
         texture_files = generate_laptop_texture(image_files, warpedpath, contactimg_file, reorder, skip)
-        # base, ext = os.path.splitext(camerapos)
-        # camerapos = base + "_laptop" + ext
-        
+    elif do_medium:
+        texture_files = generate_medium_texture(image_files, warpedpath, contactimg_file, reorder, skip)
     else:
         texture_files = generate_contact_sheet(image_files, reorder, skip)
 
