@@ -1,0 +1,6 @@
+./textures/diningroom3.xml
+-0.00566299
+0,0
+0,5
+12,4
+1

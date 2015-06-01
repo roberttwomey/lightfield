@@ -234,19 +234,16 @@ ControlMixFaderView {
 				HLayout(
 					[ VLayout(
 						StaticText().string_("min"),
-						minBx = NumberBox().minDecimals_(3).fixedWidth_(nBoxWidth)
-						.fixedHeight_(nBoxHeight).scroll_(false)
+						minBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight).scroll_(false)
 					).spacing_(0), a: \left ],
 					[ VLayout(
 						StaticText().string_("max"),
-						maxBx = NumberBox().minDecimals_(3).fixedWidth_(nBoxWidth)
-						.fixedHeight_(nBoxHeight).scroll_(false)
+						maxBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight).scroll_(false)
 					).spacing_(0), a: \left ],
 					nil,
 					[ VLayout(
 						StaticText().string_("StaticVal").align_(\left),
-						valBx = NumberBox().minDecimals_(3).fixedWidth_(nBoxWidth*1.2)
-						.fixedHeight_(nBoxHeight).scroll_(false)
+						valBx = NumberBox().fixedWidth_(nBoxWidth*1.2).fixedHeight_(nBoxHeight).scroll_(false)
 					).spacing_(5), a: \right ],
 				),
 				HLayout(
@@ -561,29 +558,27 @@ ControlMixMaster {
 	*listPresets { ^this.class.presets.keys.asArray.sort.do(_.postln) }
 
 	backupPreset {
-		Archive.write(format("/Users/admin/Desktop/archive_BAK_%.sctxar",Date.getDate.stamp).standardizePath);
-		// format( "cp %% %%%",
-		// 	Archive.archiveDir,
-		// 	"/archive.sctxar",
-		// 	"~/Desktop/archive.sctxar_BAK_",
-		// 	Date.getDate.stamp,
-		// 	".sctxar"
-		// ).replace(
-		// 	" Support","\\ Support"
-		// ).unixCmd
+		format( "cp %% %%%",
+			Archive.archiveDir,
+			"/archive.sctxar",
+			"~/Desktop/archive.sctxar_BAK_",
+			Date.getDate.stamp,
+			".sctxar"
+		).replace(
+			" Support","\\ Support"
+		).unixCmd
 	}
 
 	*backupPreset {
-		Archive.write(format("~/Desktop/archive_BAK_%.sctxar",Date.getDate.stamp).standardizePath);
-		// format( "cp %% %%%",
-		// 	Archive.archiveDir,
-		// 	"/archive.sctxar",
-		// 	"~/Desktop/archive.sctxar_BAK_",
-		// 	Date.getDate.stamp,
-		// 	".sctxar"
-		// ).replace(
-		// 	" Support","\\ Support"
-		// ).unixCmd
+		format( "cp %% %%%",
+			Archive.archiveDir,
+			"/archive.sctxar",
+			"~/Desktop/archive.sctxar_BAK_",
+			Date.getDate.stamp,
+			".sctxar"
+		).replace(
+			" Support","\\ Support"
+		).unixCmd
 	}
 
 
@@ -642,8 +637,8 @@ ControlMixMaster {
 
 		faderStates.do{ |fDict, fDex|
 
-			// "\tUpdating Control".postln;
-			// fDict.keysValuesDo({|k,v| [k,v].postln;});
+			//"\tUpdating Control".postln;
+			//fDict.keysValuesDo({|k,v| [k,v].postln;});
 
 			ctlFade = mixer.ctlFades[fDex];
 
@@ -723,6 +718,7 @@ ControlMixMaster {
 
 			p[\mixers].keysValuesDo({ |ptag, faderStates|
 				var recalled=false;
+				// QUIET
 				// postf("recalling mixer %\n", ptag.asString);
 
 				fork({ var cond = Condition();

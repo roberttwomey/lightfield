@@ -6,8 +6,12 @@
 
 #define MAX_SUBIMAGES 600
 #define MAX_OFFSETS 1200
-
 #define MAX_LF_TILES 20
+
+// physical setup
+#define SCREEN_WIDTH 55.0
+#define SCREEN_HEIGHT 50.0
+
 
 class ofApp : public ofBaseApp{
 public:
@@ -31,6 +35,14 @@ public:
     void snapshot();
 
     void keyPressed  (int key);
+    void keyReleased(int key);
+    int mouseXStart, mouseYStart;
+    float xoffsetStart, yoffsetStart;
+    float focusStart, zoomStart;
+    int xcountStart, ycountStart;
+    int xstartStart, ystartStart;
+    bool bPressed;
+
     void process_OSC(ofxOscMessage m);
 
     ofxOscReceiver receiver;
@@ -80,7 +92,7 @@ public:
 
     // snapshot
     int snapcount;
-    
+
     // onscreen display
     bool bShowThumbnail;
     bool bHideCursor;

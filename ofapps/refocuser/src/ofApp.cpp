@@ -19,6 +19,7 @@ void ofApp::setup(){
     receiver.setup(port);
     ofLog(OF_LOG_NOTICE, "listening for osc messages on port " + ofToString(port));
 
+    startTimeStamp = ofGetTimestampString("%m%d%H%M");
     snapcount = 0;
     bSuspendRender = false;
 }
@@ -80,7 +81,7 @@ void ofApp::draw(){
     float xoff = (ofGetWindowWidth() - width)/2;
 
     // draw with transparency to fade
-    ofSetColor(255, fade);
+    ofSetColor(255, 255 * (1.0 - ofClamp(fade, 0.0, 1.0)));
 
     // draw fused image
     fbo->draw(xoff, 0, width, height);
@@ -90,9 +91,9 @@ void ofApp::draw(){
     float bar = (width-cwidth)/2.0;
     ofSetColor(0);
     ofFill();
-    ofRect(0, 0, bar, height);
-    ofRect(width-bar, 0, width, height);
-    
+    ofRect(xoff, 0, bar, height);
+    ofRect(xoff+width-bar, 0, width, height);
+
     // draw thumbnail with indicator
     if(bShowThumbnail == true) {
 
@@ -229,7 +230,7 @@ void ofApp::freeLightfieldData() {
 
 void ofApp::setupGraphics() {
     // fade
-    fade = 255.0;
+    fade = 0.0;
 
     // allocate fbos
     fbo = ofPtr<ofFbo>(new ofFbo());
@@ -348,39 +349,51 @@ void ofApp::setupGraphics() {
 //  keyboard interaction / osc control
 //--------------------------------------------------------------
 
+void ofApp::keyReleased(int key) {
+    bPressed = false;
+};
+
 void ofApp::keyPressed(int key){
-    //    cout << bShowThumbnail << " " << bHideCursor << " " << bDebug << endl;
-    if(key=='s') {
-        snapshot();
+
+    if(!bPressed) {
+        bPressed = true;
+        mouseXStart = mouseX;
+        mouseYStart = mouseY;
+        zoomStart = zoom;
+        focusStart = focus;
+        xoffsetStart = xoffset;
+        yoffsetStart = yoffset;
+        xcountStart = xcount;
+        ycountStart = ycount;
+        xstartStart = xstart;
+        ystartStart = ystart;
     }
+
+    if(key=='s')
+        snapshot();
     if(key=='f')
         ofToggleFullscreen();
     if(key=='b') {
         // zoom
-        zoom = ofMap(mouseX, 0, ofGetWindowWidth(), 4.0, 0.01);
+        zoom = ofClamp(ofMap((mouseXStart - mouseX), 0, ofGetWindowWidth()/2, zoomStart * 1.0, zoomStart * 2.0), 0.0, 4.0);
     }
     if(key=='z') {
-        // parallax
-        xstart = ofMap(mouseX, 0, ofGetWindowWidth(), 0, xsubimages-xcount+1);
-        ystart = ofMap(mouseY, 0, ofGetWindowHeight(), 0, ysubimages-ycount+1);
+        // aperture location
+        xstart = ofClamp(xstartStart + ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth(), 0, xsubimages), 0, xsubimages-xcountStart);
+        ystart = ofClamp(ystartStart + ofMap(mouseY - mouseYStart, 0, ofGetWindowHeight(), 0, ysubimages), 0, ysubimages-ycountStart);
     }
     if(key=='x') {
-        // number of subimages in resynthesis
-        xcount = ofMap(mouseX, 0, ofGetWindowWidth(), 0, xsubimages);
-        ycount = ofMap(mouseY, 0, ofGetWindowHeight(), 0, ysubimages);
-        if(xcount+xstart > xsubimages)
-            xstart = xsubimages - xcount;
-        if(ycount + ystart > ysubimages)
-            ystart = ysubimages - ycount;
+        // aperture width
+        xcount = ofClamp(xcountStart + ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth(), 0, xsubimages), 0, xsubimages);
+        ycount = ofClamp(ycountStart + ofMap(mouseY - mouseYStart, 0, ofGetWindowHeight(), 0, ysubimages), 0, ysubimages);
     }
     if(key == 'v') {
-        // offsets
-        xoffset = ofMap(mouseX, 0, ofGetWindowWidth(), -subwidth, subwidth);
-        yoffset = ofMap(mouseY, 0, ofGetWindowHeight(), -subheight, subheight);
+        // scroll
+        xoffset = ofClamp(xoffsetStart - ofMap(mouseXStart - mouseX, 0, ofGetWindowWidth(), 0, subwidth), -subwidth, subwidth);
+        yoffset = ofClamp(yoffsetStart - ofMap(mouseYStart - mouseY, 0, ofGetWindowHeight(), 0, subheight), -subheight, subheight);
     }
     if(key == 'c')
-        // focus
-        focus = ofMap(mouseX, 0, ofGetWindowWidth(), minScale, maxScale);
+        focus = ofClamp(focusStart + ofMap(mouseXStart - mouseX, 0, ofGetWindowWidth(), 0, minScale - maxScale), minScale, maxScale);
     if(key == 't') {
         bShowThumbnail = (bShowThumbnail == 0);
         cout << "t " << bShowThumbnail << endl;
@@ -598,8 +611,8 @@ void ofApp::snapshot() {
     while(!done) {
         ofFile file(scenefiles[0]);
         string filename = file.getBaseName();
-//        timestamp = "./snapshots/"+filename+ "_" +ofGetTimestampString("%m%d%H%M")+"_" + ofToString(snapcount, 4, '0');
-        timestamp = "./snapshots/"+filename+"_" + ofToString(snapcount, 4, '0');
+        timestamp = "./snapshots/"+filename+ "_" +startTimeStamp+"_" + ofToString(snapcount, 4, '0');
+//        timestamp = "./snapshots/"+filename+"_" + ofToString(snapcount, 4, '0');
         imgfilename = timestamp + ".jpg";
         paramfilename = timestamp + ".txt";
         ofFile test;
@@ -639,10 +652,10 @@ void ofApp::snapshot() {
             img_pixels[img_i+2]=fbo_pixels[fbo_i+2];
         }
     }
-    
+
     screenGrab.setFromPixels(img_pixels, crop_w, h, OF_IMAGE_COLOR);
     screenGrab.saveImage(imgfilename, OF_IMAGE_QUALITY_BEST);
-    
+
     fbo->end();
     ofLog(OF_LOG_VERBOSE, "[DiskOut]  saved frame " + imgfilename );
 
