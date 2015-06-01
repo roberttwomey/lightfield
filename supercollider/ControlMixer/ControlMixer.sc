@@ -5,7 +5,7 @@ ControlMixer {
 	var <busnum, <oscTag, <ctlFades, <ctlViews, <>oscEnabled = true, outVal;
 	var <ratePeriodSpec, <sclSpec, <offsSpec;
 	var <mixView, msgTxt, <broadcastChk, <plotChk, updateBx, outValTxt;
-	var <nBoxWidth = 35, <nBoxHeight = 15, <validLFOs, <plotter, <ctlLayout, plotterAdded = false;
+	var <nBoxWidth = 42, <nBoxHeight = 15, <validLFOs, <plotter, <ctlLayout, plotterAdded = false;
 	var broadcastBus, broadcastWaittime, broadcastTag, pollTask;//, <broadcasting=false;
 	var baseColor, idColor, <mixColor, colorStep;
 
@@ -234,6 +234,13 @@ ControlMixFaderView {
 				HLayout(
 					[ VLayout(
 						StaticText().string_("min"),
+<<<<<<< HEAD
+						minBx = NumberBox().maxDecimals_(3).fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight).scroll_(false)
+					).spacing_(0), a: \left ],
+					[ VLayout(
+						StaticText().string_("max"),
+						maxBx = NumberBox().maxDecimals_(3).fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight).scroll_(false)
+=======
 						minBx = NumberBox()
 						.fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight)
 						.scroll_(false).minDecimals_(3)
@@ -242,18 +249,23 @@ ControlMixFaderView {
 						StaticText().string_("max"),
 						maxBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight)
 						.scroll_(false).minDecimals_(3)
+>>>>>>> ee3a5cddfd373168cc0dd98d306ae0c72904470e
 					).spacing_(0), a: \left ],
 					nil,
 					[ VLayout(
 						StaticText().string_("StaticVal").align_(\left),
+<<<<<<< HEAD
+						valBx = NumberBox().maxDecimals_(3).fixedWidth_(nBoxWidth*1.2).fixedHeight_(nBoxHeight).scroll_(false)
+=======
 						valBx = NumberBox().fixedWidth_(nBoxWidth*1.2).fixedHeight_(nBoxHeight)
 						.scroll_(false).minDecimals_(3)
+>>>>>>> ee3a5cddfd373168cc0dd98d306ae0c72904470e
 					).spacing_(5), a: \right ],
 				),
 				HLayout(
 					[ VLayout(
 						rateTxt = StaticText().string_("Rate(sec)"),
-						rateBx = NumberBox().fixedWidth_(nBoxWidth*1.5).fixedHeight_(nBoxHeight).scroll_(false),
+						rateBx = NumberBox().maxDecimals_(3).fixedWidth_(nBoxWidth*1.5).fixedHeight_(nBoxHeight).scroll_(false),
 					).spacing_(0), a: \left ],
 					[ VLayout(
 						StaticText().string_("period").align_(\center),
@@ -265,14 +277,22 @@ ControlMixFaderView {
 				HLayout(
 					VLayout(
 						StaticText().string_("scale").align_(\center),
+<<<<<<< HEAD
+						sclBx = NumberBox().maxDecimals_(3).fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight).scroll_(false),
+=======
 						sclBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight)
 						.scroll_(false).minDecimals_(3),
+>>>>>>> ee3a5cddfd373168cc0dd98d306ae0c72904470e
 					).spacing_(0),
 					sclKnb = Knob().mode_(\vert).centered_(true),
 					VLayout(
 						StaticText().string_("offset").align_(\center),
+<<<<<<< HEAD
+						offsBx = NumberBox().maxDecimals_(3).fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight).scroll_(false),
+=======
 						offsBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight)
 						.scroll_(false).minDecimals_(3),
+>>>>>>> ee3a5cddfd373168cc0dd98d306ae0c72904470e
 					).spacing_(0),
 					offsKnb = Knob().mode_(\vert).centered_(true),
 				),
