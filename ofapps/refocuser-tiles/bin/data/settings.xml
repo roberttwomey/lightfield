@@ -1,7 +1,7 @@
-<!-- lightfield textures. 
+<!-- lightfield textures.
 
 link the appropriate version to your app ./data/textures directory
-e.g. tiled for tiled refocuser, laptop for laptop, single for single. 
+e.g. tiled for tiled refocuser, laptop for laptop, single for single.
 
  <scene>./textures/ballard_wall_tile.xml</scene>
  <scene>./textures/bookcase_tile.xml</scene>
@@ -19,9 +19,11 @@ e.g. tiled for tiled refocuser, laptop for laptop, single for single.
  <scene>./textures/tunnel_tile.xml</scene>
  <scene>./textures/yellowcliff_tile.xml</scene>
 
- -->
+<scene>./textures/mike3.xml</scene>
 
+ -->
 <scene>./textures/carkeek_tile.xml</scene>
+
 
 <!-- refocuser settings -->
 

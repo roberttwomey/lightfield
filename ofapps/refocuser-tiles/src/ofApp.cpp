@@ -83,7 +83,7 @@ void ofApp::update(){
     }
 
     ofSetWindowTitle( ofToString( ofGetFrameRate(), 2));
-    
+
 	// check for waiting OSC messages
     while(receiver.hasWaitingMessages()){
         // get the next message
@@ -105,10 +105,18 @@ void ofApp::draw(){
     float xoff = (ofGetWindowWidth() - width)/2;
 
     // draw with transparency to fade
-    ofSetColor(255, fade);
+    ofSetColor(255, 255 * (1.0 - ofClamp(fade, 0.0, 1.0)));
+//    ofSetColor(255, fade);
 
     // draw fused image
     fbo->draw(xoff, 0, width, height);
+
+    float cwidth = height / SCREEN_HEIGHT * SCREEN_WIDTH;
+    float bar = (width-cwidth)/2.0;
+    ofSetColor(0);
+    ofFill();
+    ofRect(xoff, 0, bar, height);
+    ofRect(xoff+width-bar, 0, width, height);
 
 //    refocusFbo[0].draw(xoff, 0, width, height);
 
@@ -306,7 +314,7 @@ void ofApp::freeLightfieldData() {
 
 void ofApp::setupGraphics() {
     // fade
-    fade = 255.0;
+    fade = 0.0;
 
     // allocate fbos
     fbo = ofPtr<ofFbo>(new ofFbo());
@@ -429,7 +437,7 @@ void ofApp::setupGraphics() {
             // one-time data setparameters
             shader[i].setUniform2f("resolution", subwidth, subheight);
             shader[i].setUniform2i("subimages", xsubimages, ysubimages);
-
+            shader[i].setUniform2i("subimagestart", x * xsubimages, y * ysubimages);
             shader[i].end();
 
             ofLog(OF_LOG_NOTICE, "shader end " + ofToString(i));
@@ -487,39 +495,51 @@ void ofApp::setupGraphics() {
 //  keyboard interaction / osc control
 //--------------------------------------------------------------
 
+void ofApp::keyReleased(int key) {
+    bPressed = false;
+};
+
 void ofApp::keyPressed(int key){
-    //    cout << bShowThumbnail << " " << bHideCursor << " " << bDebug << endl;
-    if(key=='s') {
-        snapshot();
+
+    if(!bPressed) {
+        bPressed = true;
+        mouseXStart = mouseX;
+        mouseYStart = mouseY;
+        zoomStart = zoom;
+        focusStart = focus;
+        xoffsetStart = xoffset;
+        yoffsetStart = yoffset;
+        xcountStart = xcount;
+        ycountStart = ycount;
+        xstartStart = xstart;
+        ystartStart = ystart;
     }
+
+    if(key=='s')
+        snapshot();
     if(key=='f')
         ofToggleFullscreen();
     if(key=='b') {
         // zoom
-        zoom = ofMap(mouseX, 0, ofGetWindowWidth(), 4.0, 0.01);
+        zoom = ofMap((mouseXStart - mouseX), 0, ofGetWindowWidth()/2, zoomStart * 1.0, zoomStart * 2.0);
     }
     if(key=='z') {
-        // parallax
-        xstart = ofMap(mouseX, 0, ofGetWindowWidth(), 0, xsubimages-xcount+1);
-        ystart = ofMap(mouseY, 0, ofGetWindowHeight(), 0, ysubimages-ycount+1);
+        // aperture location
+        xstart = ofClamp(ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth()/2, xstartStart, xsubimages), 0, xsubimages-xcountStart);
+        ystart = ofClamp(ofMap(mouseY - mouseYStart, 0, ofGetWindowHeight()/2, ystartStart, ysubimages), 0, ysubimages-ycountStart);
     }
     if(key=='x') {
-        // number of subimages in resynthesis
-        xcount = ofMap(mouseX, 0, ofGetWindowWidth(), 0, xsubimages);
-        ycount = ofMap(mouseY, 0, ofGetWindowHeight(), 0, ysubimages);
-        if(xcount+xstart > xsubimages)
-            xstart = xsubimages - xcount;
-        if(ycount + ystart > ysubimages)
-            ystart = ysubimages - ycount;
+        // aperture width
+        xcount = ofClamp(ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth()/2, xcountStart, xcountStart * 2.0), 0, xsubimages);
+        ycount = ofClamp(ofMap(mouseY - mouseYStart, 0, ofGetWindowHeight()/2, ycountStart, ycountStart * 2.0), 0, ysubimages);
     }
     if(key == 'v') {
-        // offsets
-        xoffset = ofMap(mouseX, 0, ofGetWindowWidth(), -subwidth, subwidth);
-        yoffset = ofMap(mouseY, 0, ofGetWindowHeight(), -subheight, subheight);
+        // scroll
+        xoffset = ofMap(mouseXStart - mouseX, 0, ofGetWindowWidth(), xoffsetStart, -subwidth);
+        yoffset = ofMap(mouseYStart - mouseY, 0, ofGetWindowHeight(), yoffsetStart, -subheight);
     }
     if(key == 'c')
-        // focus
-        focus = ofMap(mouseX, 0, ofGetWindowWidth(), minScale, maxScale);
+        focus = min(ofMap(mouseXStart - mouseX, 0, ofGetWindowWidth()/2, focusStart, minScale), maxScale);
     if(key == 't') {
         bShowThumbnail = (bShowThumbnail == 0);
         cout << "t " << bShowThumbnail << endl;
@@ -537,11 +557,6 @@ void ofApp::keyPressed(int key){
         bDebug = (bDebug == 0) ;
         cout << "d " << bDebug << endl;
     }
-
-    if(key == '+') {
-        tilenum = (tilenum + 1) % numlftextures;
-    }
-
 }
 
 
@@ -563,7 +578,8 @@ void ofApp::process_OSC(ofxOscMessage m) {
 
             // TODO: I think this vector of scene files is unnecessary
             scenefiles.clear();
-    //        scenefiles.push_back(scenefile);
+            scenefiles.push_back(scenefile);
+
             loadXMLScene(scenefile);
 
             loadLightfieldData();
@@ -734,15 +750,15 @@ void ofApp::process_OSC(ofxOscMessage m) {
 void ofApp::snapshot() {
     string timestamp, imgfilename, paramfilename;
 
-    // save time-stamped image to data folder
+    // save sequential snapshot image to data folder
     bool done = false;
-    while(!done) {
-//        timestamp = "./snapshots/"+ofGetTimestampString("%m%d%H%M") + "_" + ofToString(snapcount, 4, '0');
 
+    snapcount = 0;
+    while(!done) {
         ofFile file(scenefiles[0]);
         string filename = file.getBaseName();
-//        timestamp = "./snapshots/"+filename+ "_" +ofGetTimestampString("%m%d%H%M")+"_" + ofToString(snapcount, 4, '0');
-        timestamp = "./snapshots/"+filename+"_" + ofToString(snapcount, 4, '0');
+        timestamp = "./snapshots/"+filename+ "_" +ofGetTimestampString("%m%d%H%M")+"_" + ofToString(snapcount, 4, '0');
+//        timestamp = "./snapshots/"+filename+"_" + ofToString(snapcount, 4, '0');
         imgfilename = timestamp + ".jpg";
         paramfilename = timestamp + ".txt";
         ofFile test;
@@ -751,30 +767,47 @@ void ofApp::snapshot() {
         snapcount++;
     }
 
-    // save fbo to file
-    // from http://forum.openframeworks.cc/t/ofxfenster-addon-to-handle-multiple-windows-rewrite/6499/61
+    // fbo pixels
     int w = fbo->getWidth();
     int h = fbo->getHeight();
-    unsigned char* pixels = new unsigned char[w*h*3];  ;
+    unsigned char* fbo_pixels = new unsigned char[w*h*3];
+
+    // crop to projection size
+    int crop_w = h / SCREEN_HEIGHT * SCREEN_WIDTH;
+    int edge = (w-crop_w)/2.0;
+
+    // output images
     ofImage screenGrab;
-    screenGrab.allocate(w,h,OF_IMAGE_COLOR);
+    unsigned char* img_pixels = new unsigned char[crop_w*h*3];
+
+    screenGrab.allocate(crop_w,h,OF_IMAGE_COLOR);
     screenGrab.setUseTexture(false);
 
     //copy the pixels from FBO to the pixel array; then set the normal ofImage from those pixels; and use the save method of ofImage
     fbo->begin();
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glReadPixels(0, 0, fbo->getWidth(), fbo->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, pixels);
-    screenGrab.setFromPixels(pixels, fbo->getWidth(), fbo->getHeight(), OF_IMAGE_COLOR);
+    glReadPixels(0, 0, fbo->getWidth(), fbo->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, fbo_pixels);
+
+    // copy cropped window from fbo to screengrab pixels
+    for(int x=edge; x<edge+crop_w; x++) {
+        for(int y=0; y<h; y++) {
+            int fbo_i = (x+y*w) * 3;
+            int img_i = ((x-edge) + y*crop_w) * 3;
+            img_pixels[img_i]=fbo_pixels[fbo_i];
+            img_pixels[img_i+1]=fbo_pixels[fbo_i+1];
+            img_pixels[img_i+2]=fbo_pixels[fbo_i+2];
+        }
+    }
+
+    screenGrab.setFromPixels(img_pixels, crop_w, h, OF_IMAGE_COLOR);
     screenGrab.saveImage(imgfilename, OF_IMAGE_QUALITY_BEST);
+
     fbo->end();
     ofLog(OF_LOG_VERBOSE, "[DiskOut]  saved frame " + imgfilename );
 
     // save refocusing parameters to companion text file
     ofFile file(paramfilename, ofFile::WriteOnly);
 
-    // add additional parameters below
-//    for(int i=0; i < numlftextures; i++)
-//        file << lffilenames[i] << endl;
     file << scenefiles[0] << endl;
     file << focus/float(subwidth) << endl;
     file << xoffset/float(subwidth) << "," << yoffset/float(subheight) << endl;

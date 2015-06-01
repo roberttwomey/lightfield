@@ -1,29 +1,39 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="bin/data/shaders/blend_per_tile_150.frag" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/ofApp.h" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="589" topLine="0" />
+			<Cursor1 position="595" topLine="54" />
 		</Cursor>
 	</File>
-	<File name="src/ofApp.h" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/ofApp.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="465" topLine="0" />
+			<Cursor1 position="13093" topLine="408" />
 		</Cursor>
 	</File>
-	<File name="bin/data/shaders/refocus_per_tile_120.frag" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="bin/data/shaders/refocus_tile_150.frag" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="3851" topLine="39" />
+			<Cursor1 position="691" topLine="23" />
 		</Cursor>
 	</File>
-	<File name="src/ofApp.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
+	<File name="src/main.cpp" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="17281" topLine="507" />
+			<Cursor1 position="561" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="bin/data/shaders/refocus_per_tile_150.frag" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="bin/data/settings.xml" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="2860" topLine="0" />
+			<Cursor1 position="673" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="bin/data/shaders/blend_per_tile_150.frag" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="750" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="bin/data/shaders/refocus_per_tile_150.frag" open="1" top="1" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1504" topLine="36" />
 		</Cursor>
 	</File>
 	<File name="bin/data/shaders/refocus_tile.frag" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
@@ -31,29 +41,9 @@
 			<Cursor1 position="3841" topLine="96" />
 		</Cursor>
 	</File>
-	<File name="src/main.cpp" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="317" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="bin/data/settings.xml" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="702" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="bin/data/shaders/blend_per_tile_120 .frag" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="267" topLine="0" />
-		</Cursor>
-	</File>
 	<File name="config.make" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="0" topLine="103" />
-		</Cursor>
-	</File>
-	<File name="bin/data/shaders/refocus_tile_150.frag" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="691" topLine="23" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

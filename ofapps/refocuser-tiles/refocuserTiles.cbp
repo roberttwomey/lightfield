@@ -27,7 +27,7 @@
 				<Option projectLinkerOptionsRelation="2" />
 			</Target>
 		</Build>
-		<Unit filename="bin/data/scenes.xml">
+		<Unit filename="bin/data/settings.xml">
 			<Option virtualFolder="runtime config/" />
 		</Unit>
 		<Unit filename="bin/data/shaders/blend_per_tile_150.frag">

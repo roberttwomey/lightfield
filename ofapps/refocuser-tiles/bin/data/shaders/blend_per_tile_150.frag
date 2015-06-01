@@ -18,19 +18,21 @@ void main (void){
 
     for(int i=0; i < numtextures; i++) {
         vec4 thiscolor = texture2DRect(refocustex[i], gl_FragCoord.xy);
-//        if(any(notEqual(thiscolor, vec4(0.0)))) {
+
         if(all(greaterThan(thiscolor, vec4(zero_ish)))) {
             counter ++;
             color += thiscolor;
         }
+
+        // no change in performance with the following
+//        float nz = step(0.0, length(thiscolor));
+//        counter += int(nz);
+//        color += nz * thiscolor;
+
     }
-//        color = max(color, texture2DRect(refocustex[i], gl_FragCoord.xy));
-//
-////    color=vec4(gl_FragCoord.xy/1400.0, 0, 1); // test that shader/coords are outputting
-////    color = texture2DRect(refocustex[0], gl_FragCoord.xy);
-////    color = texture2DRect(testtex, gl_FragCoord.xy);
-//    fragColor = color / numtextures;//counter;
+
     fragColor = color / counter;
-//    fragColor = color;
+
+//   fragColor = texture2DRect(refocustex[0], gl_FragCoord.xy);
 }
 
