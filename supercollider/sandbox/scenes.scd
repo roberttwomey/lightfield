@@ -3,6 +3,8 @@ c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart"
 
 c.backupPreset
 
+c.loadScene("./textures/dark_trees.xml")
+
 // loading from list of snapshot files
 (
 j =  [
@@ -28,7 +30,6 @@ c.presets.keys.do { |p|
 )
 
 
-c.loadScene("./textures/dark_trees.xml")
 
 c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/bookcase/20150521155438_0000.txt")
 c.storePreset(\bookcase_close)
@@ -38,9 +39,6 @@ c.storePreset(\bookcase_close)
 c.updatePreset
 
 
-
-
-
 r.stop
 r.play
 (
@@ -48,6 +46,16 @@ r.play
 thisThread.randSeed=54321;
 
 d = [
+	[
+		"./textures/bookcase.xml",
+		[
+			\bookcase_close, 5.0, 5.0,
+			\bookcase_bed, 5.0, 5.0,
+			\bookcase_mirror, 5.0, 5.0
+		]
+	]
+	,
+
 	[
 		"./textures/cliffside.xml",
 		[
@@ -149,11 +157,13 @@ d = [
 		]
 	],
 
+
+
 ];
 
 r = Task ({
 	// d = d.scramble();
-	// d = d.rotate(2);
+	d = d.rotate(-3);
 	d.do { |params|
 		var scene, views;
 		#scene, views = params;
@@ -194,13 +204,6 @@ c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/outsidelookingin
 c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/outsidelookingin_tex_0001.txt")
 // c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/outsidelookingin_tex_0004.txt")
 c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/outsidelookingin_tex_0005.txt")
-
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0000.txt")
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0006.txt")
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0007.txt")
-
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/diningroom3_0008.txt")
-
 
 
 // c.loadScene("./textures/tivon1_calib.xml")
@@ -251,6 +254,26 @@ c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/train/05221118_0000_sm.
 c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/20150522111823_0003.txt")
 c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/20150522111823_0004.txt")
 
+
+
+// BOOKCASE
+
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0000.txt")
+// c.storePreset(\bookcase_close)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0006.txt")
+// c.storePreset(\bookcase_bed)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0007.txt")
+// c.storePreset(\bookcase_mirror)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/diningroom3_0008.txt")
+
+// [
+// 	"./textures/bookcase.xml",
+// 	[
+// 		\bookcase_close, 5.0, 5.0,
+// 		\bookcase_bed, 5.0, 5.0,
+// 		\bookcase_mirror, 5.0, 5.0
+// 	]
+// ]
 
 
 // MIKE3 TILED
