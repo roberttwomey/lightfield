@@ -4,6 +4,7 @@ GrainScanner1 {
 	// copyArgs
 	var numScanners, initBufOrPath, outbus, initGUI;
 	var <scanners, <buffers, <bufferPath, <lastRecalledPreset, loadSuccessful, <server;
+	var <presetWin;
 
 	*new {|numScanners, bufOrPath, outbus = 0, initGUI = true|
 		^super.newCopyArgs(numScanners, bufOrPath, outbus, initGUI).init;
@@ -63,6 +64,9 @@ GrainScanner1 {
 		}
 	}
 
+	play { |fadeTime = 0.5|
+		scanners.do(_.play(fadeTime));
+	}
 	resume { |fadeTime = 4|
 		scanners.do(_.play(fadeTime));
 	}
@@ -127,6 +131,58 @@ GrainScanner1 {
 		);
 	}
 
+	presetGUI { |numCol=1|
+		var presetsClumped, ftBox, varBox, msg_Txt, presetLayouts, maxRows;
+		maxRows = (this.presets.size / numCol).ceil.asInt;
+
+		presetsClumped = this.presets.keys.asArray.sort.clump(maxRows);
+
+		presetLayouts = presetsClumped.collect({ |presetGroup|
+			VLayout(
+				*presetGroup.extend(maxRows,nil).collect({ |name, i|
+					var lay;
+					name.notNil.if({
+						lay = HLayout(
+							[ Button().states_([[name]])
+								.action_({
+									this.recallPreset(name.asSymbol, ftBox.value);
+									msg_Txt.string_(format(
+										"preset % updated.", name.asSymbol)).stringColor_(Color.black);
+							}), a: \top]
+						)
+					},{
+						nil
+					})
+				})
+			)
+		});
+
+		presetWin = Window("Presets", Rect(0,0,100, 100)).view.layout_(
+			VLayout(
+				[ Button().states_([
+					["Play", Color.black, Color.grey],
+					["Release", Color.white, Color.red]
+
+				]).action_({ |but|
+					switch( but.value,
+						0, {this.release},
+						1, {this.play}
+					)
+				}).maxWidth_(70).fixedHeight_(35), a: \right],
+				HLayout(
+					nil,
+					StaticText().string_("Fade Time").align_(\right).fixedHeight_(25),
+					ftBox = NumberBox().value_(1.0).maxWidth_(35).fixedHeight_(25)
+				),
+				HLayout(
+					msg_Txt = StaticText().string_("Select a preset to recall.").fixedHeight_(35),
+					Button().states_([["Update Preset"]]).action_({this.updatePreset}).fixedWidth_(95)
+				),
+				HLayout( *presetLayouts )
+			)
+		).front;
+	}
+
 	free { |freeBufs=false|
 		scanners.do(_.free);
 		freeBufs.if(buffers.do(_.free));
@@ -144,27 +200,29 @@ GrainScanner1 {
 	*listPresets { ^this.class.presets.keys.asArray.sort.do(_.postln) }
 
 	backupPreset {
-		format( "cp %% %%%",
-			Archive.archiveDir,
-			"/archive.sctxar",
-			"~/Desktop/archive.sctxar_BAK_",
-			Date.getDate.stamp,
-			".sctxar"
-		).replace(
-			" Support","\\ Support"
-		).unixCmd
+		this.class.backupPreset
+		// format( "cp %% %%%",
+		// 	Archive.archiveDir,
+		// 	"/archive.sctxar",
+		// 	"~/Desktop/archive.sctxar_BAK_",
+		// 	Date.getDate.stamp,
+		// 	".sctxar"
+		// ).replace(
+		// 	" Support","\\ Support"
+		// ).unixCmd
 	}
 
 	*backupPreset {
-		format( "cp %% %%%",
-			Archive.archiveDir,
-			"/archive.sctxar",
-			"~/Desktop/archive.sctxar_BAK_",
-			Date.getDate.stamp,
-			".sctxar"
-		).replace(
-			" Support","\\ Support"
-		).unixCmd
+		Archive.write(format("~/Desktop/archive_BAK_%.sctxar",Date.getDate.stamp).standardizePath)
+		// format( "cp %% %%%",
+		// 	Archive.archiveDir,
+		// 	"/archive.sctxar",
+		// 	"~/Desktop/archive.sctxar_BAK_",
+		// 	Date.getDate.stamp,
+		// 	".sctxar"
+		// ).replace(
+		// 	" Support","\\ Support"
+		// ).unixCmd
 	}
 
 	initBuffer { |bufOrPath, finishCond|
@@ -545,7 +603,8 @@ GrainScan1 {
 			pos = pos.wrap(st , ed);
 
 			/* granulator */
-			sig = GrainBufJ.ar(1, trig, gdur, buffer, 1 , pos, 1, interp: 1, grainAmp: amp_scale);
+			// sig = GrainBufJ.ar(1, trig, gdur, buffer, 1 , pos, 1, interp: 1, grainAmp: amp_scale);
+			sig = GrainBuf.ar(numChannels: 1, trigger: trig, dur: gdur, sndbuf: buffer, rate: 1, pos: pos, interp: 1, mul: amp_scale);
 
 			/* overall amp control */
 			sig = Limiter.ar( sig * vol * env, -0.5.dbamp);
@@ -557,7 +616,8 @@ GrainScan1 {
 			// aux = sig * auxmix_lagged.sqrt;
 			out = sig;
 			panPos = panCenter + panOffset;
-			out = PanAz.ar(4, out, (panPos + (0.1 * flux)).wrap(-1,1));
+			// out = PanAz.ar(4, out, (panPos + (0.1 * flux)).wrap(-1,1));
+			out = PanAz.ar(2, out, (panPos + (0.1 * flux)).wrap(-1,1)); // keep in the front of the container
 
 			// send signals to outputs
 			Out.ar( outbus,		out * globalAmp);

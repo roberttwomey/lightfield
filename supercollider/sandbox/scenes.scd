@@ -1,7 +1,201 @@
 // control mixer
-c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("refocuser.local", 12345))
+c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("ubuntu.local", 12345))
 
 c.backupPreset
+
+c.loadScene("./textures/dark_trees.xml")
+
+// loading from list of snapshot files
+(
+j =  [
+"/Volumes/Work/Projects/lightfield/scenes/scratch/cliffside/cliffside_05311717_0000.txt",
+"/Volumes/Work/Projects/lightfield/scenes/scratch/cliffside/cliffside_05311717_0001.txt"
+];
+
+postf("\n");
+j.do { |fname|
+	postf("c.loadSnapshot(\"%\")\n", fname);
+	postf("c.storePreset()\n");
+};
+postf("\n");
+)
+
+
+// search for certain preset
+(
+q = "yellow";
+c.presets.keys.do { |p|
+	p.asString.contains(q).if{ postf("%, 5.0, 5.0,\n", p);};
+};
+)
+
+
+
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/bookcase/20150521155438_0000.txt")
+c.storePreset(\bookcase_close)
+
+\bookcase_close
+
+c.updatePreset
+
+
+r.stop
+r.play
+(
+
+thisThread.randSeed=54321;
+
+d = [
+	[
+		"./textures/bookcase.xml",
+		[
+			\bookcase_close, 5.0, 5.0,
+			\bookcase_bed, 5.0, 5.0,
+			\bookcase_mirror, 5.0, 5.0
+		]
+	]
+	,
+
+	[
+		"./textures/cliffside.xml",
+		[
+			\cliffside_shore, 5.0, 30.0,
+			\cliffside_greenery_close, 5.0, 30.0,
+			\cliffside_right, 5.0, 30.0,
+		]
+	],
+
+	[
+		"./textures/yellowcliff.xml",
+		[
+			\yellowcliff_bush, 5.0, 5.0,
+			\yellowcliff_sky_top, 5.0, 5.0,
+			\yellowcliff_sky_bot, 5.0, 5.0,
+			\yellowcliff_bush_left, 5.0, 5.0,
+			\yellowcliff_bush_right, 5.0, 5.0,
+			\yellowcliff_close, 5.0, 5.0,
+		]
+	],
+	[
+		"./textures/carkeek.xml",
+		[
+			\carkeek_train_blur, 5.0, 1.0,
+			\carkeek_train_start, 5.0, 1.0,
+			\carkeek_train1, 1.0, 1.0,
+			\carkeek_train2, 1.0, 1.0,
+			\carkeek_train3, 1.0, 1.0,
+			\carkeek_train4, 1.0, 1.0,
+			\carkeek_pile, 5.0, 7.0,
+			\carkeek_pile_distant, 5.0, 7.0
+		]
+	],
+	[
+		"./textures/mike3.xml",
+		[
+			\mike3_lamp, 5.0, 5.0,
+			\mike3_book_orbit1, 5.0, 5.0,
+			\mike3_book_orbit2, 5.0, 5.0,
+			\mike3_book_orbit3, 5.0, 5.0,
+			\mike3_book_orbit4, 5.0, 5.0,
+			\mike3_fruittable, 5.0, 5.0,
+			\mike3_distant_window, 5.0, 5.0,
+			\mike3_cloth_table, 5.0, 5.0,
+			\mike3_cloth_table_pull, 5.0, 5.0,
+			\mike3_lamp_glow, 5.0, 5.0,
+			\mike3_lamp_glow_2, 5.0, 5.0,
+			\mike3_lamp_glow_3, 5.0, 5.0,
+		]
+	],
+	[
+		"./textures/mike1.xml",
+		[
+			\mike1_1, 5.0, 5.0,
+			\mike1_2, 5.0, 5.0,
+			\mike1_3, 5.0, 5.0,
+			\mike1_4, 5.0, 5.0,
+			\mike1_5_fruitbowl, 5.0, 5.0,
+			\mike1_5_weird, 5.0, 5.0,
+			\mike1_parallax_left, 5.0, 5.0,
+			\mike1_rover_mirror, 5.0, 5.0,
+			\mike1_window, 5.0, 5.0,
+			\mike1_rover_rover, 5.0, 5.0,
+			\mike1_rover, 5.0, 5.0,
+		]
+	],
+	[
+		"./textures/mike2.xml",
+		[
+			\mike2_yellowtunnel, 10.0, 10.0,
+			\mike2_swimmingtrees, 3.0, 30.0,
+			\mike2_window, 5.0, 5.0,
+			\mike2_desk_ironingboard, 10.0, 30.0,
+			\mike2_rover, 5.0, 5.0,
+			\mike2_yellowtunnel, 5.0, 5.0
+		]
+	],
+	[
+		"./textures/outsidelookingin.xml",
+		[
+			\outside_1, 5.0, 5.0,
+			\outside_2, 5.0, 5.0,
+			\outside_book, 5.0, 5.0,
+			\outside_book_left, 5.0, 5.0,
+			\outside_book, 5.0, 5.0,
+			\outside_book_left, 5.0, 5.0,
+		]
+	],
+	[
+		"./textures/diningroom3.xml",
+		[
+			\diningroom3_kaleid, 15.0, 15.0,
+			\diningroom3_detail_books_nofocus, 10.0, 5.0,
+			\diningroom3_detail_books_focus, 5.0, 5.0,
+			\diningroom3_books3, 5.0, 5.0,
+			\diningroom3_books4, 5.0, 5.0,
+			\diningroom3_flower, 5.0, 10.0,
+			\diningroom3_floor, 10.0, 10.0
+		]
+	],
+
+
+
+];
+
+r = Task ({
+	// d = d.scramble();
+	d = d.rotate(-3);
+	d.do { |params|
+		var scene, views;
+		#scene, views = params;
+		views = views.clump(3);
+
+		// load sceen
+		c.loadScene(scene);
+		postf("load scene: %\n", scene);
+
+		// iterate over views
+		views.do{ |vals|
+			var preset, fadetime, waittime;
+			#preset, fadetime, waittime = vals;
+			c.recallPreset(preset, fadetime);
+			(fadetime + waittime).wait;
+		}
+	};
+
+}).play();
+
+)
+
+
+r.reset().play()
+r.stop()
+r.play()
+r.reset()
+
+r.play()
+
+
+c.updatePreset
 
 // snapshots
 c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/yellowcliff/yellowcliff_0002.txt")
@@ -11,16 +205,327 @@ c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/outsidelookingin
 // c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/outsidelookingin_tex_0004.txt")
 c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/outsidelookingin_tex_0005.txt")
 
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/mike1_0000.txt")
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/mike1_0001.txt")
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/mike1_0002.txt")
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/mike1_0003.txt")
 
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0000.txt")
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0006.txt")
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0007.txt")
+// c.loadScene("./textures/tivon1_calib.xml")
+// c.loadScene("./textures/tivon2_sm.xml")
 
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/diningroom3_0008.txt")
+// c.loadScene("./textures/ballard_wall_sm.xml")
+
+// c.loadScene("./textures/carkeek_med_tile.xml")
+
+
+// presets
+c.loadScene("./textures/yellowcliff.xml")
+// c.storePreset( \yellowcliff_close)
+// c.storePreset( \yellowcliff_bush)
+
+
+// oops I deleted this:
+// c.storePreset( \tivon1 )
+// c.storePreset( \tivon1_lights )
+// c.storePreset( \tivon1_mirror )
+c.globalFadeTime_(3)
+
+
+
+// c.storePreset(\mike1_rover_mirror, true)
+// c.storePreset(\mike1_rover_rover, true)
+
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/20150524/mike1_laptop_0002.txt")
+c.recallPreset(\mike1_rover_mirror)
+10.wait();
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/20150524/mike1_laptop_0003.txt")
+c.recallPreset(\mike1_rover_rover)
+
+
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_in_mirror/20150521132155_0000.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_in_mirror/20150521132159_0001.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_in_mirror/20150521132202_0002.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_in_mirror/20150521132205_0003.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_in_mirror/20150521132208_0004.txt")
+
+
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/books/book_spines_small.txt")
+
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/mike_portal/0000_sm.txt")
+
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/train/05221118_0000_sm.txt")
+
+c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/20150522111823_0003.txt")
+c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/20150522111823_0004.txt")
+
+
+
+// BOOKCASE
+
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0000.txt")
+// c.storePreset(\bookcase_close)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0006.txt")
+// c.storePreset(\bookcase_bed)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0007.txt")
+// c.storePreset(\bookcase_mirror)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/diningroom3_0008.txt")
+
+// [
+// 	"./textures/bookcase.xml",
+// 	[
+// 		\bookcase_close, 5.0, 5.0,
+// 		\bookcase_bed, 5.0, 5.0,
+// 		\bookcase_mirror, 5.0, 5.0
+// 	]
+// ]
+
+
+// MIKE3 TILED
+
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/mike3_tiled/20150521211423_0000.txt")
+// c.storePreset(\mike3_fruittable)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/mike3_tiled/20150521211452_0001.txt")
+// c.storePreset(\mike3_distant_window)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/mike3_tiled/20150521211515_0002.txt")
+// c.storePreset(\mike3_cloth_table)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/mike3_tiled/20150521211546_0003.txt")
+// c.storePreset(\mike3_cloth_table_pull)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/mike3_tiled/20150521211704_0004.txt")
+// c.storePreset(\mike3_lamp_glow)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/mike3_tiled/20150521211736_0005.txt")
+// c.storePreset(\mike3_lamp_glow_2)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/mike3_tiled/20150521211854_0006.txt")
+// c.storePreset(\mike3_lamp_glow_3)
+
+// MIKE3
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/mike3/mike3_05301111_0000.txt")
+// c.storePreset(\mike3_lamp)
+//
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/mike3/mike3_05301247_0000.txt")
+// c.storePreset(\mike3_book_orbit1)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/mike3/mike3_05301247_0001.txt")
+// c.storePreset(\mike3_book_orbit2)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/mike3/mike3_05301247_0002.txt")
+// c.storePreset(\mike3_book_orbit3)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/mike3/mike3_05301247_0003.txt")
+// c.storePreset(\mike3_book_orbit4)
+
+// [
+// 	"./textures/mike3.xml",
+// 	[
+// 		\mike3_lamp, 5.0, 5.0,
+// 		\mike3_book_orbit1, 5.0, 5.0,
+// 		\mike3_book_orbit2, 5.0, 5.0,
+// 		\mike3_book_orbit3, 5.0, 5.0,
+// 		\mike3_book_orbit4, 5.0, 5.0,
+// 		\mike3_fruittable, 5.0, 5.0,
+// 		\mike3_distant_window, 5.0, 5.0,
+// 		\mike3_cloth_table, 5.0, 5.0,
+// 		\mike3_cloth_table_pull, 5.0, 5.0,
+// 		\mike3_lamp_glow, 5.0, 5.0,
+// 		\mike3_lamp_glow_2, 5.0, 5.0,
+// 		\mike3_lamp_glow_3, 5.0, 5.0,
+// 	]
+// ]
+
+
+// MIKE1
+
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/mike1_0000.txt")
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/mike1_0001.txt")
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/mike1_0002.txt")
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/mike1_0003.txt")
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/20150524/mike1_0002.txt")
+// c.storePreset(\mike1_window)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/20150524/mike1_0003.txt")
+// c.storePreset(\mike1_rover)
+//
+// c.loadScene("./textures/mike1.xml");
+//
+//
+// p = [
+// 	"./textures/mike1.xml",
+// 	[
+// 		\mike1_1, 5.0, 5.0,
+// 		\mike1_2, 5.0, 5.0,
+// 		\mike1_3, 5.0, 5.0,
+// 		\mike1_4, 5.0, 5.0,
+// 		\mike1_5_fruitbowl, 5.0, 5.0,
+// 		\mike1_5_weird, 5.0, 5.0,
+// 		\mike1_parallax_left, 5.0, 5.0,
+// 		\mike1_rover_mirror, 5.0, 5.0,
+// 		\mike1_window, 5.0, 5.0,
+// 		\mike1_rover_rover, 5.0, 5.0,
+// 		\mike1_rover, 5.0, 5.0,
+// 	]
+// ];
+
+
+// CARKEEK
+
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek/carkeek_05301108_0000.txt")
+// c.storePreset(\carkeek_pile)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek/carkeek_05301109_0000.txt")
+// c.storePreset(\carkeek_pile_distant)
+//
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek/carkeek_0000.txt")
+// c.storePreset(\carkeek_train_blur)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek/carkeek_0001.txt")
+// c.storePreset(\carkeek_train_start)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek/carkeek_0002.txt")
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek/carkeek_0003.txt")
+//
+//
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek_train/05221118_0000.txt")
+// c.storePreset(\carkeek_train1)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek_train/05221118_0001.txt")
+// c.storePreset(\carkeek_train2)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek_train/05221118_0002.txt")
+// c.storePreset(\carkeek_train3)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek_train/05221118_0003.txt")
+// c.storePreset(\carkeek_train4)
+//
+// p = [
+// 	\carkeek_train_blur, 5.0, 1.0,
+// 	\carkeek_train_start, 5.0, 1.0,
+// 	\carkeek_train1, 1.0, 1.0,
+// 	\carkeek_train2, 1.0, 1.0,
+// 	\carkeek_train3, 1.0, 1.0,
+// 	\carkeek_train4, 1.0, 1.0,
+// 	\carkeek_pile, 5.0, 7.0,
+// 	\carkeek_pile_distant, 5.0, 7.0
+// ].clump(3);
+
+
+// MIKE2 looking in
+
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/mike2_portal/0000.txt")
+// c.storePreset(\mike2_yellowtunnel)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/mike2_portal/0001.txt")
+// c.storePreset(\mike2_window)
+// c.storePreset(\mike2_rover)
+//
+// p = [
+// 	"./textures/mike2.xml",
+// 	[
+// 		\mike2_yellowtunnel, 5.0, 5.0,
+// 		\mike2_window, 5.0, 5.0,
+// 		\mike2_rover, 5.0, 5.0,
+// 		\mike2_yellowtunnel, 5.0, 5.0
+// 	]
+// ];
+
+
+
+// OUTSIDE LOOKING IN
+//
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/outsidelookingin/20150521163332_0000.txt")
+// c.storePreset()
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/outsidelookingin/20150521163356_0001.txt")
+// c.storePreset(\outside_1)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/outsidelookingin/20150521163400_0002.txt")
+// c.storePreset(\outside_2)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/outsidelookingin/20150521163417_0003.txt")
+// c.storePreset(\outside_book)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/outsidelookingin/20150521163452_0004.txt")
+// c.storePreset(\outside_book_left)
+//
+// p = [
+// 	"./textures/outsidelookingin.xml",
+// 	[
+//
+// 		\outside_1, 5.0, 5.0,
+// 		\outside_2, 5.0, 5.0,
+// 		\outside_book, 5.0, 5.0,
+// 		\outside_book_left, 5.0, 5.0,
+// 		\outside_book, 5.0, 5.0,
+// 		\outside_book_left, 5.0, 5.0,
+// 	]
+// ];
+
+
+// DINING ROOM 3
+
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/20150524/diningroom3_0004.txt")
+// c.storePreset(\diningroom3_kaleid)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/20150524/diningroom3_0005.txt")
+// c.storePreset(\diningroom3_detail_books_nofocus)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/20150524/diningroom3_0006.txt")
+// c.storePreset(\diningroom3_detail_books_focus)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/20150524/diningroom3_0007.txt")
+// c.storePreset(\diningroom3_books3)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/20150524/diningroom3_0008.txt")
+// c.storePreset(\diningroom3_books4)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/20150524/diningroom3_0009.txt")
+// c.storePreset(\diningroom3_flower)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/20150524/diningroom3_0010.txt")
+// c.storePreset(\diningroom3_floor)
+//
+// c.loadScene("./textures/diningroom3.xml");
+
+//
+// p = [
+// 	"./textures/diningroom3.xml",
+// 	[
+// 		\diningroom3_kaleid, 3.0, 15.0,
+// 		\diningroom3_detail_books_nofocus, 10.0, 5.0,
+// 		\diningroom3_detail_books_focus, 5.0, 5.0,
+// 		\diningroom3_books3, 5.0, 5.0,
+// 		\diningroom3_books4, 5.0, 5.0,
+// 		\diningroom3_flower, 5.0, 10.0,
+// 		\diningroom3_floor, 10.0, 10.0
+// 	]
+// ];
+//
+
+
+// BOOKCASE
+
+
+// YELLOWCLIFF
+//
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/yellowcliff/yellowcliff_05311545_0000.txt")
+// c.storePreset(\yellowcliff_bush)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/yellowcliff/yellowcliff_05311601_0000.txt")
+// c.storePreset(\yellowcliff_sky_top)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/yellowcliff/yellowcliff_05311602_0000.txt")
+// c.storePreset(\yellowcliff_sky_bot)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/yellowcliff/yellowcliff_05311605_0000.txt")
+// c.storePreset(\yellowcliff_bush_left)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/yellowcliff/yellowcliff_05311605_0001.txt")
+// c.storePreset(\yellowcliff_bush_right)
+//
+// [
+// 	"./textures/yellowcliff.xml",
+// 	[
+// 		\yellowcliff_bush, 5.0, 5.0,
+// 		\yellowcliff_sky_top, 5.0, 5.0,
+// 		\yellowcliff_bush_left, 5.0, 5.0,
+// 		\mike2_yellowtunnel, 5.0, 5.0,
+// 		\yellowcliff_bush_right, 5.0, 5.0,
+// 		\yellowcliff_sky_bot, 5.0, 5.0,
+// 		\yellowcliff_close, 5.0, 5.0,
+// 	]
+// ]
+
+
+// CLIFFSIDE
+//
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/cliffside/cliffside_05311717_0000.txt")
+// c.storePreset(\cliffside_greenery_close)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/cliffside/cliffside_05311717_0001.txt")
+// c.storePreset(\cliffside_shore)
+// \cliffside_right
+//
+// [
+// 	"./textures/cliffside.xml",
+// 	[
+// 		\cliffside_shore, 5.0, 30.0,
+// 		\cliffside_greenery_close, 5.0, 30.0,
+// 		\cliffside_right, 5.0, 30.0,
+// 	]
+// ],
+
+
+
+// scenes
+
 /*
 
  // interiors
@@ -66,145 +571,3 @@ c.loadScene("./textures/precise.xml")
 c.loadScene("./textures/towers.xml")
 c.loadScene("./textures/tunnel.xml")
 c.loadScene("./textures/yellowcliff.xml")
-
-
-// c.loadScene("./textures/tivon1_calib.xml")
-// c.loadScene("./textures/tivon2_sm.xml")
-
-// c.loadScene("./textures/ballard_wall_sm.xml")
-
-// c.loadScene("./textures/carkeek_med_tile.xml")
-
-
-// presets
-c.storePreset( \mike2)
-
-c.storePreset( \mike1_1)
-c.storePreset( \mike1_2)
-c.storePreset( \mike1_3)
-c.storePreset( \mike1_4)
-c.storePreset( \mike1_5_fruitbowl)
-c.storePreset( \mike1_5_weird)
-
-c.storePreset( \mike1_parallax_left)
-
-
-c.loadScene("./textures/yellowcliff.xml")
-// c.storePreset( \yellowcliff_close)
-// c.storePreset( \yellowcliff_bush)
-c.recallPreset(\yellowcliff_close)
-c.recallPreset(\yellowcliff_bush)
-
-
-// oops I deleted this:
-// c.storePreset( \tivon1 )
-// c.storePreset( \tivon1_lights )
-// c.storePreset( \tivon1_mirror )
-c.globalFadeTime_(3)
-
-
-
-// c.storePreset(\mike1_rover_mirror, true)
-// c.storePreset(\mike1_rover_rover, true)
-
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/20150524/mike1_laptop_0002.txt")
-c.recallPreset(\mike1_rover_mirror)
-10.wait();
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/20150524/mike1_laptop_0003.txt")
-c.recallPreset(\mike1_rover_rover)
-
-
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_in_mirror/20150521132155_0000.txt")
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_in_mirror/20150521132159_0001.txt")
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_in_mirror/20150521132202_0002.txt")
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_in_mirror/20150521132205_0003.txt")
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/rover_in_mirror/20150521132208_0004.txt")
-
-
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/books/book_spines_small.txt")
-
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/mike_portal/0000_sm.txt")
-
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/train/05221118_0000_sm.txt")
-
-c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/20150522111823_0003.txt")
-c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/20150522111823_0004.txt")
-
-OSCdef(\texture, {|msg| msg.postln;}, '/loadTextures')
-
-
-// NetAddr("localhost", 12345).sendMsg("/")
-
-c.storePreset( \projTest, true )
-c.storePreset( \first )
-c.storePreset( \second )
-c.storePreset( \third )
-c.storePreset( \fourth )
-c.storePreset( \fifth )
-c.storePreset( \sixth )
-c.storePreset( \basement )
-
-c.recallPreset( \first )
-c.recallPreset( \second )
-c.recallPreset( \third )
-c.recallPreset( \fourth )
-c.recallPreset( \fifth )
-c.recallPreset( \sixth )
-c.recallPreset( \projTest )
-
-
-c.removePreset( \first )
-
-c.presetGUI(3)
-
-c.presets[\first].mixers.keys
-c.presets[\first].mixers['/ycount'].size
-
-(
-ControlMixMaster.archive[\first].mixers.keysValuesDo({|k,v| k.postln; v.do({|ctlFadeStates, i| i.postln; ctlFadeStates.keysValuesDo({|k,v| [k,v].postln }) }); "".postln; });
-nil
-)
-(
-ControlMixMaster.archive[\fifth].mixers.keysValuesDo({|k,v| k.postln; v.do({|ctlFadeStates, i| i.postln; ctlFadeStates.keysValuesDo({|k,v| [k,v].postln }) }); "".postln; });
-nil
-)
-
-(
-c.presets[\first].mixers['/ycount'].do({|ctlFadeStates, i| i.postln; ctlFadeStates.keysValuesDo({|k,v| [k,v].postln }) });
-nil
-)
-
-c.presets[\first].mixers['/xstart']
-c.presets[\first].mixers['/xstart'].size
-(
-c.presets[\first].mixers['/xstart'].do({|ctlFadeStates, i| i.postln; ctlFadeStates.keysValuesDo({|k,v| [k,v].postln }) });
-nil
-)
-
-
-c.addMixer
-
-OSCdef(\cmtest1, {|msg, time, addr, recvPort| msg.postln}, '/focus', n); // def style
-
-OSCdef(\cmtest2, {|msg, time, addr, recvPort| msg.postln}, '/test2', n); // def style
-
-to save, an array of controls to be mixed, each with:
-\min, ctl.low
-\max, ctl.high
-\signal, ctl.lfo,
-\rate, ctl.freq
-\val, ctl.value
-\scale, ctl.scale
-\offset, ctl.offset
-\mix, ctl.amp
-
-c.ctlFades[0].lfo //symbol
-c.ctlFades[0].freq
-c.ctlFades[0].low
-c.ctlFades[0].high
-c.ctlFades[0].value
-c.ctlFades[0].scale
-c.ctlFades[0].offset
-c.ctlFades[0].amp
-
-c.addCtl(-1,3)
