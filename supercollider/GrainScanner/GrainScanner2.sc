@@ -6,7 +6,7 @@ GrainScanner2 {
 	var server, <scanners, <sf, <buffers, <grnGroup, <synths, <bufDur, <view, <bufferPath;
 	var <grnDurSpec, <grnRateSpec, <grnRandSpec, <grnDispSpec, <distFrmCenSpec, <clusterSpreadSpec, <azSpec, <xformAmtSpec, <ampSpec;
 	var <dataDir, loadSuccess = true, <curDataSet;
-	var <spreadSpec, <panSpec, <lastRecalledPreset;
+	var <spreadSpec, <panSpec, <lastRecalledPreset, <presetWin;
 	var <curCluster, <numFramesInClusters, <numClusters, <clusterFramesByDist, <invalidClusters, setClusterCnt = 0;
 
 	*new { |outbus=0, sfPath|
@@ -276,27 +276,29 @@ GrainScanner2 {
 	*listPresets { ^this.class.presets.keys.asArray.sort.do(_.postln) }
 
 	backupPreset {
-		format( "cp %% %%%",
-			Archive.archiveDir,
-			"/archive.sctxar",
-			"~/Desktop/archive.sctxar_BAK_",
-			Date.getDate.stamp,
-			".sctxar"
-		).replace(
-			" Support","\\ Support"
-		).unixCmd
+		Archive.write(format("~/Desktop/archive_BAK_%.sctxar",Date.getDate.stamp).standardizePath)
+		// format( "cp %% %%%",
+		// 	Archive.archiveDir,
+		// 	"/archive.sctxar",
+		// 	"~/Desktop/archive.sctxar_BAK_",
+		// 	Date.getDate.stamp,
+		// 	".sctxar"
+		// ).replace(
+		// 	" Support","\\ Support"
+		// ).unixCmd
 	}
 
 	*backupPreset {
-		format( "cp %% %%%",
-			Archive.archiveDir,
-			"/archive.sctxar",
-			"~/Desktop/archive.sctxar_BAK_",
-			Date.getDate.stamp,
-			".sctxar"
-		).replace(
-			" Support","\\ Support"
-		).unixCmd
+		Archive.write(format("~/Desktop/archive_BAK_%.sctxar",Date.getDate.stamp).standardizePath)
+		// format( "cp %% %%%",
+		// 	Archive.archiveDir,
+		// 	"/archive.sctxar",
+		// 	"~/Desktop/archive.sctxar_BAK_",
+		// 	Date.getDate.stamp,
+		// 	".sctxar"
+		// ).replace(
+		// 	" Support","\\ Support"
+		// ).unixCmd
 	}
 	storePreset { |name, overwrite=false|
 		block{ |break|
@@ -379,6 +381,58 @@ GrainScanner2 {
 		);
 	}
 
+	presetGUI { |numCol=1|
+		var presetsClumped, ftBox, varBox, msg_Txt, presetLayouts, maxRows;
+		maxRows = (this.presets.size / numCol).ceil.asInt;
+
+		presetsClumped = this.presets.keys.asArray.sort.clump(maxRows);
+
+		presetLayouts = presetsClumped.collect({ |presetGroup|
+			VLayout(
+				*presetGroup.extend(maxRows,nil).collect({ |name, i|
+					var lay;
+					name.notNil.if({
+						lay = HLayout(
+							[ Button().states_([[name]])
+								.action_({
+									this.recallPreset(name.asSymbol, ftBox.value);
+									msg_Txt.string_(format(
+										"preset % updated.", name.asSymbol)).stringColor_(Color.black);
+							}), a: \top]
+						)
+					},{
+						nil
+					})
+				})
+			)
+		});
+
+		presetWin = Window("Presets", Rect(0,0,100, 100)).view.layout_(
+			VLayout(
+				[ Button().states_([
+					["Play", Color.black, Color.grey],
+					["Release", Color.white, Color.red]
+
+				]).action_({ |but|
+					switch( but.value,
+						0, {this.release},
+						1, {this.play}
+					)
+				}).maxWidth_(70).fixedHeight_(35), a: \right],
+				HLayout(
+					nil,
+					StaticText().string_("Fade Time").align_(\right).fixedHeight_(25),
+					ftBox = NumberBox().value_(1.0).maxWidth_(35).fixedHeight_(25)
+				),
+				HLayout(
+					msg_Txt = StaticText().string_("Select a preset to recall.").fixedHeight_(35),
+					Button().states_([["Update Preset"]]).action_({this.updatePreset}).fixedWidth_(95)
+				),
+				HLayout( *presetLayouts )
+			)
+		).front;
+	}
+
 	loadGlobalSynthLib {
 		grnSynthDef = CtkSynthDef(\grainScanner2, {
 			arg outbus = 0, ctllag = 0, lagcrv = 0,
@@ -388,8 +442,8 @@ GrainScanner2 {
 			pan = 0, spread = 0.25,
 			fadein = 2, fadeout = 2, amp = 1, gate = 1;
 
-			var env, trig, out, grain_dens, amp_scale, disp, dispNorm;
-			var gRate, gDur, gRand, gDisp, gPan, gSpread, gAmp, cSpread, dFrmCen;
+			var env, trig, out, grain_dens, amp_scale, disp, dispNorm, panner;
+			var gRate, gDur, gRand, gDisp, gPan, gSpread, gAmp, cSpread, dFrmCen, gPos;
 
 			// envelope for fading output in and out - re-triggerable
 			env = EnvGen.kr(Env([1,1,0],[fadein, fadeout], \sin, 1), gate, doneAction: 0);
@@ -421,13 +475,18 @@ GrainScanner2 {
 
 			SendReply.ar(trig, '/pointer', [cSpread, dFrmCen, gDur], replyID);
 
-			out = GrainBufJ.ar(
-				4, //1, // pan to multiple channels
-				trig, gDur, buffer, 1,
-				(pos + disp).wrap(0,1),
-				1, interp:1, grainAmp: amp_scale,
-				pan: WhiteNoise.kr(gSpread, gPan).wrap(-1,1) // random grain location in the panned channels (difusers)
-			);
+			gPos = (pos + disp).wrap(0,1);
+			panner = WhiteNoise.kr(gSpread, gPan).wrap(-1,1);
+
+			// out = GrainBufJ.ar(
+			// 	4, //1, // pan to multiple channels
+			// 	trig, gDur, buffer, 1,
+			// 	gPos,
+			// 	1, interp:1, grainAmp: amp_scale,
+			// 	pan: panner
+			// );
+			out = GrainBuf.ar(numChannels: 4,trigger: trig, dur: gDur,sndbuf: buffer, rate: 1, pos: gPos, interp: 1, pan: panner, mul: amp_scale);
+
 			out = out * env;
 			// out = Pan2.ar(out);
 			Out.ar(outbus, out * gAmp);

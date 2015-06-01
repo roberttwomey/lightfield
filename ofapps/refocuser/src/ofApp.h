@@ -9,7 +9,7 @@
 
 // physical setup
 #define SCREEN_WIDTH 55.0
-#define SCREEN_HEIGHT 50.0
+#define SCREEN_HEIGHT 52.0
 
 
 class ofApp : public ofBaseApp{
@@ -32,6 +32,7 @@ public:
 //    float *aperture_mask;
 
     void snapshot();
+    string startTimeStamp;
 
     void keyPressed  (int key);
     void keyReleased(int key);
@@ -41,8 +42,8 @@ public:
     int xcountStart, ycountStart;
     int xstartStart, ystartStart;
     bool bPressed;
-    
-    
+
+
     void process_OSC(ofxOscMessage m);
 
     ofxOscReceiver receiver;
@@ -64,7 +65,7 @@ public:
 
 	// refocus shaders
     ofShader shader;
-    
+
 	// refocus parameters
     float focus;
     float zoom;

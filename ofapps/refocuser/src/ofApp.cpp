@@ -19,6 +19,7 @@ void ofApp::setup(){
     receiver.setup(port);
     ofLog(OF_LOG_NOTICE, "listening for osc messages on port " + ofToString(port));
 
+    startTimeStamp = ofGetTimestampString("%m%d%H%M");
     snapcount = 0;
     bSuspendRender = false;
 }
@@ -92,7 +93,7 @@ void ofApp::draw(){
     ofFill();
     ofRect(xoff, 0, bar, height);
     ofRect(xoff+width-bar, 0, width, height);
-    
+
     // draw thumbnail with indicator
     if(bShowThumbnail == true) {
 
@@ -353,7 +354,7 @@ void ofApp::keyReleased(int key) {
 };
 
 void ofApp::keyPressed(int key){
-    
+
     if(!bPressed) {
         bPressed = true;
         mouseXStart = mouseX;
@@ -367,32 +368,32 @@ void ofApp::keyPressed(int key){
         xstartStart = xstart;
         ystartStart = ystart;
     }
-    
+
     if(key=='s')
         snapshot();
     if(key=='f')
         ofToggleFullscreen();
     if(key=='b') {
         // zoom
-        zoom = ofMap((mouseXStart - mouseX), 0, ofGetWindowWidth()/2, zoomStart * 1.0, zoomStart * 2.0);
+        zoom = ofClamp(ofMap((mouseXStart - mouseX), 0, ofGetWindowWidth()/2, zoomStart * 1.0, zoomStart * 2.0), 0.0, 4.0);
     }
     if(key=='z') {
         // aperture location
-        xstart = ofClamp(ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth()/2, xstartStart, xsubimages), 0, xsubimages-xcountStart);
-        ystart = ofClamp(ofMap(mouseY - mouseYStart, 0, ofGetWindowHeight()/2, ystartStart, ysubimages), 0, ysubimages-ycountStart);
+        xstart = ofClamp(xstartStart + ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth(), 0, xsubimages), 0, xsubimages-xcountStart);
+        ystart = ofClamp(ystartStart + ofMap(mouseY - mouseYStart, 0, ofGetWindowHeight(), 0, ysubimages), 0, ysubimages-ycountStart);
     }
     if(key=='x') {
         // aperture width
-        xcount = ofClamp(ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth()/2, xcountStart, xcountStart * 2.0), 0, xsubimages);
-        ycount = ofClamp(ofMap(mouseY - mouseYStart, 0, ofGetWindowHeight()/2, ycountStart, ycountStart * 2.0), 0, ysubimages);
+        xcount = ofClamp(xcountStart + ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth(), 0, xsubimages), 0, xsubimages);
+        ycount = ofClamp(ycountStart + ofMap(mouseY - mouseYStart, 0, ofGetWindowHeight(), 0, ysubimages), 0, ysubimages);
     }
     if(key == 'v') {
         // scroll
-        xoffset = ofMap(mouseXStart - mouseX, 0, ofGetWindowWidth(), xoffsetStart, -subwidth);
-        yoffset = ofMap(mouseYStart - mouseY, 0, ofGetWindowHeight(), yoffsetStart, -subheight);
+        xoffset = ofClamp(xoffsetStart - ofMap(mouseXStart - mouseX, 0, ofGetWindowWidth(), 0, subwidth), -subwidth, subwidth);
+        yoffset = ofClamp(yoffsetStart - ofMap(mouseYStart - mouseY, 0, ofGetWindowHeight(), 0, subheight), -subheight, subheight);
     }
     if(key == 'c')
-        focus = min(ofMap(mouseXStart - mouseX, 0, ofGetWindowWidth()/2, focusStart, minScale), maxScale);
+        focus = ofClamp(focusStart + ofMap(mouseXStart - mouseX, 0, ofGetWindowWidth(), 0, minScale - maxScale), minScale, maxScale);
     if(key == 't') {
         bShowThumbnail = (bShowThumbnail == 0);
         cout << "t " << bShowThumbnail << endl;
@@ -610,7 +611,7 @@ void ofApp::snapshot() {
     while(!done) {
         ofFile file(scenefiles[0]);
         string filename = file.getBaseName();
-        timestamp = "./snapshots/"+filename+ "_" +ofGetTimestampString("%m%d%H%M")+"_" + ofToString(snapcount, 4, '0');
+        timestamp = "./snapshots/"+filename+ "_" +startTimeStamp+"_" + ofToString(snapcount, 4, '0');
 //        timestamp = "./snapshots/"+filename+"_" + ofToString(snapcount, 4, '0');
         imgfilename = timestamp + ".jpg";
         paramfilename = timestamp + ".txt";
@@ -651,10 +652,10 @@ void ofApp::snapshot() {
             img_pixels[img_i+2]=fbo_pixels[fbo_i+2];
         }
     }
-    
+
     screenGrab.setFromPixels(img_pixels, crop_w, h, OF_IMAGE_COLOR);
     screenGrab.saveImage(imgfilename, OF_IMAGE_QUALITY_BEST);
-    
+
     fbo->end();
     ofLog(OF_LOG_VERBOSE, "[DiskOut]  saved frame " + imgfilename );
 
