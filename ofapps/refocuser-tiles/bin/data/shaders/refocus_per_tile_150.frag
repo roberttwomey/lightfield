@@ -25,6 +25,8 @@ uniform sampler2DRect campos_tex;
 
 out vec4 fragColor;
 
+#define PRECISION 0.0000001
+
 void main (void){
     vec2 size = textureSize(lftex);
 
@@ -38,17 +40,18 @@ void main (void){
     vec2 ap_center = 0.5 * ap_size + ap_loc;
 
     int count = 0;
+//    float count = 0;
 
 //    // only iterate over subimages that are on this tile
-//    ivec2 start = ivec2(max(subimgstart, ap_loc));
-//    ivec2 end = ivec2(min(subimgstart + subimages, ap_loc + ap_size));
-//
-//    for (int x=start.x; x <end.x; x++){
-//        for (int y=start.y; y<end.y; y++) {
-//
+    ivec2 start = ivec2(max(subimgstart, ap_loc));
+    ivec2 end = ivec2(min(start + subimages, ap_loc + ap_size));
+
+    for (int x=start.x; x <end.x; x++){
+        for (int y=start.y; y<end.y; y++) {
+
     // grab color from each subimage in arrayed texture
-    for (int x=ap_loc.x; x <(ap_loc.x+ap_size.x); x++){
-        for (int y=ap_loc.y; y<(ap_loc.y+ap_size.y); y++) {
+//    for (int x=ap_loc.x; x <(ap_loc.x+ap_size.x); x++){
+//        for (int y=ap_loc.y; y<(ap_loc.y+ap_size.y); y++) {
 
             // resolution should be a float
             vec2 subimg_corner = vec2(x, y) * resolution; //vec2(float(x)*resolution.x, float(y)*resolution.y);
@@ -67,7 +70,8 @@ void main (void){
             // debugging positions, etc.
 //            color += vec4(subimg_corner / (resolution * subimages), 0.0, 1.0); // check subimage corners
 //            color += vec4(atlaspos / (resolution * subimages), 0.0, 1.0); // check atlas position
-//            color += vec4(tilepixoffset / (halfres * subimages), 0.0, 1.0); // check that tilepixoffset is working
+//            color += vec4(tilepixoffset / (halfres * subiofClamp(fade, 0.0, 1.0)));
+//    ofSetColor(255, fade);mages), 0.0, 1.0); // check that tilepixoffset is working
 //            color += vec4(tilepixoffset / vec2(14560, 16380), 0.0, 1.0); // check that tilepixoffset is working
 //            color += vec4(pos / (resolution * subimages), 0.0, 1.0); // check tile texture position
 
@@ -79,21 +83,42 @@ void main (void){
             float mask = minmask * maxmask;
 
             // debugging
-//            color += vec4(minedge, 0.0, 1.0); // check lower edge mask
+//            color += vec4(minedge, 0.0ofClamp(fade, 0.0, 1.0)));
+//    ofSetColor(255, fade);, 1.0); // check lower edge mask
 //            color += vec4(maxedge, 0.0, 1.0); // check lower edge mask
-
 //            color += vec4(vec3(minmask), 1.0); // check lower edge mask
 //            color += vec4(vec3(maxmask), 1.0); // check lower edge mask
-
 //            color += vec4(vec3(mask), 1.0);// check lower edge mask
 
-            count += int(mask);
+            if(mask > 0.0)
+                count += 1;
 
-            color += vec4(mask * texture2DRect(lftex, thispos));//pos - tilepixoffset));
+//            count += int(mask);
+//            count += mask;
+
+//            colorbounds += vec4(mask * texture2DRect(lftex, thispos));
+//            color += mask * texture2DRect(lftex, thispos);
+            color += texture2DRect(lftex, thispos);
+
         }
     }
 
-    color = color / float(count);//ap_size.x*ap_size.y);
-    fragColor = color;
+//    color = color / float(count);
+
+    color = color / float(ap_size.x*ap_size.y);
+
+//    float nonzero = step(-PRECISION, float(count));
+//    float nonzero = step(0.0, float(count) - PRECISION);
+
+    if(count > 0)
+        fragColor = vec4(color.rgb, 1.0);
+    else
+        fragColor = vec4(0.0);
+
+//    if(count > 0)
+//        fragColor = vec4(color.rgb, 1.0);
+//    else
+//        fragColor = vec4(0.0);
+
 }
 

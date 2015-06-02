@@ -8,10 +8,8 @@
 #define MAX_OFFSETS 1200
 #define MAX_LF_TILES 20
 
-// physical setup
 #define SCREEN_WIDTH 55.0
 #define SCREEN_HEIGHT 50.0
-
 
 class ofApp : public ofBaseApp{
 public:
@@ -68,6 +66,7 @@ public:
 
 	// refocus shaders
     ofShader shader[MAX_LF_TILES];
+
     ofShader combineShader;
 
 	// refocus parameters
@@ -97,6 +96,12 @@ public:
     bool bShowThumbnail;
     bool bHideCursor;
     bool bDebug;
+
+    // physical setup
+    float screen_width;
+    float screen_height;
+
+
 
 	// rendering control
     bool bSuspendRender;

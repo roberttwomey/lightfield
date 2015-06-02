@@ -22,7 +22,7 @@ e.g. tiled for tiled refocuser, laptop for laptop, single for single.
 <scene>./textures/mike3.xml</scene>
 
  -->
-<scene>./textures/carkeek_tile.xml</scene>
+<scene>./textures/carkeek.xml</scene>
 
 
 <!-- refocuser settings -->
@@ -31,8 +31,10 @@ e.g. tiled for tiled refocuser, laptop for laptop, single for single.
 <drawthumbnail>1</drawthumbnail>
 <hidecursor>1</hidecursor>
 <debug>1</debug>
-<fullscreen>0</fullscreen>
+<fullscreen>1</fullscreen>
 
+<screenwidth>55.0;</screenwidth>
+<screenheight>52.0</screenheight>
 
 <!-- port to receive osc -->
 <oscport>12345</oscport>
