@@ -7,7 +7,7 @@ export DISPLAY=:0
 # python mp_vsfm_rectify.py --laptop 20x15 ~/code/lightfield/data/shoots/dark_trees/eq_undistorted/*.jpg
 # python mp_vsfm_rectify.py --reorder verticalwrap --laptop 24x24 ~/code/lightfield/data/shoots/outsidelookingin/undistorted/*.jpg
 # python mp_vsfm_rectify.py --reorder wrap --laptop --inverty 30x20 ~/code/lightfield/data/shoots/bookcase/undistorted/*.jpg
-# python mp_vsfm_rectify.py --reorder wrap --laptop 20x30 ~/code/lightfield/data/shoots/diningroom3/undistorted/*.jpg
+python mp_vsfm_rectify.py --reorder wrap --laptop 20x30 ~/code/lightfield/data/shoots/diningroom3/undistorted/*.jpg
 # python mp_vsfm_rectify.py --reorder wrap --laptop 30x20 ~/code/lightfield/data/shoots/cliffside/undistorted/*.jpg
 # python mp_vsfm_rectify.py --reorder wrap --inverty --laptop 20x30 ~/code/lightfield/data/shoots/mike1/undistorted/*.jpg
 # python mp_vsfm_rectify.py --reorder wrap --laptop 20x30 ~/code/lightfield/data/shoots/mike2/undistorted/*.jpg

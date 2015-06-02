@@ -7,7 +7,9 @@
 
 void ofApp::setup(){
 
-    ofEnableAlphaBlending();
+    ofSetLogLevel(OF_LOG_NOTICE);
+
+//    ofEnableAlphaBlending();
 
     loadXMLSettings("settings.xml");
 
@@ -17,6 +19,7 @@ void ofApp::setup(){
 
     // OSC - listen on the given port
     receiver.setup(port);
+
     ofLog(OF_LOG_NOTICE, "listening for osc messages on port " + ofToString(port));
 
     snapcount = 0;
@@ -31,12 +34,12 @@ void ofApp::update(){
 
         // TODO: why is this here?
         maskFbo->begin();
-        ofClear(255, 0, 0,255);
+        ofClear(0, 0, 0, 0);
         maskFbo->end();
 
         for(int i=0; i < numlftextures; i++) {
             refocusFbo[i]->begin();
-            ofClear(0, 0, 0, 255);
+            ofClear(0, 0, 0, 0);
 
             shader[i].begin();
 
@@ -62,12 +65,12 @@ void ofApp::update(){
 
     //    // TODO: why is this here?
         maskFbo->begin();
-        ofClear(255, 0, 0,255);
+        ofClear(0, 0, 0, 0);
         maskFbo->end();
     //
     //
         fbo->begin();
-        ofClear(0, 0, 0, 255);
+        ofClear(0, 0, 0, 0);
 
         combineShader.begin();
 
@@ -111,22 +114,24 @@ void ofApp::draw(){
     // draw fused image
     fbo->draw(xoff, 0, width, height);
 
-    float cwidth = height / SCREEN_HEIGHT * SCREEN_WIDTH;
+    // mask off edges of screen
+    float cwidth = height / screen_height * screen_width;
     float bar = (width-cwidth)/2.0;
     ofSetColor(0);
     ofFill();
     ofRect(xoff, 0, bar, height);
     ofRect(xoff+width-bar, 0, width, height);
+    ofSetColor(255);
 
 //    refocusFbo[0].draw(xoff, 0, width, height);
 
-//    refocusFbo[0].draw(xoff, 0, width/2, height/2);
-//    refocusFbo[1].draw(xoff+width/2, 0, width/2, height/2);
-//    refocusFbo[2].draw(xoff, 0+height/2, width/2, height/2);
-//    refocusFbo[3].draw(xoff+width/2, 0+height/2, width/2, height/2);
-
-//    for(int i=0; i < numlftextures; i++)
-//        refocusFbo[i].draw(xoff,0, width, height);
+    // debugging, five up
+//    refocusFbo[0]->draw(xoff, 0, width/2, height/2);
+//    refocusFbo[1]->draw(xoff+width/2, 0, width/2, height/2);
+//    refocusFbo[2]->draw(xoff, 0+height/2, width/2, height/2);
+//    refocusFbo[3]->draw(xoff+width/2, 0+height/2, width/2, height/2);
+//
+//    fbo->draw(xoff+width/4, height/4, width/2, height/2);
 
     // draw thumbnail with indicator
     if(bShowThumbnail == true) {
@@ -204,6 +209,8 @@ void ofApp::loadXMLSettings(string settingsfile) {
         bDebug = (xml.getValue("debug", 0) > 0);
         bool bFullscreen = (xml.getValue("fullscreen", 0) > 0);
         ofSetFullscreen(bFullscreen);
+        screen_width = xml.getValue("screenwidth", 55.0);
+        screen_height = xml.getValue("screenheight", 52.0);
 
         // osc receiving
         port = xml.getValue("oscport", 12345);
@@ -398,7 +405,7 @@ void ofApp::setupGraphics() {
 //
 //    for (int i=0; i < numCams *3; i++)
 //        aperture_mask[i] = 0.0;
-//
+//setupGraphics
 //    aperture_mask_tex.allocate(xsubimages, ysubimages, GL_RGB32F);
 //    aperture_mask_tex.getTextureReference().loadData(aperture_mask, xsubimages, ysubimages, GL_RGB);
 //
@@ -440,7 +447,7 @@ void ofApp::setupGraphics() {
             shader[i].setUniform2i("subimagestart", x * xsubimages, y * ysubimages);
             shader[i].end();
 
-            ofLog(OF_LOG_NOTICE, "shader end " + ofToString(i));
+//            ofLog(OF_LOG_NOTICE, "shader end " + ofToString(i));
         }
     }
 
@@ -773,7 +780,7 @@ void ofApp::snapshot() {
     unsigned char* fbo_pixels = new unsigned char[w*h*3];
 
     // crop to projection size
-    int crop_w = h / SCREEN_HEIGHT * SCREEN_WIDTH;
+    int crop_w = h / screen_height * screen_width;
     int edge = (w-crop_w)/2.0;
 
     // output images

@@ -687,6 +687,10 @@ def generate_laptop_texture(files, img_path, contactimg_file, reorder = None, sk
                         x = x_img * thumb_w
                         y = y_img * thumb_h
                         tile_img[y:(y+thumb_h), x:(x+thumb_w)] = thumb_img
+
+                        # x = x_img
+                        # y = y_img
+                        # tile_img[y:(y+thumb_h*y_imgs_per_tile):y_imgs_per_tile, x:(x+thumb_w*x_imgs_per_tile):x_imgs_per_tile] = thumb_img
                     else:
                         print "*",
                 else:
