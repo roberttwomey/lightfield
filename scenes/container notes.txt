@@ -1,0 +1,6 @@
+mike2_long_lens
+[ mixers, IdentityDictionary[ (/focus -> [ IdentityDictionary[ (offset -> 0), (min -> -0.1), (max -> -0.01), (val -> -0.015), (scale -> 0.12), 
+  (mix -> 1), (freq -> 0.066666666666667), (signal -> SinOsc) ] ]), (/yscroll -> [ IdentityDictionary[ (offset -> 0), (min -> 0), (max -> 1), (val -> 0), (scale -> 1), 
+  (mix -> 1), (freq -> 0.125), (signal -> static) ] ]), (/xcount -> [ IdentityDictionary[ (offset -> 0), (min -> 2), (max -> 20), (val -> 19), (scale -> 1), 
+  (mix -> 1), (freq -> 0.33333333333333),...etc...
+

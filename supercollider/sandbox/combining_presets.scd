@@ -23,7 +23,7 @@ GrainScanner2.backupPreset
 
 // transferring a set of presets, already joined, to the new machine
 // read it in
-Archive.read("/Users/dxlocal/Documents/ROVER/Rover_workFiles/preset_backups/COMBINED_presets/archive_BAK_150527_234121_combined.sctxar")
+Archive.read("/Users/dxlocal/Documents/ROVER/Rover_workFiles/preset_backups/COMBINED_presets/archive_BAK_150529_221131_combined_revisedInt.sctxar")
 
 // test
 GrainScanner1.presets.keys

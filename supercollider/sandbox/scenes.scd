@@ -1,6 +1,6 @@
 // control mixer
 
-c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("ubuntu.local", 12345));
+c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("refocuser.local", 12345));
 
 ~fader=ControlFade(1.0);
 ~fader.broadcast( c.broadcastNetAddr, '/fade', 30 );
@@ -25,6 +25,7 @@ j.do { |fname|
 };
 postf("\n");
 )
+
 
 
 // search for certain preset
@@ -57,7 +58,7 @@ r.play()
 
 
 (
-var start = 5;
+var start = 0;
 
 thisThread.randSeed=54321;
 
