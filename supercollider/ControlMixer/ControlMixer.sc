@@ -429,7 +429,7 @@ ControlMixFaderView {
 ControlMixMaster {
 	// copyArgs
 	var broadcastTags, <broadcastNetAddr, broadcastRate, server;
-	var <win, <mixers, <lastUpdated, <presetWin, <canvas, <globalFadeTime = 0.0;
+	var <win, <mixers, <lastUpdated, <presetWin, <canvas, <globalFadeTime = 0.0, <presetsPerColumn=12.0;
 
 	*new { |broadcastTags="/myControlVal", broadcastNetAddr, broadcastRate=30, server|
 		^super.newCopyArgs(broadcastTags, broadcastNetAddr, broadcastRate, server).init
@@ -522,7 +522,7 @@ ControlMixMaster {
 				NumberBox().action_({|bx| this.globalFadeTime_(bx.value) }),
 				nil,
 				Button().states_([["Presets >>"]]).action_({
-					this.presetGUI((this.presets.size / 5).ceil.asInt) // default 5 presets per column
+					this.presetGUI((this.presets.size / presetsPerColumn).ceil.asInt) // presets per column
 				})
 			)
 		)

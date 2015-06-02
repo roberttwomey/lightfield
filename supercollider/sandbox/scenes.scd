@@ -1,9 +1,15 @@
 // control mixer
-c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("ubuntu.local", 12345))
+
+c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("ubuntu.local", 12345));
+
+~fader=ControlFade(1.0);
+~fader.broadcast( c.broadcastNetAddr, '/fade', 30 );
+
 
 c.backupPreset
 
 c.loadScene("./textures/dark_trees.xml")
+c.loadScene("./textures/mike2.xml")
 
 // loading from list of snapshot files
 (
@@ -23,7 +29,7 @@ postf("\n");
 
 // search for certain preset
 (
-q = "yellow";
+q = "myFirst";
 c.presets.keys.do { |p|
 	p.asString.contains(q).if{ postf("%, 5.0, 5.0,\n", p);};
 };
@@ -31,42 +37,62 @@ c.presets.keys.do { |p|
 
 
 
-c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/bookcase/20150521155438_0000.txt")
-c.storePreset(\bookcase_close)
+// create a new preset
+c.storePreset(\mike3_fence)
+c.storePreset(\mike3_windowplane)
+c.storePreset(\mike3_sputnik)
+c.storePreset(\mike3_start)
+c.storePreset(\mike3_peeker)
 
-\bookcase_close
 
-c.updatePreset
+// remove a preset
+c.presets.removeAtFail(\myFirst)
+
+// load a scene
+c.loadScene("./textures/mike3.xml")
+
+r.stop()
+r.reset()
+r.play()
 
 
-r.stop
-r.play
 (
+var start = 5;
 
 thisThread.randSeed=54321;
 
 d = [
 	[
 		"./textures/bookcase.xml",
+		\int,
 		[
-			\bookcase_close, 5.0, 5.0,
+			\bookcase_start, 10.0, 15.0,
 			\bookcase_bed, 5.0, 5.0,
-			\bookcase_mirror, 5.0, 5.0
-		]
-	]
-	,
-
-	[
-		"./textures/cliffside.xml",
-		[
-			\cliffside_shore, 5.0, 30.0,
-			\cliffside_greenery_close, 5.0, 30.0,
-			\cliffside_right, 5.0, 30.0,
+			\bookcase_doorknob, 5.0, 5.0,
+			\bookcase_plant_books, 5.0, 5.0,
+			\bookcase_close, 7.0, 5.0,
+			\bookcase_mirror_flat, 10.0, 7.0,
+			\bookcase_window, 5.0, 5.0,
+			\bookcase_mirror, 7.0, 5.0,
+			\bookcase_mirror_flat_up, 5.0, 5.0,
+			\bookcase_mirror_rover, 5.0, 5.0,
+			\bookcase_rover_mobile_selfie, 5.0, 30.0,
+			\bookcase_mirror, 15.0, 5.0,
 		]
 	],
-
+	[
+		"./textures/cliffside.xml",
+		\ext,
+		[
+			\cliffside_shore, 10.0, 25.0,
+			\cliffside_trees_breathing, 35.0, 15.0,
+			// \cliffside_greenery_close, 10.0, 25.0,
+			\cliffside_right, 10.0, 20.0,
+		]
+	],
 	[
 		"./textures/yellowcliff.xml",
+		\ext,
 		[
 			\yellowcliff_bush, 5.0, 5.0,
 			\yellowcliff_sky_top, 5.0, 5.0,
@@ -76,8 +102,82 @@ d = [
 			\yellowcliff_close, 5.0, 5.0,
 		]
 	],
+		[
+		"./textures/mike1.xml",
+		\int,
+		[
+			\mike1_start, 10.0, 20.0,
+			\mike1_1, 10.0, 5.0,
+			\mike1_1_rover, 5.0, 5.0,
+			\mike1_2, 5.0, 5.0,
+			\mike1_3_rover, 5.0, 5.0,
+			\mike1_4, 5.0, 5.0,
+			\mike1_3, 5.0, 5.0,
+			\mike1_5_fruitbowl, 25.0, 15.0,
+			// \mike1_5_weird, 5.0, 5.0,
+			\mike1_parallax_left, 5.0, 5.0,
+			// \mike1_rover_mirror, 5.0, 5.0,
+			// \mike1_rover, 5.0, 5.0,
+			\mike1_rover_mirror, 10.0, 7.0,
+			\mike1_rover_rover, 10.0, 7.0,
+			\mike1_window, 5.0, 5.0,
+		]
+	],
+
+	[
+		"./textures/mike2.xml",
+		\lim,
+		[
+			\mike2_yellowtunnel, 10.0, 5.0,
+			\mike2_swimmingtrees, 3.0, 20.0,
+			\mike2_window, 5.0, 5.0,
+			\mike2_strings, 15.0, 5.0,
+			\mike2_desk_ironingboard, 10.0, 30.0, // **
+			\mike2_rover, 5.0, 5.0,
+			\mike2_yellowtunnel, 5.0, 5.0
+		]
+	],
+	[
+		"./textures/mike3.xml",
+		\int,
+		[
+
+			\mike3_start, 10.0, 10.0,
+			\mike3_fruittable, 10.0, 5.0,
+
+			// \mike3_lamp, 15.0, 10.0,
+			\mike3_book_orbit2, 10.0, 1.0,
+			\mike3_book_orbit1, 4.0, 1.0,
+			// \mike3_book_orbit3, 5.0, 5.0,
+			\mike3_book_orbit4, 4.0, 5.0,
+			\mike3_distant_window, 10.0, 15.0, // **
+			\mike3_peeker, 10.0, 15.0,
+			\mike3_fence, 10.0, 10.0,
+			\mike3_windowplane, 10.0, 10.0, // **
+			\mike3_cloth_table, 5.0, 5.0,
+			\mike3_cloth_table_pull, 5.0, 5.0,
+			\mike3_sputnik, 10.0, 5.0,
+			\mike3_lamp, 15.0, 10.0,
+			\mike3_lamp_glow, 5.0, 5.0,
+			\mike3_lamp_glow_2, 5.0, 5.0,
+			\mike3_lamp_glow_3, 5.0, 5.0,
+		]
+	],
+	[
+		"./textures/outsidelookingin.xml",
+		\lim,
+		[
+			\outside_1, 5.0, 5.0,
+			\outside_2, 5.0, 5.0,
+			\outside_book, 5.0, 5.0,
+			\outside_book_left, 5.0, 5.0,
+			// \outside_book, 5.0, 5.0,
+			// \outside_book_left, 5.0, 5.0,
+		]
+	],
 	[
 		"./textures/carkeek.xml",
+		\ext,
 		[
 			\carkeek_train_blur, 5.0, 1.0,
 			\carkeek_train_start, 5.0, 1.0,
@@ -89,63 +189,10 @@ d = [
 			\carkeek_pile_distant, 5.0, 7.0
 		]
 	],
-	[
-		"./textures/mike3.xml",
-		[
-			\mike3_lamp, 5.0, 5.0,
-			\mike3_book_orbit1, 5.0, 5.0,
-			\mike3_book_orbit2, 5.0, 5.0,
-			\mike3_book_orbit3, 5.0, 5.0,
-			\mike3_book_orbit4, 5.0, 5.0,
-			\mike3_fruittable, 5.0, 5.0,
-			\mike3_distant_window, 5.0, 5.0,
-			\mike3_cloth_table, 5.0, 5.0,
-			\mike3_cloth_table_pull, 5.0, 5.0,
-			\mike3_lamp_glow, 5.0, 5.0,
-			\mike3_lamp_glow_2, 5.0, 5.0,
-			\mike3_lamp_glow_3, 5.0, 5.0,
-		]
-	],
-	[
-		"./textures/mike1.xml",
-		[
-			\mike1_1, 5.0, 5.0,
-			\mike1_2, 5.0, 5.0,
-			\mike1_3, 5.0, 5.0,
-			\mike1_4, 5.0, 5.0,
-			\mike1_5_fruitbowl, 5.0, 5.0,
-			\mike1_5_weird, 5.0, 5.0,
-			\mike1_parallax_left, 5.0, 5.0,
-			\mike1_rover_mirror, 5.0, 5.0,
-			\mike1_window, 5.0, 5.0,
-			\mike1_rover_rover, 5.0, 5.0,
-			\mike1_rover, 5.0, 5.0,
-		]
-	],
-	[
-		"./textures/mike2.xml",
-		[
-			\mike2_yellowtunnel, 10.0, 10.0,
-			\mike2_swimmingtrees, 3.0, 30.0,
-			\mike2_window, 5.0, 5.0,
-			\mike2_desk_ironingboard, 10.0, 30.0,
-			\mike2_rover, 5.0, 5.0,
-			\mike2_yellowtunnel, 5.0, 5.0
-		]
-	],
-	[
-		"./textures/outsidelookingin.xml",
-		[
-			\outside_1, 5.0, 5.0,
-			\outside_2, 5.0, 5.0,
-			\outside_book, 5.0, 5.0,
-			\outside_book_left, 5.0, 5.0,
-			\outside_book, 5.0, 5.0,
-			\outside_book_left, 5.0, 5.0,
-		]
-	],
+
 	[
 		"./textures/diningroom3.xml",
+		\int,
 		[
 			\diningroom3_kaleid, 15.0, 15.0,
 			\diningroom3_detail_books_nofocus, 10.0, 5.0,
@@ -163,15 +210,27 @@ d = [
 
 r = Task ({
 	// d = d.scramble();
-	d = d.rotate(-3);
+	d = d.rotate(-1 * start);
 	d.do { |params|
-		var scene, views;
-		#scene, views = params;
+		var scene, sceneType, views;
+		var fadeOut = 3, fadeIn = 3, loadTime = 10;
+		#scene, sceneType, views = params;
 		views = views.clump(3);
+
+		// fade out
+		~fader.fadeTime_(fadeOut);
+		~fader.value_(1.0);
+		(fadeOut+1).wait;
 
 		// load sceen
 		c.loadScene(scene);
 		postf("load scene: %\n", scene);
+		loadTime.wait;
+
+		// fade in
+		~fader.fadeTime_(fadeIn+2);
+		~fader.value_(0.0);
+		(fadeIn+1).wait;
 
 		// iterate over views
 		views.do{ |vals|
@@ -186,13 +245,10 @@ r = Task ({
 
 )
 
-
-r.reset().play()
 r.stop()
+
 r.play()
 r.reset()
-
-r.play()
 
 
 c.updatePreset
@@ -269,9 +325,16 @@ c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/201505
 // [
 // 	"./textures/bookcase.xml",
 // 	[
-// 		\bookcase_close, 5.0, 5.0,
-// 		\bookcase_bed, 5.0, 5.0,
-// 		\bookcase_mirror, 5.0, 5.0
+// bookcase_rover_mobile_selfie, 5.0, 5.0,
+// bookcase_mirror_flat, 5.0, 5.0,
+// bookcase_close, 5.0, 5.0,
+// bookcase_start, 5.0, 5.0,
+// bookcase_window, 5.0, 5.0,
+// bookcase_bed, 5.0, 5.0,
+// bookcase_mirror_rover, 5.0, 5.0,
+// bookcase_doorknob, 5.0, 5.0,
+// bookcase_mirror, 5.0, 5.0,
+// bookcase_mirror_flat_up, 5.0, 5.0,
 // 	]
 // ]
 
