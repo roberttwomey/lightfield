@@ -6,8 +6,8 @@
 
 #define MAX_SUBIMAGES 600
 #define MAX_OFFSETS 1200
-#define MAX_LF_TILES 20
 
+// physical setup
 #define SCREEN_WIDTH 55.0
 #define SCREEN_HEIGHT 52.0
 
@@ -49,28 +49,22 @@ public:
     ofxOscReceiver receiver;
     int port;
 
-    // lf texture files
-    ofTexture lfplanes[MAX_LF_TILES];
-    string lffilenames[MAX_LF_TILES];
-    int numlftextures;
+	// lf texture files
+    ofTexture lfplane;
+    string lffilename;
 
 	// data textures for shader
     ofFbo campos_tex;
     ofFbo subimg_corner_tex;
 
-	// data textures for tiles
-    ofFbo tilenum_tex;
-    ofFbo tilepixoffset_tex;
-
     // render fbos as pointers
     ofPtr <ofFbo> fbo; // main frame buffer
-    vector <ofPtr <ofFbo> > refocusFbo; // per-tile refocus buffers
     ofPtr <ofFbo> maskFbo; // used for drawing... TODO: how does this work?
-    ofPtr <ofFbo> image_fbo; // image post-processing buffer
+    ofPtr <ofFbo> image_fbo; // image processing buffer
+
 
 	// refocus shaders
-    ofShader shader[MAX_LF_TILES]; // per-tile shaders
-    ofShader combineShader;
+    ofShader shader;
     ofShader image_shader; // image post-process shader
 
 	// refocus parameters
@@ -90,7 +84,7 @@ public:
     float gamma;
     float minOutput;
     float maxOutput;
-    float desaturate;
+    float desat_val;
     float brightness;
     float contrast;
 
@@ -98,11 +92,6 @@ public:
     int xsubimages, ysubimages, subwidth, subheight;
 
     float offsets[MAX_OFFSETS];
-
-    // params for tiled dataset
-    int ximagespertex, yimagespertex, tilewidth, tileheight;
-    int xnumtextures, ynumtextures;
-    int tilenum;
 
     // snapshot
     int snapcount;

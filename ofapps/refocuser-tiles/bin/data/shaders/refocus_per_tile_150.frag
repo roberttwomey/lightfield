@@ -32,7 +32,7 @@ void main (void){
 
     // keep zoom centered around middle of texture
     vec2 halfres = 0.5 * resolution;
-    vec2 pixelpos = (gl_FragCoord.xy - halfres) * zoom - roll + halfres;
+    vec2 pixelpos = (gl_FragCoord.xy - halfres) * zoom - (roll * resolution) + halfres;
 
     vec4 color = vec4(0,0,0,0);
 
@@ -59,7 +59,7 @@ void main (void){
 
             // keep refocused image centered, offset by camera position minus aperture center
             vec2 offset = texture2DRect(campos_tex, cam_num).xy - texture2DRect(campos_tex, ap_center).xy;
-            vec2 shift = fscale * offset;
+            vec2 shift = fscale * resolution * offset;
 
             // position in large virtual texture (atlas) composed of these tiles
             vec2 atlaspos = subimg_corner + pixelpos - shift;

@@ -8,6 +8,7 @@
 void ofApp::setup(){
 
     ofSetLogLevel(OF_LOG_NOTICE);
+
 //    ofEnableAlphaBlending();
 
     loadXMLSettings("settings.xml");
@@ -28,7 +29,7 @@ void ofApp::setup(){
     // image processing
     bImageProc = true;
 
-    desaturate = 0.0;
+    desat_val = 0.0;
     minInput = 0.0;
     maxInput = 1.0;
     gamma = 1.0;
@@ -46,83 +47,57 @@ void ofApp::update(){
 
         // TODO: why is this here?
         maskFbo->begin();
-        ofClear(0, 0, 0, 0);
+        ofClear(255, 0, 0,255);
         maskFbo->end();
 
-        for(int i=0; i < numlftextures; i++) {
-            refocusFbo[i]->begin();
-            ofClear(0, 0, 0, 0);
+		fbo->begin();
+		ofClear(0, 0, 0,255);
 
-            shader[i].begin();
+		shader.begin();
 
-            // aperture
-            shader[i].setUniform2i("ap_loc", xstart, ystart);
-            shader[i].setUniform2i("ap_size", xcount, ycount);
+		// aperture
+		shader.setUniform2i("ap_loc", xstart, ystart);
+		shader.setUniform2i("ap_size", xcount, ycount);
 
-            // focus
-            shader[i].setUniform1f("fscale", focus);
+		// focus
+		shader.setUniform1f("fscale", focus);
 
-            // zoom / pan
-            shader[i].setUniform1f("zoom", zoom);
-            shader[i].setUniform2f("roll", xoffset, yoffset);
+		// zoom / pan
+		shader.setUniform1f("zoom", zoom);
+		shader.setUniform2f("roll", xoffset, yoffset);
+
+		maskFbo->draw(0,0);
+
+		shader.end();
+
+		fbo->end();
+
+        if(bImageProc) {
+			// image post-processing
+            maskFbo->begin();
+            ofClear(255, 0, 0, 255);
+            maskFbo->end();
+
+            image_fbo->begin();
+            ofClear(0, 0, 0, 255);
+
+            image_shader.begin();
+
+            image_shader.setUniformTexture("img_tex", fbo->getTextureReference(), 3);
+            image_shader.setUniform1f("desat_val", desat_val);
+            image_shader.setUniform1f("minInput", minInput);
+            image_shader.setUniform1f("maxInput", maxInput);
+            image_shader.setUniform1f("gamma", gamma);
+            image_shader.setUniform1f("minOutput", minOutput);
+            image_shader.setUniform1f("maxOutput", maxOutput);
+            image_shader.setUniform1f("brightness", brightness);
+            image_shader.setUniform1f("contrast", contrast);
 
             maskFbo->draw(0,0);
 
-            shader[i].end();
+            image_shader.end();
 
-            refocusFbo[i]->end();
-        }
-
-
-    //    // TODO: why is this here?
-        maskFbo->begin();
-        ofClear(0, 0, 0, 0);
-        maskFbo->end();
-
-        fbo->begin();
-        ofClear(0, 0, 0, 0);
-
-        combineShader.begin();
-
-    //    for(int i=0; i < numlftextures; i++) {
-    //        combineShader.setUniformTexture("refocustex[" + ofToString(i) + "]", refocusFbo[i].getTextureReference(), i+9);
-    //    }
-
-        maskFbo->draw(0, 0);
-
-        combineShader.end();
-        fbo->end();
-
-
-
-	if(bImageProc) {
-		// image post-processing
-
-        maskFbo->begin();
-        ofClear(255, 0, 0, 255);
-        maskFbo->end();
-
-
-        image_fbo->begin();
-        ofClear(0, 0, 0, 255);
-
-        image_shader.begin();
-
-        image_shader.setUniformTexture("img_tex", fbo->getTextureReference(), 13);
-        image_shader.setUniform1f("desaturate", desaturate);
-        image_shader.setUniform1f("minInput", minInput);
-        image_shader.setUniform1f("maxInput", maxInput);
-        image_shader.setUniform1f("gamma", gamma);
-        image_shader.setUniform1f("minOutput", minOutput);
-        image_shader.setUniform1f("maxOutput", maxOutput);
-        image_shader.setUniform1f("brightness", brightness);
-        image_shader.setUniform1f("contrast", contrast);
-
-        maskFbo->draw(0,0);
-
-        image_shader.end();
-
-        image_fbo->end();
+            image_fbo->end();
         }
 
 	}
@@ -156,7 +131,7 @@ void ofApp::draw(){
     if(bImageProc) {
         image_fbo->draw(xoff, 0, width, height);
     } else {
-        fbo->draw(xoff, 0, width, height);
+      fbo->draw(xoff, 0, width, height);
     }
 
     // crop to 50 x 55 screen size
@@ -166,48 +141,19 @@ void ofApp::draw(){
     ofFill();
     ofRect(xoff, 0, bar, height);
     ofRect(xoff+width-bar, 0, width, height);
-    ofSetColor(255);
-
-//    refocusFbo[0].draw(xoff, 0, width, height);
-
-    // debugging, five up
-//    refocusFbo[0]->draw(xoff, 0, width/2, height/2);
-//    refocusFbo[1]->draw(xoff+width/2, 0, width/2, height/2);
-//    refocusFbo[2]->draw(xoff, 0+height/2, width/2, height/2);
-//    refocusFbo[3]->draw(xoff+width/2, 0+height/2, width/2, height/2);
-//
-//    fbo->draw(xoff+width/4, height/4, width/2, height/2);
 
     // draw thumbnail with indicator
     if(bShowThumbnail == true) {
 
-        // thumbnail size
-        float tWidth = 160, tHeight;
-        float xunit, yunit;
-        int tSubWidth, tSubHeight;
 
-        if(numlftextures > 1) {
-            tHeight = 160/xnumtextures * ynumtextures;
-            tSubWidth = tWidth / xnumtextures;
-            tSubHeight = tHeight / ynumtextures;
-            xunit = float(tSubWidth) / float(ximagespertex);
-            yunit = float(tSubHeight) / float(yimagespertex);
-        } else {
-            tHeight = 160/xsubimages * ysubimages;
-            tSubWidth = tWidth;
-            tSubHeight = tHeight;
-            xunit = float(tSubWidth) / float(xsubimages);
-            yunit = float(tSubHeight) / float(ysubimages);
-        };
+		// thumbnail size
+		float tWidth = 160;
+		float tHeight = 160/xsubimages * ysubimages;
+        float xunit = tWidth/xsubimages;
+        float yunit = tHeight/ysubimages;
+
         ofSetColor(255);
-
-        // draw separate textures
-        for (int x = 0; x < xnumtextures; x++){
-            for (int y = 0; y < ynumtextures; y++){
-                int i = x + y * xnumtextures;
-                lfplanes[i].draw(5 + tSubWidth * x ,5 + tSubWidth * y, tSubWidth, tSubHeight);
-            }
-        }
+        lfplane.draw(5,5,tWidth,tHeight);
 
         ofSetColor(255, 0, 0);
         ofNoFill();
@@ -221,7 +167,7 @@ void ofApp::draw(){
         ofTranslate(10, ofGetHeight()-90);
 //        ofDrawBitmapString("tilenum:  \t"+ofToString(tilenum), 0, -15);
 //        ofDrawBitmapString("b/c:      \t"+ofToString(brightness)+" "+ofToString(contrast), 0, -60);
-        ofDrawBitmapString("desat:    \t"+ofToString(desaturate), 0, -45);
+        ofDrawBitmapString("desat:    \t"+ofToString(desat_val), 0, -45);
         ofDrawBitmapString("img:      \t"+ofToString(minInput)+" "+ofToString(maxInput) +" "+ofToString(minOutput)+" "+ofToString(maxOutput)+" "+ofToString(gamma), 0, -30);
         ofDrawBitmapString("fade:     \t"+ofToString(fade), 0, -15);
         ofDrawBitmapString("scale:    \t"+ofToString(focus), 0, 0);
@@ -257,8 +203,8 @@ void ofApp::loadXMLSettings(string settingsfile) {
         bDebug = (xml.getValue("debug", 0) > 0);
         bool bFullscreen = (xml.getValue("fullscreen", 0) > 0);
         ofSetFullscreen(bFullscreen);
-        screen_width = xml.getValue("screenwidth", screen_width);
-        screen_height = xml.getValue("screenheight", screen_height);
+        screen_width = xml.getValue("screenwidth", 55.0);
+        screen_height = xml.getValue("screenheight", 52.0);
 
         // osc receiving
         port = xml.getValue("oscport", 12345);
@@ -281,23 +227,13 @@ void ofApp::loadXMLScene(string scenefile) {
     xml.loadFile(scenefile);
 
     // lightfield images //
-    numlftextures = xml.getNumTags("texturefile");
-
-    for(int i=0; i < numlftextures; i++) {
-        lffilenames[i] = xml.getValue("texturefile", "nofile.jpg", i);
-    }
+    lffilename = xml.getValue("texturefile", "nofile.jpg");
 
     // image layout
     subwidth = xml.getValue("subimagewidth", 0);
     subheight = xml.getValue("subimageheight", 0);
     xsubimages = xml.getValue("numxsubimages", 0);
     ysubimages = xml.getValue("numysubimages", 0);
-
-    // number of large textures
-    xnumtextures = xml.getValue("xnumtextures", 1);
-    ynumtextures = xml.getValue("ynumtextures", 1);
-    ximagespertex = xml.getValue("ximagespertex", xsubimages);
-    yimagespertex = xml.getValue("yimagespertex", ysubimages);
 
     // refocusing params //
     minScale = xml.getValue("minscale", 0);
@@ -309,7 +245,7 @@ void ofApp::loadXMLScene(string scenefile) {
     xcount = xml.getValue("xcount", xsubimages);
     ycount = xml.getValue("ycount", ysubimages);
 
-    focus = float(xml.getValue("scale", 0)) / float(subwidth);
+    focus = xml.getValue("scale", 0);
     zoom = xml.getValue("zoom", 1.0);
     xoffset = 0;
     yoffset = 0;
@@ -340,30 +276,18 @@ void ofApp::loadXMLScene(string scenefile) {
 
 void ofApp::loadLightfieldData() {
 
-    for(int i=0; i < numlftextures; i++) {
-        ofLoadImage(lfplanes[i], lffilenames[i]);
-        ofLog(OF_LOG_NOTICE, "loaded texture "+ ofToString(i) + " from " + lffilenames[i]);
-//        lfplanes[i].setTextureWrap(GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);//GL_REPEAT, GL_REPEAT);//
-//        GLfloat border[4]={0, 1, 0, 0};
-//        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border);
-        //lfplanes[i].setTextureMinMagFilter(GL_LINEAR, GL_LINEAR);//NEAREST, GL_NEAREST);
-    }
-
-    ofLog(OF_LOG_NOTICE, "done loading textures.");
+	ofLoadImage(lfplane, lffilename);
 }
 
 void ofApp::freeLightfieldData() {
 
-    for(int i=0; i < numlftextures; i++) {
-        lfplanes[i].clear();
-        ofLog(OF_LOG_NOTICE, "cleared texture "+ ofToString(i));
+    lfplane.clear();
+    ofLog(OF_LOG_NOTICE, "cleared texture");
         //  lfplanes[i].setTextureWrap(GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);//GL_REPEAT, GL_REPEAT);//
 //        GLfloat border[4]={0, 1, 0, 0};
 //        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border);
         //lfplanes[i].setTextureMinMagFilter(GL_LINEAR, GL_LINEAR);//NEAREST, GL_NEAREST);
-    }
 
-    ofLog(OF_LOG_NOTICE, "done freeing textures.");
 }
 
 
@@ -387,6 +311,7 @@ void ofApp::setupGraphics() {
     if(image_fbo->isAllocated())
         ofLog(OF_LOG_NOTICE, "image_fbo is Allocated");
 
+
     // clear the fbos
     fbo->begin();
     ofClear(0,0,0,255);
@@ -404,23 +329,6 @@ void ofApp::setupGraphics() {
     // load camera positions into texture
     int numCams = xsubimages * ysubimages;
 
-    // reserve space for refocus fbos
-    refocusFbo.clear();
-    refocusFbo.reserve(numCams);
-
-    for(int i=0; i < numlftextures; i++) {
-        ofLog(OF_LOG_NOTICE, "allocating refocus fbo " + ofToString(i));
-
-        ofPtr<ofFbo> thisFbo = ofPtr<ofFbo>(new ofFbo());
-        thisFbo->allocate(subwidth,subheight);
-        thisFbo->begin();
-        ofClear(0,0,0,255);
-        thisFbo->end();
-
-        refocusFbo.push_back(thisFbo);
-
-    }
-
     // make array of float pixels with camera position information
     float * pos = new float[numCams*3];
     for (int x = 0; x < xsubimages; x++){
@@ -431,8 +339,7 @@ void ofApp::setupGraphics() {
             pos[i*3 + 1] = offsets[i*2+1];
             pos[i*3 + 2] = 0.0;
         }
-    }        xoffsetStart = xoffset;
-
+    }
 
     campos_tex.allocate(xsubimages, ysubimages, GL_RGB32F);
     campos_tex.getTextureReference().loadData(pos, xsubimages, ysubimages, GL_RGB);
@@ -466,71 +373,37 @@ void ofApp::setupGraphics() {
 //
 //    updateAperture();
 
+    // setup refocus shader
+    shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus.frag");
+    shader.linkProgram();
 
-    // setup refocus shader per tile texture
-    int tn = 1;
 
-    for(int y = 0; y < ynumtextures; y++) {
-        for(int x = 0; x < xnumtextures; x++) {
-            int i = x + y * xnumtextures;
+    shader.begin();
 
-            // initialize shader
-            ofLog(OF_LOG_NOTICE, "initializing shader " + ofToString(i));
-//            shader[i].setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus_per_tile_120.frag");
-            shader[i].setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus_per_tile_150.frag");
-            shader[i].linkProgram();
+    // camera images
+    shader.setUniformTexture("lftex", lfplane, 1);
 
-            shader[i].begin();
+    shader.setUniform2f("resolution", subwidth, subheight);
+    shader.setUniform2i("subimages", xsubimages, ysubimages);
 
-            shader[i].setUniformTexture("lftex", lfplanes[i], tn++);
-//            shader[i].setUniform2f("size", tilewidth, tileheight);
+    shader.setUniformTexture("campos_tex", campos_tex, 2);
+//    shader.setUniformTexture("subimg_corner_tex", subimg_corner_tex, 3);
+    shader.end();
 
-            // data textures for shader
-        //    shader[0].setUniformTexture("aperture_mask_tex", aperture_mask_tex, i++);
-            shader[i].setUniformTexture("campos_tex", campos_tex, tn++);
-
-            // set texture pixel offsets to index from virtual, large texture atlas
-            // to individual tile coords
-            float xtilepixoffset = x * lfplanes[i].getWidth();
-            float ytilepixoffset = y * lfplanes[i].getHeight();
-
-            shader[i].setUniform2f("tilepixoffset", xtilepixoffset, ytilepixoffset );//[i], tn++);
-
-            // one-time data setparameters
-            shader[i].setUniform2f("resolution", subwidth, subheight);
-            shader[i].setUniform2i("subimages", xsubimages, ysubimages);
-            shader[i].setUniform2i("subimagestart", x * xsubimages, y * ysubimages);
-            shader[i].end();
-
-//            ofLog(OF_LOG_NOTICE, "shader end " + ofToString(i));
-        }
-    }
-
-    // set up shader to combine the four refocus fbos
-    ofLog(OF_LOG_NOTICE, "initializing combine shader ");
-//    combineShader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/blend_per_tile_120.frag");
-    combineShader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/blend_per_tile_150.frag");
-    combineShader.linkProgram();
-
-    combineShader.begin();
-    combineShader.setUniform1i("numtextures", numlftextures);
-
-    // TODO: uncommenting this prevents refocusFbo from working
-
-    for(int i=0; i < numlftextures; i++)
-        combineShader.setUniformTexture("refocustex[" + ofToString(i) + "]", refocusFbo[i]->getTextureReference(), tn++);
-
-    combineShader.end();
-
-//    ofLog(OF_LOG_NOTICE, "combine shader end");
 
     // setup desaturate shader
     image_shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/image_proc.frag");
     image_shader.linkProgram();
 
-//        GLint maxTextureSize;
-//        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-//        std::cout <<"Max texture size: " << maxTextureSize << std::endl;
+    image_shader.begin();
+
+    image_shader.setUniform1f("desat_val", desat_val);
+
+    image_shader.end();
+
+    //    GLint maxTextureSize;
+    //    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+    //    std::cout <<"Max texture size: " << maxTextureSize << std::endl;
 
     //        GLint v_maj;
     //    glGetIntegerv(GL_MAJOR_VERSION, &v_maj);
@@ -571,15 +444,14 @@ void ofApp::keyPressed(int key){
         mouseXStart = mouseX;
         mouseYStart = mouseY;
         zoomStart = zoom;
-        focusStart = focus;        xoffsetStart = xoffset;
-
+        focusStart = focus;
         xoffsetStart = xoffset;
         yoffsetStart = yoffset;
         xcountStart = xcount;
         ycountStart = ycount;
         xstartStart = xstart;
         ystartStart = ystart;
-        desatStart = desaturate;
+        desatStart = desat_val;
     }
 
     if(key=='s')
@@ -592,23 +464,23 @@ void ofApp::keyPressed(int key){
         bImageProc = !bImageProc;
     }
     if(key=='1') {
-        minInput = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
+        minInput = ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.0);
     }
     if(key=='2') {
-        maxInput = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
+        maxInput = ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.0);
     }
     if(key=='3') {
-        minOutput = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
+        minOutput = ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.0);
     }
     if(key=='4') {
-        maxOutput = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
+        maxOutput = ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.0);
     }
     if(key=='5') {
-        gamma= ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
+        gamma= ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.0);
     }
     if(key=='6') {
         // desaturate
-        desaturate = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
+        desat_val = ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.0);
     }
     if(key=='7') {
         brightness = ofMap(mouseX, 0.0, ofGetWindowWidth(), 0, 2.0);//, 1.0);
@@ -616,25 +488,7 @@ void ofApp::keyPressed(int key){
     if(key=='8') {
         contrast = ofMap(mouseX, 0.0, ofGetWindowWidth(), 0, 2.0);//-1.0, 1.0);
     }
-    if(key=='r') {
-        // reset image params
-        desaturate = 0.0;
-        minInput = 0.0;
-        maxInput = 1.0;
-        gamma = 1.0;
-        minOutput = 0.0;
-        maxOutput = 1.0;
-        brightness = 1.0;
-        contrast = 1.0;
-        zoom = 1.0;
-        xstart = 0;
-        ystart = 0;
-        xcount = xsubimages;
-        ycount = ysubimages;
-        xoffset = 0;
-        yoffset = 0;
-        focus = -0.01;
-    }
+
     // refocus parameters
     if(key=='b') {
         // zoom
@@ -647,18 +501,16 @@ void ofApp::keyPressed(int key){
     }
     if(key=='x') {
         // aperture width
-        xcount = ofClamp(xcountStart + ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth(), 0, xsubimages), 0, xsubimages-xstartStart);
-        ycount = ofClamp(ycountStart + ofMap(mouseY - mouseYStart, 0, ofGetWindowHeight(), 0, ysubimages), 0, ysubimages-ystartStart);
+        xcount = ofClamp(xcountStart + ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth(), 0, xsubimages), 0, xsubimages);
+        ycount = ofClamp(ycountStart + ofMap(mouseY - mouseYStart, 0, ofGetWindowHeight(), 0, ysubimages), 0, ysubimages);
     }
     if(key == 'v') {
         // scroll
-        xoffset = ofClamp(xoffsetStart - ofMap(mouseXStart - mouseX, 0, ofGetWindowWidth(), 0, 1.0), -1.0, 1.0);
-        yoffset = ofClamp(yoffsetStart - ofMap(mouseYStart - mouseY, 0, ofGetWindowHeight(), 0, 1.0), -1.0, 1.0);
+        xoffset = ofClamp(xoffsetStart - ofMap(mouseXStart - mouseX, 0, ofGetWindowWidth(), 0, subwidth), -subwidth, subwidth);
+        yoffset = ofClamp(yoffsetStart - ofMap(mouseYStart - mouseY, 0, ofGetWindowHeight(), 0, subheight), -subheight, subheight);
     }
-    // TODO: fix this control
     if(key == 'c')
-        focus = ofClamp(focusStart - ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth(), 0, 0.5), -0.5, 0.01);
-        //-1.0 * ofClamp(focusStart + ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth(), -0.5, 0.5), 0, 0.5);
+        focus = ofClamp(focusStart + ofMap(mouseXStart - mouseX, 0, ofGetWindowWidth(), 0, minScale - maxScale), minScale, maxScale);
     if(key == 't') {
         bShowThumbnail = (bShowThumbnail == 0);
         cout << "t " << bShowThumbnail << endl;
@@ -687,31 +539,27 @@ void ofApp::process_OSC(ofxOscMessage m) {
     else if( m.getAddress() == "/loadScene") {
         string scenefile = m.getArgAsString(0);
 
-        if(scenefile == scenefiles[0]) {
-                ofLog(OF_LOG_NOTICE, "requested scene "+scenefile+" is already loaded");
+        ofFile file(scenefile);
+
+        if(file.doesFileExist(scenefile)) {
+            // suspend render
+            bSuspendRender = true;
+
+            freeLightfieldData();
+
+            // TODO: I think this vector of scene files is unnecessary
+            scenefiles.clear();
+            scenefiles.push_back(scenefile);
+
+            loadXMLScene(scenefile);
+
+            loadLightfieldData();
+
+            setupGraphics();
+
+            bSuspendRender = false;
         } else {
-            ofFile file(scenefile);
-
-            if(file.doesFileExist(scenefile)) {
-                // suspend render
-                bSuspendRender = true;
-
-                freeLightfieldData();
-
-                // TODO: I think this vector of scene files is unnecessary
-                scenefiles.clear();
-                scenefiles.push_back(scenefile);
-
-                loadXMLScene(scenefile);
-
-                loadLightfieldData();
-
-                setupGraphics();
-
-                bSuspendRender = false;
-            } else {
-                ofLog(OF_LOG_WARNING, "requested file " + scenefile + " does not exist.");
-            }
+            ofLog(OF_LOG_WARNING, "requested file " + scenefile + " does not exist.");
         }
     }
     else if( m.getAddress() == "/fade") {
@@ -907,18 +755,10 @@ void ofApp::snapshot() {
     screenGrab.setUseTexture(false);
 
     //copy the pixels from FBO to the pixel array; then set the normal ofImage from those pixels; and use the save method of ofImage
+    fbo->begin();
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glReadPixels(0, 0, fbo->getWidth(), fbo->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, fbo_pixels);
 
-    // save either image-processed or raw fbo version as necessary
-    if(bImageProc) {
-        image_fbo->begin();
-        glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        glReadPixels(0, 0, image_fbo->getWidth(), image_fbo->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, fbo_pixels);
-
-    } else {
-        fbo->begin();
-        glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        glReadPixels(0, 0, fbo->getWidth(), fbo->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, fbo_pixels);
-    }
     // copy cropped window from fbo to screengrab pixels
     for(int x=edge; x<edge+crop_w; x++) {
         for(int y=0; y<h; y++) {
@@ -933,12 +773,7 @@ void ofApp::snapshot() {
     screenGrab.setFromPixels(img_pixels, crop_w, h, OF_IMAGE_COLOR);
     screenGrab.saveImage(imgfilename, OF_IMAGE_QUALITY_BEST);
 
-    if(bImageProc) {
-        image_fbo->end();
-    } else {
-        fbo->end();
-    }
-
+    fbo->end();
     ofLog(OF_LOG_NOTICE, "[DiskOut]  saved frame " + imgfilename );
 
     // save refocusing parameters to companion text file
@@ -950,14 +785,10 @@ void ofApp::snapshot() {
     file << xstart << "," << ystart << endl;
     file << xcount << "," << ycount << endl;
     file << zoom << endl;
-
-    // dump image processing parameters if necessary
-    if(bImageProc) {
-        file << minInput << "," << maxInput << endl;
-        file << minOutput << "," << maxOutput << endl;
-        file << gamma << endl;
-        file << desaturate << endl;
-    };
+    file << minInput << "," << maxInput << endl;
+    file << minOutput << "," << maxOutput << endl;
+    file << gamma << endl;
+    file << desat_val << endl;
 
     file.close();
 }

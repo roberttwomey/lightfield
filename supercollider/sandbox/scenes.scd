@@ -1,21 +1,20 @@
 // control mixer
 
-c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("refocuser.local", 12345));
+c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("192.168.0.100", 12345));
+// c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("refocuser.local", 12345));
 
 ~fader=ControlFade(1.0);
 ~fader.broadcast( c.broadcastNetAddr, '/fade', 30 );
-
+~fader.value_(0)
 
 c.backupPreset
-
-c.loadScene("./textures/dark_trees.xml")
-c.loadScene("./textures/mike2.xml")
 
 // loading from list of snapshot files
 (
 j =  [
-"/Volumes/Work/Projects/lightfield/scenes/scratch/cliffside/cliffside_05311717_0000.txt",
-"/Volumes/Work/Projects/lightfield/scenes/scratch/cliffside/cliffside_05311717_0001.txt"
+"/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek_night/carkeek_night_06021537_0000.txt",
+"/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek_night/carkeek_night_06021537_0001.txt",
+"/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek_night/carkeek_night_06021537_0002.txt"
 ];
 
 postf("\n");
@@ -30,27 +29,25 @@ postf("\n");
 
 // search for certain preset
 (
-q = "myFirst";
+q = "carkeek_night";
 c.presets.keys.do { |p|
-	p.asString.contains(q).if{ postf("%, 5.0, 5.0,\n", p);};
+	p.asString.contains(q).if{ postf("%%, 5.0, 5.0,\n", "\\", p);};
 };
 )
 
 
 
 // create a new preset
-c.storePreset(\mike3_fence)
-c.storePreset(\mike3_windowplane)
-c.storePreset(\mike3_sputnik)
-c.storePreset(\mike3_start)
-c.storePreset(\mike3_peeker)
+
 
 
 // remove a preset
 c.presets.removeAtFail(\myFirst)
 
 // load a scene
-c.loadScene("./textures/mike3.xml")
+c.loadScene("./textures/tunnel.xml")
+
+
 
 r.stop()
 r.reset()
@@ -63,151 +60,140 @@ var start = 0;
 thisThread.randSeed=54321;
 
 d = [
+	// ballard wall
+	// carkeek_night
+	// precise
+	// tivon1
+	// towers
+	// tunnel
+	\bookcase,
 	[
-		"./textures/bookcase.xml",
-		\int,
-		[
-			\bookcase_start, 10.0, 15.0,
-			\bookcase_bed, 5.0, 5.0,
-			\bookcase_doorknob, 5.0, 5.0,
-			\bookcase_plant_books, 5.0, 5.0,
-			\bookcase_close, 7.0, 5.0,
-			\bookcase_mirror_flat, 10.0, 7.0,
-			\bookcase_window, 5.0, 5.0,
-			\bookcase_mirror, 7.0, 5.0,
-			\bookcase_mirror_flat_up, 5.0, 5.0,
-			\bookcase_mirror_rover, 5.0, 5.0,
-			\bookcase_rover_mobile_selfie, 5.0, 30.0,
-			\bookcase_mirror, 15.0, 5.0,
-		]
+		\bookcase_start, 10.0, 15.0,
+		\bookcase_bed, 5.0, 5.0,
+		\bookcase_doorknob, 5.0, 5.0,
+		\bookcase_plant_books, 5.0, 5.0,
+		\bookcase_close, 7.0, 5.0,
+		\bookcase_mirror_flat, 10.0, 7.0,
+		\bookcase_window, 5.0, 5.0,
+		\bookcase_mirror, 7.0, 5.0,
+		\bookcase_mirror_flat_up, 5.0, 5.0,
+		\bookcase_mirror_rover, 5.0, 5.0,
+		\bookcase_rover_mobile_selfie, 5.0, 30.0,
+		\bookcase_mirror, 15.0, 5.0,
 	],
+	\carkeek,
 	[
-		"./textures/cliffside.xml",
-		\ext,
-		[
-			\cliffside_shore, 10.0, 25.0,
-			\cliffside_trees_breathing, 35.0, 15.0,
-			// \cliffside_greenery_close, 10.0, 25.0,
-			\cliffside_right, 10.0, 20.0,
-		]
+		\carkeek_train_blur, 5.0, 1.0,
+		\carkeek_train_start, 5.0, 1.0,
+		\carkeek_train1, 1.0, 1.0,
+		\carkeek_train2, 1.0, 1.0,
+		\carkeek_train3, 1.0, 1.0,
+		\carkeek_train4, 1.0, 1.0,
+		\carkeek_pile, 5.0, 7.0,
+		\carkeek_pile_distant, 5.0, 7.0
 	],
+	\carkeek_night,
 	[
-		"./textures/yellowcliff.xml",
-		\ext,
-		[
-			\yellowcliff_bush, 5.0, 5.0,
-			\yellowcliff_sky_top, 5.0, 5.0,
-			\yellowcliff_sky_bot, 5.0, 5.0,
-			\yellowcliff_bush_left, 5.0, 5.0,
-			\yellowcliff_bush_right, 5.0, 5.0,
-			\yellowcliff_close, 5.0, 5.0,
-		]
+		\carkeek_night_ground, 5.0, 5.0,
+		\carkeek_night_shore, 5.0, 5.0,
+		\carkeek_night_hypercolortree, 5.0, 5.0,
+		\carkeek_night_oceanblur, 5.0, 5.0,
 	],
-		[
-		"./textures/mike1.xml",
-		\int,
-		[
-			\mike1_start, 10.0, 20.0,
-			\mike1_1, 10.0, 5.0,
-			\mike1_1_rover, 5.0, 5.0,
-			\mike1_2, 5.0, 5.0,
-			\mike1_3_rover, 5.0, 5.0,
-			\mike1_4, 5.0, 5.0,
-			\mike1_3, 5.0, 5.0,
-			\mike1_5_fruitbowl, 25.0, 15.0,
-			// \mike1_5_weird, 5.0, 5.0,
-			\mike1_parallax_left, 5.0, 5.0,
-			// \mike1_rover_mirror, 5.0, 5.0,
-			// \mike1_rover, 5.0, 5.0,
-			\mike1_rover_mirror, 10.0, 7.0,
-			\mike1_rover_rover, 10.0, 7.0,
-			\mike1_window, 5.0, 5.0,
-		]
+	\cliffside,
+	[
+		\cliffside_shore, 10.0, 25.0,
+		\cliffside_trees_breathing, 35.0, 15.0,
+		// \cliffside_greenery_close, 10.0, 25.0,
+		\cliffside_right, 10.0, 20.0,
+	],
+	\dark_trees,
+	[
+		\dark_trees_whitetree, 5.0, 5.0,
+		\dark_trees_start, 5.0, 5.0,
+		\dark_trees_deepzoom, 5.0, 5.0,
+		\dark_trees_leaves, 5.0, 5.0,
+	],
+	\diningroom3,
+	[
+		\diningroom3_kaleid, 15.0, 15.0,
+		\diningroom3_detail_books_nofocus, 10.0, 5.0,
+		\diningroom3_detail_books_focus, 5.0, 5.0,
+		\diningroom3_books3, 5.0, 5.0,
+		\diningroom3_books4, 5.0, 5.0,
+		\diningroom3_flower, 5.0, 10.0,
+		\diningroom3_floor, 10.0, 10.0
+	],
+	\mike1,
+	[
+		\mike1_start, 10.0, 20.0,
+		\mike1_1, 10.0, 5.0,
+		\mike1_1_rover, 5.0, 5.0,
+		\mike1_2, 5.0, 5.0,
+		\mike1_3_rover, 5.0, 5.0,
+		\mike1_4, 5.0, 5.0,
+		\mike1_3, 5.0, 5.0,
+		\mike1_5_fruitbowl, 25.0, 15.0,
+		// \mike1_5_weird, 5.0, 5.0,
+		\mike1_parallax_left, 5.0, 5.0,
+		// \mike1_rover_mirror, 5.0, 5.0,
+		// \mike1_rover, 5.0, 5.0,
+		\mike1_rover_mirror, 10.0, 7.0,
+		\mike1_rover_rover, 10.0, 7.0,
+		\mike1_window, 5.0, 5.0,
+	],
+	\mike2,
+	[
+		\mike2_yellowtunnel, 10.0, 5.0,
+		\mike2_swimmingtrees, 3.0, 20.0,
+		\mike2_window, 5.0, 5.0,
+		\mike2_strings, 15.0, 5.0,
+		\mike2_desk_ironingboard, 10.0, 30.0, // **
+		\mike2_rover, 5.0, 5.0,
+		\mike2_yellowtunnel, 5.0, 5.0
+	],
+	\mike3,
+	[
+
+		\mike3_start, 10.0, 10.0,
+		\mike3_fruittable, 10.0, 5.0, // *** abstractish
+
+		// \mike3_lamp, 15.0, 10.0,
+		\mike3_book_orbit2, 10.0, 1.0,
+		\mike3_book_orbit1, 4.0, 1.0,
+		// \mike3_book_orbit3, 5.0, 5.0,
+		\mike3_book_orbit4, 4.0, 5.0,
+		\mike3_distant_window, 10.0, 15.0, // **
+		\mike3_peeker, 10.0, 15.0,
+		\mike3_fence, 10.0, 10.0,
+		\mike3_windowplane, 10.0, 10.0, // **
+		\mike3_cloth_table, 5.0, 5.0,
+		\mike3_cloth_table_pull, 5.0, 5.0,
+		\mike3_sputnik, 10.0, 5.0,
+		\mike3_lamp, 15.0, 10.0,
+		\mike3_lamp_glow, 5.0, 5.0,
+		\mike3_lamp_glow_2, 5.0, 5.0,
+		\mike3_lamp_glow_3, 5.0, 5.0,
+	],
+	\outsidelookingin,
+	[
+		\outside_1, 5.0, 5.0,
+		\outside_2, 5.0, 5.0,
+		\outside_book, 5.0, 5.0,
+		\outside_book_left, 5.0, 5.0,
+		// \outside_book, 5.0, 5.0,
+		// \outside_book_left, 5.0, 5.0,
+	],
+	\yellowcliff,
+	[
+		\yellowcliff_bush, 5.0, 5.0,
+		\yellowcliff_sky_top, 5.0, 5.0,
+		\yellowcliff_sky_bot, 5.0, 5.0,
+		\yellowcliff_bush_left, 5.0, 5.0,
+		\yellowcliff_bush_right, 5.0, 5.0,
+		\yellowcliff_close, 5.0, 5.0,
 	],
 
-	[
-		"./textures/mike2.xml",
-		\lim,
-		[
-			\mike2_yellowtunnel, 10.0, 5.0,
-			\mike2_swimmingtrees, 3.0, 20.0,
-			\mike2_window, 5.0, 5.0,
-			\mike2_strings, 15.0, 5.0,
-			\mike2_desk_ironingboard, 10.0, 30.0, // **
-			\mike2_rover, 5.0, 5.0,
-			\mike2_yellowtunnel, 5.0, 5.0
-		]
-	],
-	[
-		"./textures/mike3.xml",
-		\int,
-		[
-
-			\mike3_start, 10.0, 10.0,
-			\mike3_fruittable, 10.0, 5.0,
-
-			// \mike3_lamp, 15.0, 10.0,
-			\mike3_book_orbit2, 10.0, 1.0,
-			\mike3_book_orbit1, 4.0, 1.0,
-			// \mike3_book_orbit3, 5.0, 5.0,
-			\mike3_book_orbit4, 4.0, 5.0,
-			\mike3_distant_window, 10.0, 15.0, // **
-			\mike3_peeker, 10.0, 15.0,
-			\mike3_fence, 10.0, 10.0,
-			\mike3_windowplane, 10.0, 10.0, // **
-			\mike3_cloth_table, 5.0, 5.0,
-			\mike3_cloth_table_pull, 5.0, 5.0,
-			\mike3_sputnik, 10.0, 5.0,
-			\mike3_lamp, 15.0, 10.0,
-			\mike3_lamp_glow, 5.0, 5.0,
-			\mike3_lamp_glow_2, 5.0, 5.0,
-			\mike3_lamp_glow_3, 5.0, 5.0,
-		]
-	],
-	[
-		"./textures/outsidelookingin.xml",
-		\lim,
-		[
-			\outside_1, 5.0, 5.0,
-			\outside_2, 5.0, 5.0,
-			\outside_book, 5.0, 5.0,
-			\outside_book_left, 5.0, 5.0,
-			// \outside_book, 5.0, 5.0,
-			// \outside_book_left, 5.0, 5.0,
-		]
-	],
-	[
-		"./textures/carkeek.xml",
-		\ext,
-		[
-			\carkeek_train_blur, 5.0, 1.0,
-			\carkeek_train_start, 5.0, 1.0,
-			\carkeek_train1, 1.0, 1.0,
-			\carkeek_train2, 1.0, 1.0,
-			\carkeek_train3, 1.0, 1.0,
-			\carkeek_train4, 1.0, 1.0,
-			\carkeek_pile, 5.0, 7.0,
-			\carkeek_pile_distant, 5.0, 7.0
-		]
-	],
-
-	[
-		"./textures/diningroom3.xml",
-		\int,
-		[
-			\diningroom3_kaleid, 15.0, 15.0,
-			\diningroom3_detail_books_nofocus, 10.0, 5.0,
-			\diningroom3_detail_books_focus, 5.0, 5.0,
-			\diningroom3_books3, 5.0, 5.0,
-			\diningroom3_books4, 5.0, 5.0,
-			\diningroom3_flower, 5.0, 10.0,
-			\diningroom3_floor, 10.0, 10.0
-		]
-	],
-
-
-
-];
+].clump(2);
 
 r = Task ({
 	// d = d.scramble();
@@ -215,7 +201,7 @@ r = Task ({
 	d.do { |params|
 		var scene, sceneType, views;
 		var fadeOut = 3, fadeIn = 3, loadTime = 10;
-		#scene, sceneType, views = params;
+		#scene, views = params;
 		views = views.clump(3);
 
 		// fade out
@@ -369,7 +355,12 @@ c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/201505
 // c.storePreset(\mike3_book_orbit3)
 // c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/mike3/mike3_05301247_0003.txt")
 // c.storePreset(\mike3_book_orbit4)
-
+//
+// c.storePreset(\mike3_fence)
+// c.storePreset(\mike3_windowplane)
+// c.storePreset(\mike3_sputnik)
+// c.storePreset(\mike3_start)
+// c.storePreset(\mike3_peeker)
 // [
 // 	"./textures/mike3.xml",
 // 	[
@@ -587,17 +578,26 @@ c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/201505
 // ],
 
 
+// CARKEEK NIGHT
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek_night/carkeek_night_06021537_0000.txt")
+// c.storePreset(\carkeek_night_shore, true)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek_night/carkeek_night_06021537_0001.txt")
+// c.storePreset(\carkeek_night_oceanblur)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek_night/carkeek_night_06021537_0002.txt")
+// c.storePreset(\carkeek_night_ground)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek_night/carkeek_night_06021609_0000.txt")
+// c.storePreset(\carkeek_night_hypercolortree)
 
 // scenes
 
 /*
 
- // interiors
+// interiors
 
- <scene>./textures/mike1.xml</scene>
- <scene>./textures/mike2.xml</scene>
- <scene>./textures/mike3.xml</scene>
- <scene>./textures/diningroom3.xml</scene>
+<scene>./textures/mike1.xml</scene>
+<scene>./textures/mike2.xml</scene>
+<scene>./textures/mike3.xml</scene>
+<scene>./textures/diningroom3.xml</scene>
 
 
 // departures
