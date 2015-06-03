@@ -156,6 +156,7 @@ p = "/Users/admin/src/rover/data/AUDIO/EDITS/garden_morning2_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_central_dist_clear_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_porch_13min_EDIT.WAV";
 
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_capture_EDIT.WAV"
 
 (
 ~data = ~loadOrProcess.(p, true);
@@ -168,7 +169,7 @@ p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_porch_13min_EDIT.WAV";
 // define vectors
 (
 ~vectors = ~data.analysis.featuredata.clump( ~data.analysis.numfeatures );
-~numClusters = 8;
+~numClusters = 4;
 k = KMeansMod(~numClusters);
 ~vectors.do{|vec, i| k.add(vec) };
 )

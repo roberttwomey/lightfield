@@ -1,6 +1,6 @@
-x = { |auxLag=5, auxOnsetCurve = 1, t_auxOnset = 0|
+x = { |auxLag=3, auxOnsetCurve = 1, t_auxOnset = 0|
 Out.kr( 0, EnvGen.kr(
-				Env([0,0,1],[0,auxLag], auxOnsetCurve, releaseNode:1, loopNode: 0),
+				Env([0,0,1, 0.5, 0],[0,auxLag, auxLag/2, auxLag/3], auxOnsetCurve, releaseNode:1, loopNode: 0),
 				t_auxOnset, doneAction: 0
 			)
 	)
