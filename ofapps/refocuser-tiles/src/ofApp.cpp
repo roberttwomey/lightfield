@@ -8,7 +8,6 @@
 void ofApp::setup(){
 
     ofSetLogLevel(OF_LOG_NOTICE);
-
 //    ofEnableAlphaBlending();
 
     loadXMLSettings("settings.xml");
@@ -22,8 +21,21 @@ void ofApp::setup(){
 
     ofLog(OF_LOG_NOTICE, "listening for osc messages on port " + ofToString(port));
 
+    startTimeStamp = ofGetTimestampString("%m%d%H%M");
     snapcount = 0;
     bSuspendRender = false;
+
+    // image processing
+    bImageProc = true;
+
+    desaturate = 0.0;
+    minInput = 0.0;
+    maxInput = 1.0;
+    gamma = 1.0;
+    minOutput = 0.0;
+    maxOutput = 1.0;
+    brightness = 1.0;
+    contrast = 1.0;
 }
 
 //--------------------------------------------------------------
@@ -47,7 +59,6 @@ void ofApp::update(){
             shader[i].setUniform2i("ap_loc", xstart, ystart);
             shader[i].setUniform2i("ap_size", xcount, ycount);
 
-        //    updateAperture();
             // focus
             shader[i].setUniform1f("fscale", focus);
 
@@ -67,8 +78,7 @@ void ofApp::update(){
         maskFbo->begin();
         ofClear(0, 0, 0, 0);
         maskFbo->end();
-    //
-    //
+
         fbo->begin();
         ofClear(0, 0, 0, 0);
 
@@ -83,7 +93,39 @@ void ofApp::update(){
         combineShader.end();
         fbo->end();
 
-    }
+
+
+	if(bImageProc) {
+		// image post-processing
+
+        maskFbo->begin();
+        ofClear(255, 0, 0, 255);
+        maskFbo->end();
+
+
+        image_fbo->begin();
+        ofClear(0, 0, 0, 255);
+
+        image_shader.begin();
+
+        image_shader.setUniformTexture("img_tex", fbo->getTextureReference(), 13);
+        image_shader.setUniform1f("desaturate", desaturate);
+        image_shader.setUniform1f("minInput", minInput);
+        image_shader.setUniform1f("maxInput", maxInput);
+        image_shader.setUniform1f("gamma", gamma);
+        image_shader.setUniform1f("minOutput", minOutput);
+        image_shader.setUniform1f("maxOutput", maxOutput);
+        image_shader.setUniform1f("brightness", brightness);
+        image_shader.setUniform1f("contrast", contrast);
+
+        maskFbo->draw(0,0);
+
+        image_shader.end();
+
+        image_fbo->end();
+        }
+
+	}
 
     ofSetWindowTitle( ofToString( ofGetFrameRate(), 2));
 
@@ -109,13 +151,16 @@ void ofApp::draw(){
 
     // draw with transparency to fade
     ofSetColor(255, 255 * (1.0 - ofClamp(fade, 0.0, 1.0)));
-//    ofSetColor(255, fade);
 
     // draw fused image
-    fbo->draw(xoff, 0, width, height);
+    if(bImageProc) {
+        image_fbo->draw(xoff, 0, width, height);
+    } else {
+        fbo->draw(xoff, 0, width, height);
+    }
 
-    // mask off edges of screen
-    float cwidth = height / screen_height * screen_width;
+    // crop to 50 x 55 screen size
+    float cwidth = height / SCREEN_HEIGHT * SCREEN_WIDTH;
     float bar = (width-cwidth)/2.0;
     ofSetColor(0);
     ofFill();
@@ -175,6 +220,9 @@ void ofApp::draw(){
         ofSetColor(255);
         ofTranslate(10, ofGetHeight()-90);
 //        ofDrawBitmapString("tilenum:  \t"+ofToString(tilenum), 0, -15);
+//        ofDrawBitmapString("b/c:      \t"+ofToString(brightness)+" "+ofToString(contrast), 0, -60);
+        ofDrawBitmapString("desat:    \t"+ofToString(desaturate), 0, -45);
+        ofDrawBitmapString("img:      \t"+ofToString(minInput)+" "+ofToString(maxInput) +" "+ofToString(minOutput)+" "+ofToString(maxOutput)+" "+ofToString(gamma), 0, -30);
         ofDrawBitmapString("fade:     \t"+ofToString(fade), 0, -15);
         ofDrawBitmapString("scale:    \t"+ofToString(focus), 0, 0);
         ofDrawBitmapString("roll:     \t"+ofToString(xoffset)+" "+ofToString(yoffset), 0, 15);
@@ -209,8 +257,8 @@ void ofApp::loadXMLSettings(string settingsfile) {
         bDebug = (xml.getValue("debug", 0) > 0);
         bool bFullscreen = (xml.getValue("fullscreen", 0) > 0);
         ofSetFullscreen(bFullscreen);
-        screen_width = xml.getValue("screenwidth", 55.0);
-        screen_height = xml.getValue("screenheight", 52.0);
+        screen_width = xml.getValue("screenwidth", screen_width);
+        screen_height = xml.getValue("screenheight", screen_height);
 
         // osc receiving
         port = xml.getValue("oscport", 12345);
@@ -218,7 +266,7 @@ void ofApp::loadXMLSettings(string settingsfile) {
         // load first scene
         loadXMLScene(scenefiles[0]);
     } else {
-        ofLog(OF_LOG_WARNING, "No scenes in file" +ofToString(settingsfile)+", exiting.");
+        ofLog(OF_LOG_WARNING, "No scenes in file " +ofToString(settingsfile)+", exiting.");
         ofExit();
     }
 
@@ -261,7 +309,7 @@ void ofApp::loadXMLScene(string scenefile) {
     xcount = xml.getValue("xcount", xsubimages);
     ycount = xml.getValue("ycount", ysubimages);
 
-    focus = xml.getValue("scale", 0);
+    focus = float(xml.getValue("scale", 0)) / float(subwidth);
     zoom = xml.getValue("zoom", 1.0);
     xoffset = 0;
     yoffset = 0;
@@ -327,12 +375,17 @@ void ofApp::setupGraphics() {
     fbo = ofPtr<ofFbo>(new ofFbo());
     fbo->allocate(subwidth,subheight);
     if(fbo->isAllocated())
-        cout << "fbo is Allocated" << endl;
+        ofLog(OF_LOG_NOTICE, "main fbo is Allocated");
 
     maskFbo = ofPtr<ofFbo>(new ofFbo());
     maskFbo->allocate(subwidth,subheight);
     if(fbo->isAllocated())
-        cout << "maskFbo is Allocated" << endl;
+        ofLog(OF_LOG_NOTICE, "maskFbo is Allocated");
+
+    image_fbo = ofPtr<ofFbo>(new ofFbo());
+    image_fbo->allocate(subwidth,subheight);
+    if(image_fbo->isAllocated())
+        ofLog(OF_LOG_NOTICE, "image_fbo is Allocated");
 
     // clear the fbos
     fbo->begin();
@@ -342,6 +395,11 @@ void ofApp::setupGraphics() {
     maskFbo->begin();
     ofClear(0,0,0,255);
     maskFbo->end();
+
+    image_fbo->begin();
+    ofClear(0,0,0,255);
+    image_fbo->end();
+
 
     // load camera positions into texture
     int numCams = xsubimages * ysubimages;
@@ -361,10 +419,6 @@ void ofApp::setupGraphics() {
 
         refocusFbo.push_back(thisFbo);
 
-//        refocusFbo[i].allocate(subwidth,subheight);
-//        refocusFbo[i].begin();
-//        ofClear(0,0,0,255);
-//        refocusFbo[i].end();
     }
 
     // make array of float pixels with camera position information
@@ -377,7 +431,8 @@ void ofApp::setupGraphics() {
             pos[i*3 + 1] = offsets[i*2+1];
             pos[i*3 + 2] = 0.0;
         }
-    }
+    }        xoffsetStart = xoffset;
+
 
     campos_tex.allocate(xsubimages, ysubimages, GL_RGB32F);
     campos_tex.getTextureReference().loadData(pos, xsubimages, ysubimages, GL_RGB);
@@ -405,7 +460,7 @@ void ofApp::setupGraphics() {
 //
 //    for (int i=0; i < numCams *3; i++)
 //        aperture_mask[i] = 0.0;
-//setupGraphics
+//
 //    aperture_mask_tex.allocate(xsubimages, ysubimages, GL_RGB32F);
 //    aperture_mask_tex.getTextureReference().loadData(aperture_mask, xsubimages, ysubimages, GL_RGB);
 //
@@ -467,8 +522,11 @@ void ofApp::setupGraphics() {
 
     combineShader.end();
 
-    ofLog(OF_LOG_NOTICE, "combine shader end");
+//    ofLog(OF_LOG_NOTICE, "combine shader end");
 
+    // setup desaturate shader
+    image_shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/image_proc.frag");
+    image_shader.linkProgram();
 
 //        GLint maxTextureSize;
 //        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
@@ -513,40 +571,94 @@ void ofApp::keyPressed(int key){
         mouseXStart = mouseX;
         mouseYStart = mouseY;
         zoomStart = zoom;
-        focusStart = focus;
+        focusStart = focus;        xoffsetStart = xoffset;
+
         xoffsetStart = xoffset;
         yoffsetStart = yoffset;
         xcountStart = xcount;
         ycountStart = ycount;
         xstartStart = xstart;
         ystartStart = ystart;
+        desatStart = desaturate;
     }
 
     if(key=='s')
         snapshot();
     if(key=='f')
         ofToggleFullscreen();
+
+    // image processing
+    if(key=='I') {
+        bImageProc = !bImageProc;
+    }
+    if(key=='1') {
+        minInput = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
+    }
+    if(key=='2') {
+        maxInput = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
+    }
+    if(key=='3') {
+        minOutput = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
+    }
+    if(key=='4') {
+        maxOutput = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
+    }
+    if(key=='5') {
+        gamma= ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
+    }
+    if(key=='6') {
+        // desaturate
+        desaturate = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
+    }
+    if(key=='7') {
+        brightness = ofMap(mouseX, 0.0, ofGetWindowWidth(), 0, 2.0);//, 1.0);
+    }
+    if(key=='8') {
+        contrast = ofMap(mouseX, 0.0, ofGetWindowWidth(), 0, 2.0);//-1.0, 1.0);
+    }
+    if(key=='r') {
+        // reset image params
+        desaturate = 0.0;
+        minInput = 0.0;
+        maxInput = 1.0;
+        gamma = 1.0;
+        minOutput = 0.0;
+        maxOutput = 1.0;
+        brightness = 1.0;
+        contrast = 1.0;
+        zoom = 1.0;
+        xstart = 0;
+        ystart = 0;
+        xcount = xsubimages;
+        ycount = ysubimages;
+        xoffset = 0;
+        yoffset = 0;
+        focus = -0.01;
+    }
+    // refocus parameters
     if(key=='b') {
         // zoom
-        zoom = ofMap((mouseXStart - mouseX), 0, ofGetWindowWidth()/2, zoomStart * 1.0, zoomStart * 2.0);
+        zoom = ofClamp(ofMap((mouseXStart - mouseX), 0, ofGetWindowWidth()/2, zoomStart * 1.0, zoomStart * 2.0), 0.0, 4.0);
     }
     if(key=='z') {
         // aperture location
-        xstart = ofClamp(ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth()/2, xstartStart, xsubimages), 0, xsubimages-xcountStart);
-        ystart = ofClamp(ofMap(mouseY - mouseYStart, 0, ofGetWindowHeight()/2, ystartStart, ysubimages), 0, ysubimages-ycountStart);
+        xstart = ofClamp(xstartStart + ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth(), 0, xsubimages), 0, xsubimages-xcountStart);
+        ystart = ofClamp(ystartStart + ofMap(mouseY - mouseYStart, 0, ofGetWindowHeight(), 0, ysubimages), 0, ysubimages-ycountStart);
     }
     if(key=='x') {
         // aperture width
-        xcount = ofClamp(ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth()/2, xcountStart, xcountStart * 2.0), 0, xsubimages);
-        ycount = ofClamp(ofMap(mouseY - mouseYStart, 0, ofGetWindowHeight()/2, ycountStart, ycountStart * 2.0), 0, ysubimages);
+        xcount = ofClamp(xcountStart + ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth(), 0, xsubimages), 0, xsubimages-xstartStart);
+        ycount = ofClamp(ycountStart + ofMap(mouseY - mouseYStart, 0, ofGetWindowHeight(), 0, ysubimages), 0, ysubimages-ystartStart);
     }
     if(key == 'v') {
         // scroll
-        xoffset = ofMap(mouseXStart - mouseX, 0, ofGetWindowWidth(), xoffsetStart, -subwidth);
-        yoffset = ofMap(mouseYStart - mouseY, 0, ofGetWindowHeight(), yoffsetStart, -subheight);
+        xoffset = ofClamp(xoffsetStart - ofMap(mouseXStart - mouseX, 0, ofGetWindowWidth(), 0, 1.0), -1.0, 1.0);
+        yoffset = ofClamp(yoffsetStart - ofMap(mouseYStart - mouseY, 0, ofGetWindowHeight(), 0, 1.0), -1.0, 1.0);
     }
+    // TODO: fix this control
     if(key == 'c')
-        focus = min(ofMap(mouseXStart - mouseX, 0, ofGetWindowWidth()/2, focusStart, minScale), maxScale);
+        focus = ofClamp(focusStart - ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth(), 0, 0.5), -0.5, 0.01);
+        //-1.0 * ofClamp(focusStart + ofMap(mouseX - mouseXStart, 0, ofGetWindowWidth(), -0.5, 0.5), 0, 0.5);
     if(key == 't') {
         bShowThumbnail = (bShowThumbnail == 0);
         cout << "t " << bShowThumbnail << endl;
@@ -575,27 +687,31 @@ void ofApp::process_OSC(ofxOscMessage m) {
     else if( m.getAddress() == "/loadScene") {
         string scenefile = m.getArgAsString(0);
 
-        ofFile file(scenefile);
-
-        if(file.doesFileExist(scenefile)) {
-            // suspend render
-            bSuspendRender = true;
-
-            freeLightfieldData();
-
-            // TODO: I think this vector of scene files is unnecessary
-            scenefiles.clear();
-            scenefiles.push_back(scenefile);
-
-            loadXMLScene(scenefile);
-
-            loadLightfieldData();
-
-            setupGraphics();
-
-            bSuspendRender = false;
+        if(scenefile == scenefiles[0]) {
+                ofLog(OF_LOG_NOTICE, "requested scene "+scenefile+" is already loaded");
         } else {
-            ofLog(OF_LOG_WARNING, "requested file " + scenefile + " does not exist.");
+            ofFile file(scenefile);
+
+            if(file.doesFileExist(scenefile)) {
+                // suspend render
+                bSuspendRender = true;
+
+                freeLightfieldData();
+
+                // TODO: I think this vector of scene files is unnecessary
+                scenefiles.clear();
+                scenefiles.push_back(scenefile);
+
+                loadXMLScene(scenefile);
+
+                loadLightfieldData();
+
+                setupGraphics();
+
+                bSuspendRender = false;
+            } else {
+                ofLog(OF_LOG_WARNING, "requested file " + scenefile + " does not exist.");
+            }
         }
     }
     else if( m.getAddress() == "/fade") {
@@ -761,11 +877,11 @@ void ofApp::snapshot() {
     bool done = false;
 
     snapcount = 0;
+
     while(!done) {
         ofFile file(scenefiles[0]);
         string filename = file.getBaseName();
-        timestamp = "./snapshots/"+filename+ "_" +ofGetTimestampString("%m%d%H%M")+"_" + ofToString(snapcount, 4, '0');
-//        timestamp = "./snapshots/"+filename+"_" + ofToString(snapcount, 4, '0');
+        timestamp = "./snapshots/"+filename+ "_" +startTimeStamp+"_" + ofToString(snapcount, 4, '0');
         imgfilename = timestamp + ".jpg";
         paramfilename = timestamp + ".txt";
         ofFile test;
@@ -791,10 +907,18 @@ void ofApp::snapshot() {
     screenGrab.setUseTexture(false);
 
     //copy the pixels from FBO to the pixel array; then set the normal ofImage from those pixels; and use the save method of ofImage
-    fbo->begin();
-    glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glReadPixels(0, 0, fbo->getWidth(), fbo->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, fbo_pixels);
 
+    // save either image-processed or raw fbo version as necessary
+    if(bImageProc) {
+        image_fbo->begin();
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        glReadPixels(0, 0, image_fbo->getWidth(), image_fbo->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, fbo_pixels);
+
+    } else {
+        fbo->begin();
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        glReadPixels(0, 0, fbo->getWidth(), fbo->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, fbo_pixels);
+    }
     // copy cropped window from fbo to screengrab pixels
     for(int x=edge; x<edge+crop_w; x++) {
         for(int y=0; y<h; y++) {
@@ -809,8 +933,13 @@ void ofApp::snapshot() {
     screenGrab.setFromPixels(img_pixels, crop_w, h, OF_IMAGE_COLOR);
     screenGrab.saveImage(imgfilename, OF_IMAGE_QUALITY_BEST);
 
-    fbo->end();
-    ofLog(OF_LOG_VERBOSE, "[DiskOut]  saved frame " + imgfilename );
+    if(bImageProc) {
+        image_fbo->end();
+    } else {
+        fbo->end();
+    }
+
+    ofLog(OF_LOG_NOTICE, "[DiskOut]  saved frame " + imgfilename );
 
     // save refocusing parameters to companion text file
     ofFile file(paramfilename, ofFile::WriteOnly);
@@ -821,6 +950,14 @@ void ofApp::snapshot() {
     file << xstart << "," << ystart << endl;
     file << xcount << "," << ycount << endl;
     file << zoom << endl;
+
+    // dump image processing parameters if necessary
+    if(bImageProc) {
+        file << minInput << "," << maxInput << endl;
+        file << minOutput << "," << maxOutput << endl;
+        file << gamma << endl;
+        file << desaturate << endl;
+    };
 
     file.close();
 }

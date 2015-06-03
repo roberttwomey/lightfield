@@ -44,9 +44,8 @@ public:
     float desatStart;
     bool bPressed;
 
-
+	// osc messaging
     void process_OSC(ofxOscMessage m);
-
     ofxOscReceiver receiver;
     int port;
 
@@ -58,17 +57,16 @@ public:
     ofFbo campos_tex;
     ofFbo subimg_corner_tex;
 
-
     // render fbos as pointers
     ofPtr <ofFbo> fbo; // main frame buffer
     ofPtr <ofFbo> maskFbo; // used for drawing... TODO: how does this work?
-    ofPtr <ofFbo> image_fbo;
-    
+    ofPtr <ofFbo> image_fbo; // image processing buffer
+
 
 	// refocus shaders
     ofShader shader;
-    ofShader image_shader;
-    
+    ofShader image_shader; // image post-process shader
+
 	// refocus parameters
     float focus;
     float zoom;
@@ -89,12 +87,11 @@ public:
     float desat_val;
     float brightness;
     float contrast;
-    
+
     // camera images
     int xsubimages, ysubimages, subwidth, subheight;
 
     float offsets[MAX_OFFSETS];
-
 
     // snapshot
     int snapcount;
@@ -103,7 +100,11 @@ public:
     bool bShowThumbnail;
     bool bHideCursor;
     bool bDebug;
-    
+
+    // physical setup
+    float screen_width;
+    float screen_height;
+
 	// rendering control
     bool bSuspendRender;
 
