@@ -9,7 +9,8 @@
 #define MAX_LF_TILES 20
 
 #define SCREEN_WIDTH 55.0
-#define SCREEN_HEIGHT 50.0
+#define SCREEN_HEIGHT 52.0
+
 
 class ofApp : public ofBaseApp{
 public:
@@ -31,6 +32,7 @@ public:
 //    float *aperture_mask;
 
     void snapshot();
+    string startTimeStamp;
 
     void keyPressed  (int key);
     void keyReleased(int key);
@@ -39,10 +41,11 @@ public:
     float focusStart, zoomStart;
     int xcountStart, ycountStart;
     int xstartStart, ystartStart;
+    float desatStart;
     bool bPressed;
 
+	// osc messaging
     void process_OSC(ofxOscMessage m);
-
     ofxOscReceiver receiver;
     int port;
 
@@ -60,14 +63,15 @@ public:
     ofFbo tilepixoffset_tex;
 
     // render fbos as pointers
-    ofPtr <ofFbo> fbo;
-    vector <ofPtr <ofFbo> > refocusFbo;
-    ofPtr <ofFbo> maskFbo;
+    ofPtr <ofFbo> fbo; // main frame buffer
+    vector <ofPtr <ofFbo> > refocusFbo; // per-tile refocus buffers
+    ofPtr <ofFbo> maskFbo; // used for drawing... TODO: how does this work?
+    ofPtr <ofFbo> image_fbo; // image post-processing buffer
 
 	// refocus shaders
-    ofShader shader[MAX_LF_TILES];
-
+    ofShader shader[MAX_LF_TILES]; // per-tile shaders
     ofShader combineShader;
+    ofShader image_shader; // image post-process shader
 
 	// refocus parameters
     float focus;
@@ -78,6 +82,17 @@ public:
     float xoffset, yoffset;
 
     float fade;
+
+    // image manipulation
+    bool bImageProc;
+    float minInput;
+    float maxInput;
+    float gamma;
+    float minOutput;
+    float maxOutput;
+    float desaturate;
+    float brightness;
+    float contrast;
 
     // camera images
     int xsubimages, ysubimages, subwidth, subheight;
@@ -100,8 +115,6 @@ public:
     // physical setup
     float screen_width;
     float screen_height;
-
-
 
 	// rendering control
     bool bSuspendRender;

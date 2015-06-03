@@ -8,24 +8,24 @@
 void ofApp::setup(){
 
     ofSetLogLevel(OF_LOG_NOTICE);
-    ofEnableAlphaBlending();
+
+//    ofEnableAlphaBlending();
 
     loadXMLSettings("settings.xml");
 
     loadLightfieldData();
 
-    desat_val = 0.5;
-    
     setupGraphics();
 
     // OSC - listen on the given port
     receiver.setup(port);
+
     ofLog(OF_LOG_NOTICE, "listening for osc messages on port " + ofToString(port));
 
     startTimeStamp = ofGetTimestampString("%m%d%H%M");
     snapcount = 0;
     bSuspendRender = false;
-    
+
     // image processing
     bImageProc = true;
 
@@ -71,9 +71,9 @@ void ofApp::update(){
 		shader.end();
 
 		fbo->end();
-        
+
         if(bImageProc) {
-            // desaturation shader
+			// image post-processing
             maskFbo->begin();
             ofClear(255, 0, 0, 255);
             maskFbo->end();
@@ -81,9 +81,8 @@ void ofApp::update(){
             image_fbo->begin();
             ofClear(0, 0, 0, 255);
 
-            // image processing shader
             image_shader.begin();
-            
+
             image_shader.setUniformTexture("img_tex", fbo->getTextureReference(), 3);
             image_shader.setUniform1f("desat_val", desat_val);
             image_shader.setUniform1f("minInput", minInput);
@@ -97,10 +96,10 @@ void ofApp::update(){
             maskFbo->draw(0,0);
 
             image_shader.end();
-            
+
             image_fbo->end();
         }
-        
+
 	}
 
     ofSetWindowTitle( ofToString( ofGetFrameRate(), 2));
@@ -134,7 +133,7 @@ void ofApp::draw(){
     } else {
       fbo->draw(xoff, 0, width, height);
     }
-    
+
     // crop to 50 x 55 screen size
     float cwidth = height / SCREEN_HEIGHT * SCREEN_WIDTH;
     float bar = (width-cwidth)/2.0;
@@ -204,6 +203,8 @@ void ofApp::loadXMLSettings(string settingsfile) {
         bDebug = (xml.getValue("debug", 0) > 0);
         bool bFullscreen = (xml.getValue("fullscreen", 0) > 0);
         ofSetFullscreen(bFullscreen);
+        screen_width = xml.getValue("screenwidth", 55.0);
+        screen_height = xml.getValue("screenheight", 52.0);
 
         // osc receiving
         port = xml.getValue("oscport", 12345);
@@ -249,6 +250,15 @@ void ofApp::loadXMLScene(string scenefile) {
     xoffset = 0;
     yoffset = 0;
 
+    // read these from the settings file
+//    // debug information (text, mouse, thumbnail) //
+//    bShowThumbnail = (xml.getValue("drawthumbnail", 0) > 0);
+//    bHideCursor = (xml.getValue("hidecursor", 0) > 0);
+//    bDebug = (xml.getValue("debug", 0) > 0);
+//
+//    // osc receiving
+//    port = xml.getValue("oscport", 12345);
+
     // read camera positions
     xml.pushTag("cameras");
     for(int i = 0; i < xml.getNumTags("cam"); i++) {
@@ -272,11 +282,12 @@ void ofApp::loadLightfieldData() {
 void ofApp::freeLightfieldData() {
 
     lfplane.clear();
-    ofLog(OF_LOG_NOTICE, "cleared texture 0");
+    ofLog(OF_LOG_NOTICE, "cleared texture");
         //  lfplanes[i].setTextureWrap(GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);//GL_REPEAT, GL_REPEAT);//
 //        GLfloat border[4]={0, 1, 0, 0};
 //        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border);
         //lfplanes[i].setTextureMinMagFilter(GL_LINEAR, GL_LINEAR);//NEAREST, GL_NEAREST);
+
 }
 
 
@@ -294,7 +305,7 @@ void ofApp::setupGraphics() {
     maskFbo->allocate(subwidth,subheight);
     if(fbo->isAllocated())
         ofLog(OF_LOG_NOTICE, "maskFbo is Allocated");
-    
+
     image_fbo = ofPtr<ofFbo>(new ofFbo());
     image_fbo->allocate(subwidth,subheight);
     if(image_fbo->isAllocated())
@@ -314,7 +325,7 @@ void ofApp::setupGraphics() {
     ofClear(0,0,0,255);
     image_fbo->end();
 
-    
+
     // load camera positions into texture
     int numCams = xsubimages * ysubimages;
 
@@ -383,13 +394,13 @@ void ofApp::setupGraphics() {
     // setup desaturate shader
     image_shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/image_proc.frag");
     image_shader.linkProgram();
-    
+
     image_shader.begin();
-    
+
     image_shader.setUniform1f("desat_val", desat_val);
-    
+
     image_shader.end();
-        
+
     //    GLint maxTextureSize;
     //    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
     //    std::cout <<"Max texture size: " << maxTextureSize << std::endl;
@@ -447,7 +458,7 @@ void ofApp::keyPressed(int key){
         snapshot();
     if(key=='f')
         ofToggleFullscreen();
-    
+
     // image processing
     if(key=='I') {
         bImageProc = !bImageProc;
@@ -477,6 +488,7 @@ void ofApp::keyPressed(int key){
     if(key=='8') {
         contrast = ofMap(mouseX, 0.0, ofGetWindowWidth(), 0, 2.0);//-1.0, 1.0);
     }
+
     // refocus parameters
     if(key=='b') {
         // zoom
@@ -713,11 +725,11 @@ void ofApp::snapshot() {
     bool done = false;
 
     snapcount = 0;
+
     while(!done) {
         ofFile file(scenefiles[0]);
         string filename = file.getBaseName();
         timestamp = "./snapshots/"+filename+ "_" +startTimeStamp+"_" + ofToString(snapcount, 4, '0');
-//        timestamp = "./snapshots/"+filename+"_" + ofToString(snapcount, 4, '0');
         imgfilename = timestamp + ".jpg";
         paramfilename = timestamp + ".txt";
         ofFile test;
@@ -732,7 +744,7 @@ void ofApp::snapshot() {
     unsigned char* fbo_pixels = new unsigned char[w*h*3];
 
     // crop to projection size
-    int crop_w = h / SCREEN_HEIGHT * SCREEN_WIDTH;
+    int crop_w = h / screen_height * screen_width;
     int edge = (w-crop_w)/2.0;
 
     // output images
