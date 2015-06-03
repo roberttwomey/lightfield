@@ -9,7 +9,7 @@
 
 uniform sampler2DRect img_tex;
 
-uniform float desat_val;
+uniform float desaturate;
 uniform float minInput;
 uniform float maxInput;
 uniform float gamma;
@@ -26,7 +26,7 @@ vec3 rgb2hsv(vec3 c)
 //    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
     vec4 p = c.g < c.b ? vec4(c.bg, K.wz) : vec4(c.gb, K.xy);
     vec4 q = c.r < p.x ? vec4(p.xyw, c.r) : vec4(c.r, p.yzx);
-    
+
     float d = q.x - min(q.w, q.y);
     float e = 1.0e-10;
     return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
@@ -59,10 +59,10 @@ vec3 hsv2rgb(vec3 c)
 
 //vec3 rgb2yuv(vec3 c) {
 //    // http://src.chromium.org/svn/trunk/o3d/samples/shaders/yuv2rgb-glsl.shader
-//    
+//
 //    // [0,1] to [-.5,.5] as part of the transform.
 //    vec4 channels = vec4(c, 1.0);
-//    
+//
 //    mat4 conversion = mat4(1.0,  0.0,    1.402, -0.701,
 //                           1.0, -0.344, -0.714,  0.529,
 //                           1.0,  1.772,  0.0,   -0.886,
@@ -74,27 +74,27 @@ vec3 hsv2rgb(vec3 c)
 
 vec3 rgb2yuv(vec3 rgb) {
     vec4 channels = vec4(rgb, 1.0);
-    
+
     mat4 coeffs = mat4(
         0.299,  0.587,  0.114, 0.000,
         -0.147, -0.289,  0.436, 0.000,
         0.615, -0.515, -0.100, 0.000,
         0.000,  0.000,  0.000, 0.000
     );
-    
+
     return (channels * coeffs).xyz;
 }
 
 vec3 yuv2rgb(vec3 yuv) {
     vec4 channels = vec4(yuv, 1.0);
-    
+
     mat4 coeffs = mat4(
                    1.000,  0.000,  1.140, 0.000,
                    1.000, -0.395, -0.581, 0.000,
                    1.000,  2.032,  0.000, 0.000,
                    0.000,  0.000,  0.000, 0.000
                    );
-    
+
     return (channels * coeffs).xyz;
 }
 
@@ -102,18 +102,18 @@ vec3 yuv2rgb(vec3 yuv) {
 void main()
 {
     vec3 color = texture2DRect(img_tex,gl_TexCoord[0].st).rgb;
-    
-    
+
+
     // rgb -> yuv
 //    color = rgb2yuv(color.rgb);
-    
+
     // 1. levels/gamma for RGB color
     // levels input range
     color = min(max(color - vec3(minInput), vec3(0.0)) / (vec3(maxInput) - vec3(minInput)), vec3(1.0));
-    
+
     //gamma correction
     color = pow(color, vec3(gamma));
-    
+
     //levels output range
     color = mix(vec3(minOutput), vec3(maxOutput), color);
 
@@ -124,21 +124,21 @@ void main()
 //    vec3 hsv = rgb2hsv(color.rgb);
 //
 //    float value = hsv.b;
-//    
+//
 //    //value input range
 //    value = min(max(value - float(minInput), float(0.0)) / (float(maxInput) - float(minInput)), float(1.0));
-//    
+//
 //    //gamma correction
 //    value = pow(value, float(gamma));
-//    
+//
 //    //levels output range
 //    vec3 hsv_desat = vec3(hsv.rg, mix(float(minOutput), float(maxOutput), value));
 
-    
+
     // 3. percent desaturate for HSV color
-    
+
     vec3 hsv = rgb2hsv(color.rgb);
-    vec3 hsv_desat = hsv * vec3(1.0, 1.0-desat_val, 1.0);
+    vec3 hsv_desat = hsv * vec3(1.0, 1.0-desaturate, 1.0);
     color = hsv2rgb(hsv_desat);
 
 //    // 4. YUV desaturate
@@ -147,10 +147,10 @@ void main()
 //    color = yuv2rgb(yuv_desat);
 
     // 4. Brightness and Contrast
-//    
+//
 //    vec3 colorContrasted = (color) * contrast;
 //    vec3 bright = colorContrasted + vec3(brightness);
 //    color = bright;
-    
+
     gl_FragColor = vec4(color, 1.0);
 }

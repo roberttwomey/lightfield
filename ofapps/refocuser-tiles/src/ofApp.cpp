@@ -682,7 +682,7 @@ void ofApp::keyPressed(int key){
 void ofApp::process_OSC(ofxOscMessage m) {
 
     if( m.getAddress() == "/focus" ){
-        focus = subwidth * m.getArgAsFloat(0);
+        focus =  m.getArgAsFloat(0);
     }
     else if( m.getAddress() == "/loadScene") {
         string scenefile = m.getArgAsString(0);
@@ -824,11 +824,11 @@ void ofApp::process_OSC(ofxOscMessage m) {
     }
 
     else if(m.getAddress() == "/xscroll"){
-        xoffset = subwidth * m.getArgAsFloat(0);
+        xoffset = m.getArgAsFloat(0);
     }
 
     else if(m.getAddress() == "/yscroll"){
-        yoffset = subheight * m.getArgAsFloat(0);
+        yoffset = m.getArgAsFloat(0);
     }
 
     else if(m.getAddress() == "/zoom"){

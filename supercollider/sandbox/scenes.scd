@@ -1,6 +1,6 @@
 // control mixer
 
-c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("192.168.0.100", 12345));
+c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("192.168.2.2", 12345));
 // c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("refocuser.local", 12345));
 
 ~fader=ControlFade(1.0);
@@ -29,7 +29,7 @@ postf("\n");
 
 // search for certain preset
 (
-q = "carkeek_night";
+q = "tunnel";
 c.presets.keys.do { |p|
 	p.asString.contains(q).if{ postf("%%, 5.0, 5.0,\n", "\\", p);};
 };
