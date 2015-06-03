@@ -101,8 +101,11 @@ GrainScanner1 {
 						scanners[index].synths.do{ |synth, j|
 							synth
 							.ctllag_(fadeTime)
-							.panCenter_((panCen + (scanners.size.reciprocal * index)).wrap(-1,1))
-							.panOffset_(j) // 180 deg offset from one another (stereo sources)
+							// .panCenter_((panCen + (scanners.size.reciprocal * index)).wrap(-1,1))
+							// .panOffset_(j) // 180 deg offset from one another (stereo sources)
+							// changed for simple l/r hard pans
+							.panCenter_(-1 + (2*j))
+							.panOffset_(0) // 180 deg offset from one another (stereo sources)
 						};
 						dict.keysValuesDo({ |k,v|
 							scanners[index].perform((k++'_').asSymbol, v);
@@ -329,11 +332,11 @@ GrainScanner1 {
 }
 
 GrainScan1 {
-	classvar <grnSynthDef;
+	classvar <grnSynthDef, <verbDef;
 
 	// copyArgs
 	var <outbus, bufferOrPath;
-	var server, <buffers, <group, <synths, <bufDur, <view, <bufferPath;
+	var server, <buffers, <group, <synths, <verbSynths, <bufDur, <view, <bufferPath, <auxBus;
 	var <grnDurSpec, <grnRateSpec, <grnRandSpec, <pntrRateSpec, <grnDispSpec, <densitySpec, <fluxRateSpec, <ampSpec;
 	var <>newMomentFunc;
 
@@ -358,6 +361,8 @@ GrainScan1 {
 
 			this.class.grnSynthDef ?? { this.loadSynthLib; 0.2.wait; };
 			server.sync;
+
+			auxBus = CtkAudio.play(2);
 
 			case
 			{ bufferOrPath.isKindOf(String) }{
@@ -432,13 +437,22 @@ GrainScan1 {
 
 	initSynths {
 		var pancen = rrand(-1,1.0);
+
 		synths = buffers.collect{|buf, i|
-			grnSynthDef.note(target: group)
-				.outbus_(outbus)
-				.buffer_(buf).bufnum_(buf.bufnum)
-				.grainDur_(2.7)
-				.panCenter_(pancen).panOffset_(i)
-		}
+			grnSynthDef.note(addAction: \head, target: group)
+			.outbus_(outbus)
+			.auxOutbus_(auxBus.bus + i)
+			.buffer_(buf).bufnum_(buf.bufnum)
+			.grainDur_(2.7)
+			//.panCenter_(pancen).panOffset_(i)
+			.panCenter_(-1 + (2*i)).panOffset_(0)
+		};
+
+		// TODO: move this to GrainScanner
+		verbSynths = synths.collect{ |synth, i|
+			verbDef.note(addAction: \tail, target: group)
+			.outbus_(0+i).inbus_(auxBus.bus+i).mix_(1).play
+		};
 	}
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -478,9 +492,13 @@ GrainScan1 {
 	amp_ {|amp| synths.do(_.amp_(amp)); this.changed(\amp, amp); }
 
 
-	// TODO:
-	// align to the moment in secs
-	timeAlign { |secs| }
+	sendToReverb { |onsetTime = 10|
+		 synths.do(_.auxLag_(onsetTime));
+		 synths.do(_.t_auxOnset_(1));
+	}
+
+	auxOnsetCurve_ { |curveNum| synths.do(_.auxOnsetCurve_(curveNum)) }
+
 
 	// sync the synths' pointers by resetting to beginning of loop
 	// optionally supply pointer rate so they stay sync'd
@@ -520,22 +538,24 @@ GrainScan1 {
 
 	free {
 		group.freeAll;
-		buffers.do(_.free)
+		buffers.do(_.free);
+		auxBus.free;
 	}
 
 
 	loadSynthLib {
+
 		grnSynthDef = CtkSynthDef(\grainScanner1, {
 			arg
 			buffer, bufnum,
 			outbus, 			// main out
-			outbus_aux,			// outbus to reverb
+			auxOutbus,			// outbus to reverb
 			start=0, end=1,		// bounds of grain position in sound file
 			grainRand = 0,		// gaussian trigger: 0 = regular at grainRate, 1 = random around grainRate
 			grainRate = 10, grainDur = 0.04,
 			grnDisp = 0.01,		// position dispersion of the pointer, as percentage of soundfile duration
 			//pitch=1,
-			auxmix=0,
+			// auxmix=0,
 			amp=1,
 			fadein = 2, fadeout = 2,
 			posRate = 1,		// change the speed of the grain position pointer (can be negative)
@@ -553,7 +573,8 @@ GrainScan1 {
 			panCenter = 0,
 			panOffset = 0.5,
 			globalAmp = 1,		// for overall control over all instances
-			ctllag = 0.1, ctlcurve = 0; // fade some of the controls
+			ctllag = 0.1, ctlcurve = 0, // fade some of the controls
+			t_auxOnset = 0, auxLag = 10, auxOnsetCurve = 3;
 
 			var
 			env, grain_dens, amp_scale, trig, b_frames,
@@ -608,21 +629,97 @@ GrainScan1 {
 
 			/* overall amp control */
 			sig = Limiter.ar( sig * vol * env, -0.5.dbamp);
+			out = sig * globalAmp;
 
 			/* aux send control */
-			// auxmix_lagged = Lag.kr(auxmix, amp_lag);
+			auxmix_lagged = EnvGen.kr(
+				Env([0,0,1],[0,auxLag], auxOnsetCurve, releaseNode:1, loopNode: 0),
+				t_auxOnset, doneAction: 0
+			).sqrt;
+
 			// balance between dry and wet routing
 			// out = sig * (1 - auxmix_lagged).sqrt;
 			// aux = sig * auxmix_lagged.sqrt;
-			out = sig;
+
 			panPos = panCenter + panOffset;
 			// out = PanAz.ar(4, out, (panPos + (0.1 * flux)).wrap(-1,1));
 			out = PanAz.ar(2, out, (panPos + (0.1 * flux)).wrap(-1,1)); // keep in the front of the container
 
 			// send signals to outputs
-			Out.ar( outbus,		out * globalAmp);
-			// Out.ar( outbus_aux,	aux );
-		})
+			Out.ar( outbus,		out);
+			Out.ar( auxOutbus,	out * auxmix_lagged );
+		});
+
+		verbDef = CtkSynthDef(\verb_localin, {
+			arg outbus = 0, inbus,
+
+decayTime = 2, mix = 0.5, apDecay = 0.2, scaleReflections = 1, dampFreq = 1800,
+			maxSclReflect = 5.8,
+			maxDecayTime = 2.4,
+			maxAPDecay = 0.5,
+			minMix = 0.2,
+			minDampFreq = 350,
+			maxDampFreq = 16500
+			;
+
+			var src, combDels, g, lIn, lOut, delay, combs, ap, out;
+
+			// var apDecay = 0.2; //2.0;
+			var apDelay = 0.095;
+			var apOrder = 6;
+			var xFormEnv, t_auxOnset = 0, auxLag = 10, auxOnsetCurve = 3;
+
+
+			src = In.ar(inbus, 1);
+			// src = In.ar(0, 1);
+			xFormEnv = EnvGen.kr(
+				Env([0,0,1],[0,auxLag], auxOnsetCurve, releaseNode:1, loopNode: 0),
+				t_auxOnset, doneAction: 0
+			);
+
+
+			maxSclReflect = 5.8,
+			maxDecayTime = 2.4,
+			maxAPDecay = 0.5,
+			minMix = 0.2,
+			minDampFreq = 350,
+			maxDampFreq = 16500,
+
+			combDels = ([0.0297, 0.0371, 0.0411, 0.0437] + 4.collect({Rand(0.0, 0.004)})) * scaleReflections;
+
+			// calculate feedback coefficient
+			g = 10.pow(-3 * combDels / decayTime);
+
+			lIn = LocalIn.ar(4);
+
+			combs = DelayC.ar(src + (lIn * g),
+				// combDels.maxItem - ControlRate.ir.reciprocal,
+				2.5 - ControlRate.ir.reciprocal,
+				combDels - ControlRate.ir.reciprocal
+			);
+
+			combs = LPF.ar(combs, dampFreq); // damping
+
+			combs = LeakDC.ar(combs);
+
+			lOut = LocalOut.ar(combs);
+
+			ap = combs.sum;
+			apOrder.do({|i|
+				ap = AllpassC.ar( ap,
+					apDelay, // 2.0,
+					apDelay.rand * LFTri.kr( rrand(8,17.0).reciprocal ).range(0.9, 1), // mod delays a bit
+					apDecay
+				);
+			});
+
+			delay = DelayN.ar(src, ControlRate.ir.reciprocal, ControlRate.ir.reciprocal); // make up delay
+
+			out = (mix.sqrt * ap) + ((1 - mix.sqrt) * delay);
+
+			// Out.ar(0, out.dup)
+			ReplaceOut.ar(outbus, out)
+		});
 	}
 }
 

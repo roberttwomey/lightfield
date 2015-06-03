@@ -97,6 +97,9 @@ x.scanners.do{|scnr| scnr.synths.do(_.fadeout_(0.5))}
 x.scanners.do{|scnr| scnr.synths.do(_.ctllag_(0.05))}
 x.scanners.do{|scnr| scnr.synths.do(_.ctllag_(0.05))}
 
+// send to aux bus
+x.scanners.do{|scnr| scnr.synths.do({ |synth, i | synth.outbus_(a.bus+i) }) };
+
 // in order to use the scmir frames, use GrainScanner2's
 // clusterFramesByDist method
 g = GrainScanner2( 0, p )

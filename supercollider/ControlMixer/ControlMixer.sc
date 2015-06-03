@@ -32,7 +32,7 @@ ControlMixer {
 			broadcastBus = CtkControl(1, 0, 0, busnum);
 
 			validLFOs = [
-				'static', SinOsc, LFPar, LFTri, LFCub, LFDNoise0, LFDNoise1, LFDNoise3
+				'static', SinOsc, LFPar, LFSaw, LFTri, LFCub, LFDNoise0, LFDNoise1, LFDNoise3
 			].collect(_.asSymbol);
 
 			ratePeriodSpec = ControlSpec(45.reciprocal, 15, 2.5, default: 3);
