@@ -106,7 +106,8 @@ GrainScanner1 {
 
 				// recall the synth settings
 				fork({
-					var panCen = rrand(-1.0,1.0);
+					var panCen = rrand(-1.0,1.0), ampScale;
+					ampScale = [0, -5, -8].dbamp.scramble;
 
 					preset[\params].do{|dict, index|
 						scanners[index].synths.do{ |synth, j|
@@ -119,7 +120,12 @@ GrainScanner1 {
 							.panOffset_(0) // 180 deg offset from one another (stereo sources)
 						};
 						dict.keysValuesDo({ |k,v|
-							scanners[index].perform((k++'_').asSymbol, v);
+							if( k.asSymbol == 'amp',
+								{	postf("scaling amp: % % > %",k, v, v * ampScale[index] );
+									scanners[index].perform((k++'_').asSymbol, v * ampScale[index] )
+								},
+								{scanners[index].perform((k++'_').asSymbol, v)}
+							);
 						})
 					};
 					lastRecalledPreset = name.asSymbol;
@@ -355,9 +361,10 @@ GrainScanner1 {
 			// dynamic arg params
 			minSclReflect = 1, maxSclReflect = 5.8,
 			minDecayTime = 0.5, maxDecayTime = 2.4,
-			minAPDecay = 0.05, maxAPDecay = 0.3,
+			minAPDecay = 0.05, maxAPDecay = 3.3,
 			minMix = 0.2, maxMix = 0.85,
-			minDampFreq = 1700, maxDampFreq = 16500;
+			minDampFreq = 1700, maxDampFreq = 16500,
+			verbCutTail = 8;
 
 
 			var src, combDels, g, lIn, lOut, delay, combs, ap, out;
@@ -368,20 +375,23 @@ GrainScanner1 {
 			src = In.ar(inbus, 1);
 
 			xFormEnv = EnvGen.kr(
-				Env([0,0,1],[0,auxLag], auxOnsetCurve, releaseNode:1, loopNode: 0),
+				Env([0,0,1],[0,auxLag*0.6], auxOnsetCurve, releaseNode:1, loopNode: 0),
 				TDelay.kr(t_auxOnset, 0.05), doneAction: 0
 			);
 			longOnsetxFormEnv = EnvGen.kr(
-				Env([0,0,1],[0,auxLag*2], auxOnsetCurve, releaseNode:1, loopNode: 0),
+				Env([0,0,1],[0,auxLag], auxOnsetCurve, releaseNode:1, loopNode: 0),
 				TDelay.kr(t_auxOnset, 0.05), doneAction: 0
 			);
 
+			longOnsetxFormEnv = LagUD.kr(longOnsetxFormEnv, 0.1, verbCutTail);
+			xFormEnv = LagUD.kr(xFormEnv, 0.1, verbCutTail);
+
 			sclReflect	= LinLin.kr(longOnsetxFormEnv, 0,1,
-				minSclReflect, TRand.kr( maxSclReflect*0.3, maxSclReflect, t_auxOnset)).poll(label: "sclReflect");
+				minSclReflect, TRand.kr( maxSclReflect*0.7, maxSclReflect, t_auxOnset)).poll(label: "sclReflect");
 			decTime		= LinLin.kr(xFormEnv, 0,1,
-				minDecayTime, TRand.kr( maxDecayTime*0.3, maxDecayTime, t_auxOnset) ).poll(label: "decTime");
-			apDec		= LinLin.kr(xFormEnv, 0,1,
-				minAPDecay, TRand.kr( maxAPDecay*0.3, maxAPDecay, t_auxOnset)).poll(label: "apDec");
+				minDecayTime, TRand.kr( maxDecayTime*0.25, maxDecayTime, t_auxOnset) ).poll(label: "decTime");
+			apDec		= LinLin.kr(longOnsetxFormEnv, 0,1,
+				minAPDecay, TRand.kr( maxAPDecay*0.25, maxAPDecay, t_auxOnset)).poll(label: "apDec");
 			verbMix		= LinLin.kr(longOnsetxFormEnv, 0,1,
 				minMix, maxMix);
 			dampFrq		= LinLin.kr(longOnsetxFormEnv, 0,1,
@@ -733,8 +743,9 @@ GrainScan1 {
 			out = PanAz.ar(2, out, panPos ); // keep in the front of the container
 
 			// send signals to outputs
-			Out.ar( outbus,		out);
-			Out.ar( auxOutbus,	out * auxmix_lagged );
+			// Out.ar( outbus,		out);
+			Out.ar( outbus,		DelayN.ar(out, ControlRate.ir.reciprocal, ControlRate.ir.reciprocal)); // delayed for reverb
+			Out.ar( auxOutbus,	out * LagUD.kr(auxmix_lagged , 0.1, 5) );
 		});
 	}
 }

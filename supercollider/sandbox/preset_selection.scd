@@ -42,15 +42,20 @@ x.presetGUI(3)
 
 // reverb
 	// reverb control
+x.sendToReverb( onsetTime: 25 )
 x.sendToReverb( onsetTime: 10 )
+x.sendToReverb( onsetTime: 5 )
 
 x.verbOnsetCurve_(3)
+(
+x.verbSynths.do(_.maxAPDecay_(1.5));
+x.verbSynths.do(_.maxDecayTime_(0.3));
+x.verbSynths.do(_.minDampFreq_(3500));
+x.verbSynths.do(_.amp_(-8.dbamp));
+x.verbSynths.do(_.maxSclReflect_(23));
+)
+x.verbSynths.do(_.verbCutTail_(10))
 
-x.verbSynths.do(_.maxAPDecay_(2.3))
-x.verbSynths.do(_.maxDecayTime_(3.3))
-x.verbSynths.do(_.minDampFreq_(4000))
-x.verbSynths.do(_.amp_(-8.dbamp))
-x.verbSynths.do(_.maxSclReflect_(3))
 x.verbSynths[0].maxDecayTime
 x.verbSynths[0].maxAPDecay
 x.verbSynths[0].minDampFreq
