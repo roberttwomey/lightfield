@@ -99,8 +99,8 @@ s.waitForBoot({
 		// \yellowcliff, \cliff1_,
 	]);
 
-	/*tests*/
-	/*	~sceneScore = [
+	/*	/*tests*/
+	~sceneScore = [
 	["diningroom3", 15, 4],
 	["cliffside", 15, 2],
 	["dark_trees", 15, 2.rand+1],
@@ -117,59 +117,70 @@ s.waitForBoot({
 	~sceneScore = [
 		// scene params
 		//scene, dur, numViews
+		// int
+		["bookcase", 120, 3],
+		// ext
+		["carkeek", 120, 3],
+		// ext
+		["carkeek_night", 120, 3],
+		// ext
+		["cliffside", 120, 3],
 		// ext
 		["dark_trees", 120, 3],
-		//int
-		["bookcase", 120, 3],
 		// int
 		["diningroom3", 130, 4],
-		["mike3", 130, 4],
-		// ext
-		// ["tunnel", 150, 4],
 		// int
-		["mike3", 110, 3],
-		["mike1", 150, 3],
+		["mike1", 130, 4],
+		// lim
+		["mike2", 130, 4],
+		// int
+		["mike3", 130, 4],
+		// lim
+		["outsidelookingin", 130, 4],
 		// ext
-		["cliffside", 108, 3],
-		// ["carkeek", 78, 3],
-
-		// liminal
-		["mike2", 90, 4],
-		["diningroom3", 90, 3],
+		["tunnel", 150, 4],
+		// ext
+		["yellowcliff", 108, 3],
 	];
+
+	// need to edit:
+	//   yellowcliff
+	//   bookcase
 
 	~sceneViews = IdentityDictionary(know: true).putPairs([
 		\bookcase,
 		[
-			\bookcase_start, 10.0, 15.0,
 			\bookcase_bed, 5.0, 5.0,
-			\bookcase_doorknob, 5.0, 5.0,
-			\bookcase_plant_books, 5.0, 5.0,
 			\bookcase_close, 7.0, 5.0,
-			\bookcase_mirror_flat, 10.0, 7.0,
-			\bookcase_window, 5.0, 5.0,
+			\bookcase_doorknob, 5.0, 5.0,
 			\bookcase_mirror, 7.0, 5.0,
 			\bookcase_mirror_flat_up, 5.0, 5.0,
 			\bookcase_mirror_rover, 5.0, 5.0,
-			\bookcase_rover_mobile_selfie, 5.0, 30.0,
-			\bookcase_mirror, 15.0, 5.0,
+			\bookcase_plant_books, 5.0, 5.0,
+			\bookcase_start, 10.0, 15.0,
+			\bookcase_window, 5.0, 5.0,
+
+			\bookcase_mirror_flat, 10.0, 7.0, // * moving
+			\bookcase_rover_mobile_selfie, 5.0, 30.0, // * moving
 		],
 		\carkeek,
 		[
 			\carkeek_tornado, 5.0, 5.0,
 			\carkeek_train1, 5.0, 5.0,
-			\carkeek_pile_distant, 5.0, 5.0
+			\carkeek_pile_distant, 5.0, 5.0,
+			\carkeek_gravel, 5.0, 5.0
 		],
 		\carkeek_night,
 		[
 			\carkeek_night_ground, 5.0, 5.0,
 			\carkeek_night_shore, 5.0, 5.0,
 			\carkeek_night_hypercolortree, 5.0, 5.0,
-			\carkeek_night_oceanblur, 5.0, 5.0,
+			// \carkeek_night_oceanblur, 5.0, 5.0,
 		],
 		\cliffside,
 		[
 			\cliffside_shore, 10.0, 25.0,
+			\cliffside_zoom, 5.0, 5.0,
 			\cliffside_trees_breathing, 35.0, 15.0,
 			\cliffside_right, 10.0, 20.0,
 		],
@@ -186,54 +197,39 @@ s.waitForBoot({
 			\diningroom3_detail_books_nofocus, 10.0, 5.0,
 			\diningroom3_detail_books_focus, 5.0, 5.0,
 			\diningroom3_books3, 5.0, 5.0,
-			\diningroom3_books4, 5.0, 5.0,
 			\diningroom3_flower, 5.0, 10.0,
 			\diningroom3_floor, 10.0, 10.0
 		],
 		\mike1,
 		[
 			\mike1_start, 10.0, 20.0,
-			\mike1_1, 10.0, 5.0,
-			\mike1_1_rover, 5.0, 5.0,
-			\mike1_2, 5.0, 5.0,
-			\mike1_3_rover, 5.0, 5.0,
-			\mike1_4, 5.0, 5.0,
-			\mike1_3, 5.0, 5.0,
+			\mike1_3, 5.0, 5.0, // horizontal
+			\mike1_3_rover, 5.0, 5.0, // * mobile
 			\mike1_5_fruitbowl, 25.0, 15.0,
-			\mike1_parallax_left, 5.0, 5.0,
-			\mike1_rover_rover, 10.0, 7.0,
-			\mike1_window, 5.0, 5.0,
+			\mike1_parallax_left, 5.0, 5.0, // vertical expansion
+			\mike1_window, 5.0, 5.0, // mobile
+			\mike1_mirrorimage_moving, 5.0, 5.0,
 		],
 		\mike2,
 		[
-			\mike2_yellowtunnel, 10.0, 5.0,
+			\mike2_rover, 5.0, 5.0,
 			\mike2_swimmingtrees, 3.0, 20.0,
 			\mike2_window, 5.0, 5.0,
 			\mike2_strings, 15.0, 5.0,
 			\mike2_desk_ironingboard, 10.0, 30.0, // **
-			\mike2_rover, 5.0, 5.0,
-			\mike2_yellowtunnel, 5.0, 5.0
 		],
 		\mike3,
 		[
-
-			\mike3_start, 10.0, 10.0,
-			\mike3_fruittable, 10.0, 5.0, // *** abstractish
-			\mike3_book_orbit2, 10.0, 1.0,
 			\mike3_book_orbit1, 4.0, 1.0,
-			// \mike3_book_orbit3, 5.0, 5.0,
-			\mike3_book_orbit4, 4.0, 5.0,
-			\mike3_distant_window, 10.0, 15.0, // **
-			\mike3_peeker, 10.0, 15.0,
-			\mike3_fence, 10.0, 10.0,
-			\mike3_windowplane, 10.0, 10.0, // **
 			\mike3_cloth_table, 5.0, 5.0,
-			\mike3_cloth_table_pull, 5.0, 5.0,
-			\mike3_sputnik, 10.0, 5.0,
-			\mike3_lamp, 15.0, 10.0,
+			\mike3_distant_window, 10.0, 15.0, // **
+			\mike3_fence, 10.0, 10.0, // *
+			\mike3_fruittable, 10.0, 5.0, // *** abstractish
 			\mike3_lamp_glow, 5.0, 5.0,
-			\mike3_lamp_glow_2, 5.0, 5.0,
-			\mike3_lamp_glow_3, 5.0, 5.0,
+			\mike3_peeker, 10.0, 15.0,
+			\mike3_sputnik, 10.0, 5.0,
+			\mike3_start, 10.0, 10.0,
+			\mike3_windowplane, 10.0, 10.0, // **
 		],
 		\outsidelookingin,
 		[
@@ -298,7 +294,7 @@ s.waitForBoot({
 
 				// choose the views within the scene
 				// viewPresets = ~videoPresets.scramble.keep(nViews);
-				viewPresets = ~sceneViews[scene.asSymbol].clump(3).scramble.keep(nViews);
+				viewPresets = ~sceneViews[scene.asSymbol].clump(3).scramble;//.keep(nViews);
 
 
 				viewPresets.do { |vPreset, i|
