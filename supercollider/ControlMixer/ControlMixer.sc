@@ -675,21 +675,35 @@ ControlMixMaster {
 
 	loadSnapshot { |filePath|
 		var f, paramDict;
-		var zoom, xcount, ycount, xstart, ystart, xscroll, yscroll, focus, textures;
+		var zoom, xcount, ycount, xstart, ystart, xscroll, yscroll, focus, scene;
+		var minIn, maxIn, minOut, maxOut, gamma, desaturation;
 
 		File.exists(filePath).not.if{warn("could not find the file... check the path")};
 
-		f = FileReader.read(filePath).reverse;
+		f = FileReader.read(filePath);//.reverse;
 
 		// f.do(_.postln);
 
-		#zoom, xcount, ycount, xstart, ystart, xscroll, yscroll, focus = 5.collect({|i|
-			f[i][0].split($,).asFloat}).flat;
 
-		textures = f[5..].reverse.collect(_.at(0));
+		scene = f[0][0]; // scene xml file is first line
 
-		postf("Found these parameters:\n\tzoom, %\n\txcount, %\n\tycount, %\n\txstart, %\n\tystart, %\n\txscroll, %\n\tyscroll, %\n\tfocus %\n\ttextures %\n",
-			zoom, xcount, ycount, xstart, ystart, xscroll, yscroll, focus, textures);
+		// refocus params are next five lines
+		#focus, xscroll, yscroll, xstart, ystart, xcount, ycount, zoom = 5.collect({|i|
+			f[i+1][0].split($,).asFloat}).flat;
+
+		// image processing params
+		(f.size > 6).if {
+			#minIn, maxIn, minOut, maxOut, gamma, desaturation = 4.collect({|i|
+			f[i+6][0].split($,).asFloat}).flat;
+		};
+
+		postf("Found these parameters:\n\tzoom, %\n\txcount, %\n\tycount, %\n\txstart, %\n\tystart, %\n\txscroll, %\n\tyscroll, %\n\tfocus, %\n\tscene %\n",
+			zoom, xcount, ycount, xstart, ystart, xscroll, yscroll, focus, scene);
+
+		(f.size > 6).if {
+			postf("Image parameters:\n\tminIn, %\n\tmaxIn, %\n\tminOut, %\n\tmaxOut, %\n\tgamma, %\n\tdesaturation\n",
+				minIn, maxIn, minOut, maxOut, gamma, desaturation);
+		};
 
 		// initialize preset entry for this snapshot
 		this.presets.put(\snapshot, IdentityDictionary().put(\mixers, IdentityDictionary()) );
@@ -712,7 +726,7 @@ ControlMixMaster {
 
 		// load the new texture
 		// broadcastNetAddr.sendMsg('/loadTextures', *textures);
-		broadcastNetAddr.sendMsg('/loadScene', *textures);
+		broadcastNetAddr.sendMsg('/loadScene', scene.asString);
 
 		this.recallPreset(\snapshot);
 		// clear the preset so it doesn't show up on the presets GUI
