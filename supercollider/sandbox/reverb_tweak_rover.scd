@@ -1,19 +1,20 @@
-a = CtkAudio.play(1)
+a = CtkAudio.play(2)
 s.scope(1, a.bus)
 (
 d = CtkSynthDef(\verb_localin, {
-	arg inbus, revTime = 3, decayTime = 2, mix = 0.5, apDecay = 0.2, scaleReflections = 1, dampFreq = 1800, impFreq = 0.257; //, apDelay = 0.095;
+	arg outbus = 0, inbus, revTime = 3, decayTime = 2, mix = 0.5, apDecay = 0.2, scaleReflections = 1, dampFreq = 1800, impFreq = 0.257;
 	var src, combDels, g, lIn, lOut, delay, combs, ap, out;
 
 	// var apDecay = 0.2; //2.0;
-	var apDelay = 0.095; //0.095;
+	var apDelay = 0.095;
 	var apOrder = 6;
 
 	src = In.ar(inbus, 1);
 	// src = In.ar(0, 1);
 	// src = Decay.ar(Impulse.ar(impFreq, 0.25), 0.2, PinkNoise.ar, 0);
 
-	combDels = [0.0297, 0.0371, 0.0411, 0.0437] * scaleReflections;
+	combDels = ([0.0297, 0.0371, 0.0411, 0.0437] + 4.collect({Rand(0.0, 0.004)})) * scaleReflections;
+
 	// calculate feedback coefficient
 	g = 10.pow(-3 * combDels / decayTime);
 
@@ -34,7 +35,7 @@ d = CtkSynthDef(\verb_localin, {
 	ap = combs.sum;
 	apOrder.do({|i|
 		ap = AllpassC.ar( ap,
-			2.0, //apDelay,
+			apDelay, // 2.0,
 			apDelay.rand * LFTri.kr( rrand(8,17.0).reciprocal ).range(0.9, 1), // mod delays a bit
 			apDecay
 		);
@@ -45,14 +46,19 @@ d = CtkSynthDef(\verb_localin, {
 	out = (mix.sqrt * ap) + ((1 - mix.sqrt) * delay);
 
 	// Out.ar(0, out.dup)
-	ReplaceOut.ar(0, out.dup)
+	ReplaceOut.ar(outbus, out)
 })
 )
 
-v = d.note(addAction: \tail).inbus_(a).apDecay_(2).mix_(1).play
+v = d.note(addAction: \tail).outbus_(0).inbus_(a).apDecay_(2).mix_(1).play
+q = d.note(addAction: \tail).outbus_(1).inbus_(a.bus+1).apDecay_(2).mix_(1).play
 // v = d.note(addAction: \tail).apDecay_(2).mix_(1).play
 
+v = 2.collect{ |i| d.note(addAction: \tail).outbus_(0+i).inbus_(a.bus+i).apDecay_(2).mix_(1).play }
+
+v.do(_.free)
 v.free
+q.free
 
 v.scaleReflections_(0.253971) // pack the early reflections closer together (denser)
 v.scaleReflections_(0.53971)
@@ -117,7 +123,8 @@ EZSlider(w, bounds: Rect(spacing * 0, 0, dim.x, dim.y),
 	label: "Scale Reflections",
 	controlSpec: ControlSpec(0.5,35, 'exp'),
 	action: { |sl|
-		v.scaleReflections_(sl.value);
+		// v.scaleReflections_(sl.value);
+		v.do(_.scaleReflections_(sl.value));
 	},
 	initVal:1, labelWidth: 85, labelHeight: 40,
 	layout: 'vert', gap: gap, margin: margin
@@ -126,7 +133,8 @@ EZSlider(w, bounds: Rect(spacing * 1, 0, dim.x, dim.y),
 	label: "Decay Time",
 	controlSpec: ControlSpec(0.05, 15, 'exp'),
 	action: { |sl|
-		v.decayTime_(sl.value);
+		// v.decayTime_(sl.value);
+		v.do(_.decayTime_(sl.value));
 	},
 	initVal:2, labelWidth: 85, labelHeight: 40,
 	layout: 'vert', gap: gap, margin: margin
@@ -135,7 +143,8 @@ EZSlider(w, bounds: Rect(spacing * 2, 0, dim.x, dim.y),
 	label: "AP Decay",
 	controlSpec: ControlSpec(0.25, 15, 'exp'),
 	action: { |sl|
-		v.apDecay_(sl.value);
+		// v.apDecay_(sl.value);
+		v.do(_.apDecay_(sl.value));
 	},
 	initVal:5, labelWidth: 85, labelHeight: 40,
 	layout: 'vert', gap: gap, margin: margin
@@ -144,7 +153,8 @@ EZSlider(w, bounds: Rect(spacing * 3, 0, dim.x, dim.y),
 	label: "mix",
 	controlSpec: ControlSpec(0, 1, 'lin'),
 	action: { |sl|
-		v.mix_(sl.value);
+		// v.mix_(sl.value);
+		v.do(_.mix_(sl.value));
 	},
 	initVal:0.2, labelWidth: 85, labelHeight: 40,
 	layout: 'vert', gap: gap, margin: margin
@@ -153,7 +163,8 @@ EZSlider(w, bounds: Rect(spacing * 4, 0, dim.x, dim.y),
 	label: "Damp Freq",
 	controlSpec: ControlSpec(100,20000, 'exp'),
 	action: { |sl|
-		v.dampFreq_(sl.value);
+		// v.dampFreq_(sl.value);
+		v.do(_.dampFreq_(sl.value));
 	},
 	initVal:1800, labelWidth: 85, labelHeight: 40,
 	layout: 'vert', gap: gap, margin: margin

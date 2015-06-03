@@ -40,6 +40,26 @@ x = GrainScanner1( 3, p )
 x.presetGUI(3)
 // see below for loading scmir frames for "moment" frame locations
 
+// reverb
+	// reverb control
+x.sendToReverb( onsetTime: 25 )
+x.sendToReverb( onsetTime: 10 )
+x.sendToReverb( onsetTime: 5 )
+
+x.verbOnsetCurve_(3)
+(
+x.verbSynths.do(_.maxAPDecay_(1.5));
+x.verbSynths.do(_.maxDecayTime_(0.3));
+x.verbSynths.do(_.minDampFreq_(3500));
+x.verbSynths.do(_.amp_(-8.dbamp));
+x.verbSynths.do(_.maxSclReflect_(23));
+)
+x.verbSynths.do(_.verbCutTail_(10))
+
+x.verbSynths[0].maxDecayTime
+x.verbSynths[0].maxAPDecay
+x.verbSynths[0].minDampFreq
+
 // ---------------
 // STORE
 
@@ -96,6 +116,9 @@ x.scanners.do{|scnr| scnr.synths.do(_.fadein_(0.5))}
 x.scanners.do{|scnr| scnr.synths.do(_.fadeout_(0.5))}
 x.scanners.do{|scnr| scnr.synths.do(_.ctllag_(0.05))}
 x.scanners.do{|scnr| scnr.synths.do(_.ctllag_(0.05))}
+
+// send to aux bus
+x.scanners.do{|scnr| scnr.synths.do({ |synth, i | synth.outbus_(a.bus+i) }) };
 
 // in order to use the scmir frames, use GrainScanner2's
 // clusterFramesByDist method

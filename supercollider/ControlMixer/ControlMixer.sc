@@ -32,7 +32,7 @@ ControlMixer {
 			broadcastBus = CtkControl(1, 0, 0, busnum);
 
 			validLFOs = [
-				'static', SinOsc, LFPar, LFTri, LFCub, LFDNoise0, LFDNoise1, LFDNoise3
+				'static', SinOsc, LFPar, LFSaw, LFTri, LFCub, LFDNoise0, LFDNoise1, LFDNoise3
 			].collect(_.asSymbol);
 
 			ratePeriodSpec = ControlSpec(45.reciprocal, 15, 2.5, default: 3);
@@ -272,14 +272,14 @@ ControlMixFaderView {
 						.fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight)
 						.minDecimals_(3).scroll_(false),
 					).spacing_(0),
-					sclKnb = Knob().mode_(\vert).centered_(true),
+					sclKnb = Knob().step_(0.001).mode_(\vert).centered_(true),
 					VLayout(
 						StaticText().string_("offset").align_(\center),
 						offsBx = NumberBox()
 						.fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight)
 						.minDecimals_(3).scroll_(false),
 					).spacing_(0),
-					offsKnb = Knob().mode_(\vert).centered_(true),
+					offsKnb = Knob().step_(0.001).mode_(\vert).centered_(true),
 				),
 				HLayout(
 					nil,
@@ -290,7 +290,7 @@ ControlMixFaderView {
 						.fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight)
 						.minDecimals_(3).scroll_(false),
 					).spacing_(0), a: \center],
-					[ mixKnb = Knob().mode_(\vert), a: \center],
+					[ mixKnb = Knob().step_(0.001).mode_(\vert), a: \center],
 					nil
 				)
 			).margins_(4).spacing_(2)
