@@ -678,12 +678,12 @@ decayTime = 2, mix = 0.5, apDecay = 0.2, scaleReflections = 1, dampFreq = 1800,
 			);
 
 
-			maxSclReflect = 5.8,
-			maxDecayTime = 2.4,
-			maxAPDecay = 0.5,
-			minMix = 0.2,
-			minDampFreq = 350,
-			maxDampFreq = 16500,
+			// maxSclReflect = 5.8,
+			// maxDecayTime = 2.4,
+			// maxAPDecay = 0.5,
+			// minMix = 0.2,
+			// minDampFreq = 350,
+			// maxDampFreq = 16500,
 
 			combDels = ([0.0297, 0.0371, 0.0411, 0.0437] + 4.collect({Rand(0.0, 0.004)})) * scaleReflections;
 
