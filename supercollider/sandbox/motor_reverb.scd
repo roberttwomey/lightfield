@@ -1,3 +1,7 @@
+
+b = CtkBuffer.playbuf("/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_capture_EDIT.WAV").load;
+
+
 (
 d = CtkSynthDef(\motorPlaybuf, {
 	arg outbus = 0, buf, bufnum, startPos = 0, amp=1, mix=0.5,
@@ -24,16 +28,17 @@ d = CtkSynthDef(\motorPlaybuf, {
 		cutoff: cutoffenv,
 		t60low: t60low, t60high: t60high, diffusion: diffusion);
 
-	decoder = FoaDecode.ar(verb,
+	decoder = FoaDecode.ar( verb,
 		FoaDecoderMatrix.newDiametric([30.degrad, -30.degrad], 'controlled'),
 	);
 
 	Out.ar(outbus, decoder);
 });
 )
+
 b = CtkBuffer.playbuf("/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_capture_EDIT.WAV").load;
 
-x = d.note.outbus_(0).buf_(b).play
+x = d.note.outbus_(0).buf_(b).bufnum_(b.bufnum).play
 
 x.t_onset_(1)
 
