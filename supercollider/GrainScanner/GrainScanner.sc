@@ -720,8 +720,8 @@ GrainScan1 {
 			pos = pos.wrap(st , ed);
 
 			/* granulator */
-			// sig = GrainBufJ.ar(1, trig, gdur, buffer, 1 , pos, 1, interp: 1, grainAmp: amp_scale);
-			sig = GrainBuf.ar(numChannels: 1, trigger: trig, dur: gdur, sndbuf: buffer, rate: 1, pos: pos, interp: 1, mul: amp_scale);
+			sig = GrainBufJ.ar(1, trig, gdur, buffer, 1 , pos, 1, interp: 1, grainAmp: amp_scale);
+			// sig = GrainBuf.ar(numChannels: 1, trigger: trig, dur: gdur, sndbuf: buffer, rate: 1, pos: pos, interp: 1, mul: amp_scale);
 
 			/* overall amp control */
 			sig = Limiter.ar( sig * vol * env, -0.5.dbamp);

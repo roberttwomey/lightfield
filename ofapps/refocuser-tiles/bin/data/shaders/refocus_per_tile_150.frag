@@ -59,7 +59,7 @@ void main (void){
 
             // keep refocused image centered, offset by camera position minus aperture center
             vec2 offset = texture2DRect(campos_tex, cam_num).xy - texture2DRect(campos_tex, ap_center).xy;
-            vec2 shift = fscale * resolution * offset;
+            vec2 shift = fscale * resolution.xx * offset;
 
             // position in large virtual texture (atlas) composed of these tiles
             vec2 atlaspos = subimg_corner + pixelpos - shift;
