@@ -945,8 +945,8 @@ void ofApp::snapshot() {
     ofFile file(paramfilename, ofFile::WriteOnly);
 
     file << scenefiles[0] << endl;
-    file << focus/float(subwidth) << endl;
-    file << xoffset/float(subwidth) << "," << yoffset/float(subheight) << endl;
+    file << focus << endl;
+    file << xoffset << "," << yoffset << endl;
     file << xstart << "," << ystart << endl;
     file << xcount << "," << ycount << endl;
     file << zoom << endl;
