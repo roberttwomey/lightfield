@@ -40,6 +40,21 @@ x = GrainScanner1( 3, p )
 x.presetGUI(3)
 // see below for loading scmir frames for "moment" frame locations
 
+// reverb
+	// reverb control
+x.sendToReverb( onsetTime: 10 )
+
+x.verbOnsetCurve_(3)
+
+x.verbSynths.do(_.maxAPDecay_(2.3))
+x.verbSynths.do(_.maxDecayTime_(3.3))
+x.verbSynths.do(_.minDampFreq_(4000))
+x.verbSynths.do(_.amp_(-8.dbamp))
+x.verbSynths.do(_.maxSclReflect_(3))
+x.verbSynths[0].maxDecayTime
+x.verbSynths[0].maxAPDecay
+x.verbSynths[0].minDampFreq
+
 // ---------------
 // STORE
 

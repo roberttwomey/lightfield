@@ -1,10 +1,11 @@
 // a master class that holds multiple GrainScan1's,
 // stores presets for multiple instances, etc.
 GrainScanner1 {
+	classvar <verbDef;
 	// copyArgs
 	var numScanners, initBufOrPath, outbus, initGUI;
 	var <scanners, <buffers, <bufferPath, <lastRecalledPreset, loadSuccessful, <server;
-	var <presetWin;
+	var <presetWin, <auxBus, <group, <verbSynths;
 
 	*new {|numScanners, bufOrPath, outbus = 0, initGUI = true|
 		^super.newCopyArgs(numScanners, bufOrPath, outbus, initGUI).init;
@@ -22,7 +23,17 @@ GrainScanner1 {
 
 			// catch failed buffer load
 			loadSuccessful.if({
-				scanners = numScanners.collect{ GrainScan1(outbus, buffers) };
+				group = CtkGroup.play();
+				auxBus = CtkAudio.play(2);
+
+				this.class.verbDef ?? { this.loadSynthLib; 0.2.wait; server.sync; };
+
+				verbSynths = 2.collect{ |i|
+					verbDef.note(addAction: \tail, target: group)
+					.outbus_(2+i).inbus_(auxBus.bus+i).mix_(1).play
+				};
+
+				scanners = numScanners.collect{ GrainScan1(outbus, buffers, this) };
 
 				initGUI.if{ 0.3.wait; scanners.do(_.gui) };
 
@@ -189,6 +200,7 @@ GrainScanner1 {
 	free { |freeBufs=false|
 		scanners.do(_.free);
 		freeBufs.if(buffers.do(_.free));
+		group.freeAll;
 	}
 
 	prInitArchive {
@@ -204,28 +216,10 @@ GrainScanner1 {
 
 	backupPreset {
 		this.class.backupPreset
-		// format( "cp %% %%%",
-		// 	Archive.archiveDir,
-		// 	"/archive.sctxar",
-		// 	"~/Desktop/archive.sctxar_BAK_",
-		// 	Date.getDate.stamp,
-		// 	".sctxar"
-		// ).replace(
-		// 	" Support","\\ Support"
-		// ).unixCmd
 	}
 
 	*backupPreset {
 		Archive.write(format("~/Desktop/archive_BAK_%.sctxar",Date.getDate.stamp).standardizePath)
-		// format( "cp %% %%%",
-		// 	Archive.archiveDir,
-		// 	"/archive.sctxar",
-		// 	"~/Desktop/archive.sctxar_BAK_",
-		// 	Date.getDate.stamp,
-		// 	".sctxar"
-		// ).replace(
-		// 	" Support","\\ Support"
-		// ).unixCmd
 	}
 
 	initBuffer { |bufOrPath, finishCond|
@@ -329,19 +323,126 @@ GrainScanner1 {
 
 		}, AppClock )
 	}
+
+
+
+	// reverb control
+	sendToReverb { |onsetTime = 10|
+		 scanners.do{ |scnr|
+			scnr.synths.do(_.auxLag_(onsetTime));
+			scnr.synths.do(_.t_auxOnset_(1));
+		};
+		verbSynths.do(_.auxLag_(onsetTime));
+		verbSynths.do(_.t_auxOnset_(1));
+
+	}
+
+	verbOnsetCurve_ { |curveNum|
+		scanners.do{ |scnr| scnr.synths.do(_.auxOnsetCurve_(curveNum)) };
+		verbSynths.do(_.auxOnsetCurve_(curveNum));
+	}
+
+
+
+	loadSynthLib {
+
+		verbDef = CtkSynthDef(\verb_localin, {
+			arg outbus = 0, inbus, amp = 0.4,
+			// unused args with dynamic params
+			decayTime = 2, mix = 0.5, apDecay = 0.2, scaleReflections = 1, dampFreq = 1800,
+			t_auxOnset = 0, auxLag = 10, auxOnsetCurve = 3,
+
+			// dynamic arg params
+			minSclReflect = 1, maxSclReflect = 5.8,
+			minDecayTime = 0.5, maxDecayTime = 2.4,
+			minAPDecay = 0.05, maxAPDecay = 0.3,
+			minMix = 0.2, maxMix = 0.85,
+			minDampFreq = 1700, maxDampFreq = 16500;
+
+
+			var src, combDels, g, lIn, lOut, delay, combs, ap, out;
+			var apDelay = 0.095, apOrder = 6;
+			var xFormEnv, longOnsetxFormEnv, sclReflect, decTime, apDec, verbMix, dampFrq;
+
+
+			src = In.ar(inbus, 1);
+
+			xFormEnv = EnvGen.kr(
+				Env([0,0,1],[0,auxLag], auxOnsetCurve, releaseNode:1, loopNode: 0),
+				TDelay.kr(t_auxOnset, 0.05), doneAction: 0
+			);
+			longOnsetxFormEnv = EnvGen.kr(
+				Env([0,0,1],[0,auxLag*2], auxOnsetCurve, releaseNode:1, loopNode: 0),
+				TDelay.kr(t_auxOnset, 0.05), doneAction: 0
+			);
+
+			sclReflect	= LinLin.kr(longOnsetxFormEnv, 0,1,
+				minSclReflect, TRand.kr( maxSclReflect*0.3, maxSclReflect, t_auxOnset)).poll(label: "sclReflect");
+			decTime		= LinLin.kr(xFormEnv, 0,1,
+				minDecayTime, TRand.kr( maxDecayTime*0.3, maxDecayTime, t_auxOnset) ).poll(label: "decTime");
+			apDec		= LinLin.kr(xFormEnv, 0,1,
+				minAPDecay, TRand.kr( maxAPDecay*0.3, maxAPDecay, t_auxOnset)).poll(label: "apDec");
+			verbMix		= LinLin.kr(longOnsetxFormEnv, 0,1,
+				minMix, maxMix);
+			dampFrq		= LinLin.kr(longOnsetxFormEnv, 0,1,
+				maxDampFreq, TRand.kr( minDampFreq, minDampFreq*2, t_auxOnset)).poll(label: "dampFrq");
+
+			combDels = ([0.0297, 0.0371, 0.0411, 0.0437] + 4.collect({Rand(0.0, 0.004)}));
+			// combDels = combDels * scaleReflections;
+			combDels = combDels * sclReflect;
+
+
+			// calculate feedback coefficient
+			// g = 10.pow(-3 * combDels / decayTime);
+			g = 10.pow(-3 * combDels / decTime);
+
+			lIn = LocalIn.ar(4);
+
+			combs = DelayC.ar(src + (lIn * g),
+				// combDels.maxItem - ControlRate.ir.reciprocal,
+				2.5 - ControlRate.ir.reciprocal,
+				combDels - ControlRate.ir.reciprocal
+			);
+
+			// combs = LPF.ar(combs, dampFreq); // damping
+			combs = LPF.ar(combs, dampFrq); // damping
+
+			combs = LeakDC.ar(combs);
+
+			lOut = LocalOut.ar(combs);
+
+			ap = combs.sum;
+			apOrder.do({|i|
+				ap = AllpassC.ar( ap,
+					apDelay, // 2.0,
+					apDelay.rand * LFTri.kr( rrand(8,17.0).reciprocal ).range(0.9, 1), // mod delays a bit
+					// apDecay
+					apDec
+				);
+			});
+
+			delay = DelayN.ar(src, ControlRate.ir.reciprocal, ControlRate.ir.reciprocal); // make up delay
+
+			// out = (mix.sqrt * ap) + ((1 - mix.sqrt) * delay);
+			out = (verbMix.sqrt * ap) + ((1 - verbMix.sqrt) * delay);
+
+			// ReplaceOut.ar(outbus, out)
+			Out.ar(outbus, out * amp)
+		});
+	}
 }
 
 GrainScan1 {
-	classvar <grnSynthDef, <verbDef;
+	classvar <grnSynthDef;
 
 	// copyArgs
-	var <outbus, bufferOrPath;
-	var server, <buffers, <group, <synths, <verbSynths, <bufDur, <view, <bufferPath, <auxBus;
+	var <outbus, <bufferOrPath, <gsMaster;
+	var server, <buffers, <group, <synths, <bufDur, <view, <bufferPath, <auxBus;
 	var <grnDurSpec, <grnRateSpec, <grnRandSpec, <pntrRateSpec, <grnDispSpec, <densitySpec, <fluxRateSpec, <ampSpec;
 	var <>newMomentFunc;
 
-	*new { |outbus=0, bufferOrPath|
-		^super.newCopyArgs( outbus, bufferOrPath ).init;
+	*new { |outbus=0, bufferOrPath, gsMaster|
+		^super.newCopyArgs( outbus, bufferOrPath, gsMaster ).init;
 	}
 
 	init {
@@ -361,8 +462,6 @@ GrainScan1 {
 
 			this.class.grnSynthDef ?? { this.loadSynthLib; 0.2.wait; };
 			server.sync;
-
-			auxBus = CtkAudio.play(2);
 
 			case
 			{ bufferOrPath.isKindOf(String) }{
@@ -439,20 +538,15 @@ GrainScan1 {
 		var pancen = rrand(-1,1.0);
 
 		synths = buffers.collect{|buf, i|
-			grnSynthDef.note(addAction: \head, target: group)
+			grnSynthDef.note(addAction: \head, target: gsMaster.group)
 			.outbus_(outbus)
-			.auxOutbus_(auxBus.bus + i)
+			.auxOutbus_(gsMaster.auxBus.bus + i)
 			.buffer_(buf).bufnum_(buf.bufnum)
 			.grainDur_(2.7)
 			//.panCenter_(pancen).panOffset_(i)
 			.panCenter_(-1 + (2*i)).panOffset_(0)
 		};
 
-		// TODO: move this to GrainScanner
-		verbSynths = synths.collect{ |synth, i|
-			verbDef.note(addAction: \tail, target: group)
-			.outbus_(0+i).inbus_(auxBus.bus+i).mix_(1).play
-		};
 	}
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -490,14 +584,6 @@ GrainScan1 {
 	end_ {|timeNorm| synths.do(_.end_(timeNorm)); this.changed(\end, timeNorm); }
 
 	amp_ {|amp| synths.do(_.amp_(amp)); this.changed(\amp, amp); }
-
-
-	sendToReverb { |onsetTime = 10|
-		 synths.do(_.auxLag_(onsetTime));
-		 synths.do(_.t_auxOnset_(1));
-	}
-
-	auxOnsetCurve_ { |curveNum| synths.do(_.auxOnsetCurve_(curveNum)) }
 
 
 	// sync the synths' pointers by resetting to beginning of loop
@@ -643,82 +729,12 @@ GrainScan1 {
 
 			panPos = panCenter + panOffset;
 			// out = PanAz.ar(4, out, (panPos + (0.1 * flux)).wrap(-1,1));
-			out = PanAz.ar(2, out, (panPos + (0.1 * flux)).wrap(-1,1)); // keep in the front of the container
+			// out = PanAz.ar(2, out, (panPos + (0.1 * flux)).wrap(-1,1)); // keep in the front of the container
+			out = PanAz.ar(2, out, panPos ); // keep in the front of the container
 
 			// send signals to outputs
 			Out.ar( outbus,		out);
 			Out.ar( auxOutbus,	out * auxmix_lagged );
-		});
-
-		verbDef = CtkSynthDef(\verb_localin, {
-			arg outbus = 0, inbus,
-
-decayTime = 2, mix = 0.5, apDecay = 0.2, scaleReflections = 1, dampFreq = 1800,
-			maxSclReflect = 5.8,
-			maxDecayTime = 2.4,
-			maxAPDecay = 0.5,
-			minMix = 0.2,
-			minDampFreq = 350,
-			maxDampFreq = 16500
-			;
-
-			var src, combDels, g, lIn, lOut, delay, combs, ap, out;
-
-			// var apDecay = 0.2; //2.0;
-			var apDelay = 0.095;
-			var apOrder = 6;
-			var xFormEnv, t_auxOnset = 0, auxLag = 10, auxOnsetCurve = 3;
-
-
-			src = In.ar(inbus, 1);
-			// src = In.ar(0, 1);
-			xFormEnv = EnvGen.kr(
-				Env([0,0,1],[0,auxLag], auxOnsetCurve, releaseNode:1, loopNode: 0),
-				t_auxOnset, doneAction: 0
-			);
-
-
-			// maxSclReflect = 5.8,
-			// maxDecayTime = 2.4,
-			// maxAPDecay = 0.5,
-			// minMix = 0.2,
-			// minDampFreq = 350,
-			// maxDampFreq = 16500,
-
-			combDels = ([0.0297, 0.0371, 0.0411, 0.0437] + 4.collect({Rand(0.0, 0.004)})) * scaleReflections;
-
-			// calculate feedback coefficient
-			g = 10.pow(-3 * combDels / decayTime);
-
-			lIn = LocalIn.ar(4);
-
-			combs = DelayC.ar(src + (lIn * g),
-				// combDels.maxItem - ControlRate.ir.reciprocal,
-				2.5 - ControlRate.ir.reciprocal,
-				combDels - ControlRate.ir.reciprocal
-			);
-
-			combs = LPF.ar(combs, dampFreq); // damping
-
-			combs = LeakDC.ar(combs);
-
-			lOut = LocalOut.ar(combs);
-
-			ap = combs.sum;
-			apOrder.do({|i|
-				ap = AllpassC.ar( ap,
-					apDelay, // 2.0,
-					apDelay.rand * LFTri.kr( rrand(8,17.0).reciprocal ).range(0.9, 1), // mod delays a bit
-					apDecay
-				);
-			});
-
-			delay = DelayN.ar(src, ControlRate.ir.reciprocal, ControlRate.ir.reciprocal); // make up delay
-
-			out = (mix.sqrt * ap) + ((1 - mix.sqrt) * delay);
-
-			// Out.ar(0, out.dup)
-			ReplaceOut.ar(outbus, out)
 		});
 	}
 }
