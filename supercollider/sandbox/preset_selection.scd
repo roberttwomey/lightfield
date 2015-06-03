@@ -49,7 +49,7 @@ x.sendToReverb( onsetTime: 5 )
 x.verbOnsetCurve_(3)
 (
 x.verbSynths.do(_.maxAPDecay_(1.5));
-x.verbSynths.do(_.maxDecayTime_(0.3));
+x.verbSynths.do(_.maxDecayTime_(6.3));
 x.verbSynths.do(_.minDampFreq_(3500));
 x.verbSynths.do(_.amp_(-8.dbamp));
 x.verbSynths.do(_.maxSclReflect_(23));

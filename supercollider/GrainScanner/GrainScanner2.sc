@@ -478,14 +478,14 @@ GrainScanner2 {
 			gPos = (pos + disp).wrap(0,1);
 			panner = WhiteNoise.kr(gSpread, gPan).wrap(-1,1);
 
-			// out = GrainBufJ.ar(
-			// 	4, //1, // pan to multiple channels
-			// 	trig, gDur, buffer, 1,
-			// 	gPos,
-			// 	1, interp:1, grainAmp: amp_scale,
-			// 	pan: panner
-			// );
-			out = GrainBuf.ar(numChannels: 4,trigger: trig, dur: gDur,sndbuf: buffer, rate: 1, pos: gPos, interp: 1, pan: panner, mul: amp_scale);
+			out = GrainBufJ.ar(
+				4, //1, // pan to multiple channels
+				trig, gDur, buffer, 1,
+				gPos,
+				1, interp:1, grainAmp: amp_scale,
+				pan: panner
+			);
+			//out = GrainBuf.ar(numChannels: 4,trigger: trig, dur: gDur,sndbuf: buffer, rate: 1, pos: gPos, interp: 1, pan: panner, mul: amp_scale);
 
 			out = out * env;
 			// out = Pan2.ar(out);
