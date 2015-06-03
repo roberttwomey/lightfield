@@ -51,7 +51,7 @@ MotorPlayback {
 			);
 
 			cutoffenv = LinLin.kr(xFormEnv, 0, 1, cutoffLow, cutoffHigh);
-			mixenv = LinLin.kr(xFormEnv, 0, 1, mixHigh, mixLow).poll;
+			mixenv = LinLin.kr(xFormEnv, 0, 1, mixHigh, mixLow);
 
 			verb = BFormatReverb.ar(encoder,
 				mixenv.sqrt, //mix,
