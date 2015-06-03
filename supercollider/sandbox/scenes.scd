@@ -1,6 +1,9 @@
 // control mixer
 
-c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("192.168.2.2", 12345));
+c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("192.168.0.100", 12345));
+
+// c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("192.168.2.2", 12345));
+
 // c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("refocuser.local", 12345));
 
 ~fader=ControlFade(1.0);
@@ -11,10 +14,10 @@ c.backupPreset
 
 // loading from list of snapshot files
 (
-j =  [
-"/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek_night/carkeek_night_06021537_0000.txt",
-"/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek_night/carkeek_night_06021537_0001.txt",
-"/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek_night/carkeek_night_06021537_0002.txt"
+j =[
+	"/Volumes/Work/Projects/lightfield/scenes/views/tunnel/tunnel_06031002_0000.txt",
+	"/Volumes/Work/Projects/lightfield/scenes/views/tunnel/tunnel_06031002_0001.txt",
+	"/Volumes/Work/Projects/lightfield/scenes/views/tunnel/tunnel_06031002_0002.txt"
 ];
 
 postf("\n");
@@ -27,25 +30,28 @@ postf("\n");
 
 
 
+
 // search for certain preset
 (
-q = "tunnel";
+q = "mike3";
 c.presets.keys.do { |p|
 	p.asString.contains(q).if{ postf("%%, 5.0, 5.0,\n", "\\", p);};
 };
 )
 
 
+// set of presets
 
 // create a new preset
+c.storePreset(\dark_trees_whitetree)
 
 
 
 // remove a preset
-c.presets.removeAtFail(\myFirst)
+c.presets.removeAt(\dark_trees_branch2)
 
 // load a scene
-c.loadScene("./textures/tunnel.xml")
+c.loadScene("./textures/dark_trees.xml")
 
 
 
@@ -54,18 +60,20 @@ r.reset()
 r.play()
 
 
+~sceneViews.keys.asArray.sort.do(_.postln)
+
 (
 var start = 0;
 
 thisThread.randSeed=54321;
 
 d = [
+
 	// ballard wall
-	// carkeek_night
 	// precise
 	// tivon1
 	// towers
-	// tunnel
+
 	\bookcase,
 	[
 		\bookcase_start, 10.0, 15.0,
@@ -108,10 +116,10 @@ d = [
 	],
 	\dark_trees,
 	[
-		\dark_trees_whitetree, 5.0, 5.0,
 		\dark_trees_start, 5.0, 5.0,
-		\dark_trees_deepzoom, 5.0, 5.0,
 		\dark_trees_leaves, 5.0, 5.0,
+		\dark_trees_whitetree, 5.0, 5.0,
+		\dark_trees_deepzoom, 5.0, 5.0,
 	],
 	\diningroom3,
 	[
@@ -183,6 +191,14 @@ d = [
 		// \outside_book, 5.0, 5.0,
 		// \outside_book_left, 5.0, 5.0,
 	],
+	\tunnel,
+	[
+		\tunnel_tunnels, 5.0, 5.0,
+		\tunnel_start, 5.0, 5.0,
+		\tunnel_rocks, 5.0, 5.0,
+		\tunnel_textures, 5.0, 5.0
+	],
+
 	\yellowcliff,
 	[
 		\yellowcliff_bush, 5.0, 5.0,
@@ -578,7 +594,20 @@ c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/201505
 // ],
 
 
+// DARK TREES
+
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/views/dark_trees/dark_trees_06031002_0000.txt")
+// c.storePreset(\dark_trees_start)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/views/dark_trees/dark_trees_06031002_0001.txt")
+// c.storePreset(\dark_trees_leaves)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/views/dark_trees/dark_trees_06031002_0002.txt")
+// c.storePreset(\dark_trees_branch)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/views/dark_trees/dark_trees_06031002_0003.txt")
+// c.storePreset(\dark_trees_branch2)
+
+
 // CARKEEK NIGHT
+
 // c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek_night/carkeek_night_06021537_0000.txt")
 // c.storePreset(\carkeek_night_shore, true)
 // c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek_night/carkeek_night_06021537_0001.txt")
@@ -587,6 +616,21 @@ c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/201505
 // c.storePreset(\carkeek_night_ground)
 // c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/scratch/carkeek_night/carkeek_night_06021609_0000.txt")
 // c.storePreset(\carkeek_night_hypercolortree)
+
+
+// TUNNEL
+
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/views/tunnel/tunnel_06021624_0002.txt")
+// c.storePreset(\tunnel_rocks)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/views/tunnel/tunnel_06031002_0000.txt")
+// c.storePreset(\tunnel_tunnels)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/views/tunnel/tunnel_06031002_0001.txt")
+// c.storePreset(\tunnel_textures)
+// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/views/tunnel/tunnel_06031002_0002.txt")
+// c.storePreset(\tunnel_start, true)
+
+
+
 
 // scenes
 
@@ -635,3 +679,138 @@ c.loadScene("./textures/precise.xml")
 c.loadScene("./textures/towers.xml")
 c.loadScene("./textures/tunnel.xml")
 c.loadScene("./textures/yellowcliff.xml")
+
+
+
+
+~sceneViews.keys.do { |key, value| key.postln}
+
+(
+
+~sceneViews = IdentityDictionary(know: true).putPairs([
+		\bookcase,
+		[
+			\bookcase_start, 10.0, 15.0,
+			\bookcase_bed, 5.0, 5.0,
+			\bookcase_doorknob, 5.0, 5.0,
+			\bookcase_plant_books, 5.0, 5.0,
+			\bookcase_close, 7.0, 5.0,
+			\bookcase_mirror_flat, 10.0, 7.0,
+			\bookcase_window, 5.0, 5.0,
+			\bookcase_mirror, 7.0, 5.0,
+			\bookcase_mirror_flat_up, 5.0, 5.0,
+			\bookcase_mirror_rover, 5.0, 5.0,
+			\bookcase_rover_mobile_selfie, 5.0, 30.0,
+			\bookcase_mirror, 15.0, 5.0,
+		],
+		\carkeek,
+		[
+			\carkeek_tornado, 5.0, 5.0,
+			\carkeek_train1, 5.0, 5.0,
+			\carkeek_pile_distant, 5.0, 5.0
+		],
+		\carkeek_night,
+		[
+			\carkeek_night_ground, 5.0, 5.0,
+			\carkeek_night_shore, 5.0, 5.0,
+			\carkeek_night_hypercolortree, 5.0, 5.0,
+			\carkeek_night_oceanblur, 5.0, 5.0,
+		],
+		\cliffside,
+		[
+			\cliffside_shore, 10.0, 25.0,
+			\cliffside_trees_breathing, 35.0, 15.0,
+			\cliffside_right, 10.0, 20.0,
+		],
+		\dark_trees,
+		[
+			\dark_trees_start, 5.0, 5.0,
+			\dark_trees_leaves, 5.0, 5.0,
+			\dark_trees_whitetree, 5.0, 5.0,
+			\dark_trees_deepzoom, 5.0, 5.0,
+		],
+		\diningroom3,
+		[
+			\diningroom3_kaleid, 15.0, 15.0,
+			\diningroom3_detail_books_nofocus, 10.0, 5.0,
+			\diningroom3_detail_books_focus, 5.0, 5.0,
+			\diningroom3_books3, 5.0, 5.0,
+			\diningroom3_books4, 5.0, 5.0,
+			\diningroom3_flower, 5.0, 10.0,
+			\diningroom3_floor, 10.0, 10.0
+		],
+		\mike1,
+		[
+			\mike1_start, 10.0, 20.0,
+			\mike1_1, 10.0, 5.0,
+			\mike1_1_rover, 5.0, 5.0,
+			\mike1_2, 5.0, 5.0,
+			\mike1_3_rover, 5.0, 5.0,
+			\mike1_4, 5.0, 5.0,
+			\mike1_3, 5.0, 5.0,
+			\mike1_5_fruitbowl, 25.0, 15.0,
+			\mike1_parallax_left, 5.0, 5.0,
+			\mike1_rover_rover, 10.0, 7.0,
+			\mike1_window, 5.0, 5.0,
+		],
+		\mike2,
+		[
+			\mike2_yellowtunnel, 10.0, 5.0,
+			\mike2_swimmingtrees, 3.0, 20.0,
+			\mike2_window, 5.0, 5.0,
+			\mike2_strings, 15.0, 5.0,
+			\mike2_desk_ironingboard, 10.0, 30.0, // **
+			\mike2_rover, 5.0, 5.0,
+			\mike2_yellowtunnel, 5.0, 5.0
+		],
+		\mike3,
+		[
+
+			\mike3_start, 10.0, 10.0,
+			\mike3_fruittable, 10.0, 5.0, // *** abstractish
+			\mike3_book_orbit2, 10.0, 1.0,
+			\mike3_book_orbit1, 4.0, 1.0,
+			// \mike3_book_orbit3, 5.0, 5.0,
+			\mike3_book_orbit4, 4.0, 5.0,
+			\mike3_distant_window, 10.0, 15.0, // **
+			\mike3_peeker, 10.0, 15.0,
+			\mike3_fence, 10.0, 10.0,
+			\mike3_windowplane, 10.0, 10.0, // **
+			\mike3_cloth_table, 5.0, 5.0,
+			\mike3_cloth_table_pull, 5.0, 5.0,
+			\mike3_sputnik, 10.0, 5.0,
+			\mike3_lamp, 15.0, 10.0,
+			\mike3_lamp_glow, 5.0, 5.0,
+			\mike3_lamp_glow_2, 5.0, 5.0,
+			\mike3_lamp_glow_3, 5.0, 5.0,
+		],
+		\outsidelookingin,
+		[
+			\outside_1, 5.0, 5.0,
+			\outside_2, 5.0, 5.0,
+			\outside_book, 5.0, 5.0,
+			\outside_book_left, 5.0, 5.0,
+			\outside_bookshelf_lamp, 5.0, 5.0,
+			// \outside_book, 5.0, 5.0,
+			// \outside_book_left, 5.0, 5.0,
+		],
+		\tunnel,
+		[
+			\tunnel_tunnels, 5.0, 5.0,
+			\tunnel_start, 5.0, 5.0,
+			\tunnel_rocks, 5.0, 5.0,
+			\tunnel_textures, 5.0, 5.0
+		],
+		\yellowcliff,
+		[
+			\yellowcliff_bush, 5.0, 5.0,
+			\yellowcliff_sky_top, 5.0, 5.0,
+			\yellowcliff_sky_bot, 5.0, 5.0,
+			\yellowcliff_bush_left, 5.0, 5.0,
+			\yellowcliff_bush_right, 5.0, 5.0,
+			\yellowcliff_close, 5.0, 5.0,
+		],
+	]);
+~sceneViews.keys.asArray.sort.do(_.postln)
+
+)

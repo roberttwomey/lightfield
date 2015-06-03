@@ -387,15 +387,15 @@ GrainScanner1 {
 			xFormEnv = LagUD.kr(xFormEnv, 0.1, verbCutTail);
 
 			sclReflect	= LinLin.kr(longOnsetxFormEnv, 0,1,
-				minSclReflect, TRand.kr( maxSclReflect*0.7, maxSclReflect, t_auxOnset)).poll(label: "sclReflect");
+				minSclReflect, TRand.kr( maxSclReflect*0.7, maxSclReflect, t_auxOnset));//.poll(label: "sclReflect");
 			decTime		= LinLin.kr(xFormEnv, 0,1,
-				minDecayTime, TRand.kr( maxDecayTime*0.25, maxDecayTime, t_auxOnset) ).poll(label: "decTime");
+				minDecayTime, TRand.kr( maxDecayTime*0.25, maxDecayTime, t_auxOnset) );//.poll(label: "decTime");
 			apDec		= LinLin.kr(longOnsetxFormEnv, 0,1,
-				minAPDecay, TRand.kr( maxAPDecay*0.25, maxAPDecay, t_auxOnset)).poll(label: "apDec");
+				minAPDecay, TRand.kr( maxAPDecay*0.25, maxAPDecay, t_auxOnset));//.poll(label: "apDec");
 			verbMix		= LinLin.kr(longOnsetxFormEnv, 0,1,
 				minMix, maxMix);
 			dampFrq		= LinLin.kr(longOnsetxFormEnv, 0,1,
-				maxDampFreq, TRand.kr( minDampFreq, minDampFreq*2, t_auxOnset)).poll(label: "dampFrq");
+				maxDampFreq, TRand.kr( minDampFreq, minDampFreq*2, t_auxOnset));//.poll(label: "dampFrq");
 
 			combDels = ([0.0297, 0.0371, 0.0411, 0.0437] + 4.collect({Rand(0.0, 0.004)}));
 			// combDels = combDels * scaleReflections;
