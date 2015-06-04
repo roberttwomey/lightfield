@@ -353,18 +353,18 @@ GrainScanner1 {
 	loadSynthLib {
 
 		verbDef = CtkSynthDef(\verb_localin, {
-			arg outbus = 0, inbus, amp = 0.4,
+			arg outbus = 0, inbus, amp = 1,
 			// unused args with dynamic params
 			decayTime = 2, mix = 0.5, apDecay = 0.2, scaleReflections = 1, dampFreq = 1800,
 			t_auxOnset = 0, auxLag = 10, auxOnsetCurve = 3,
 
 			// dynamic arg params
-			minSclReflect = 1, maxSclReflect = 5.8,
-			minDecayTime = 0.5, maxDecayTime = 2.4,
-			minAPDecay = 0.05, maxAPDecay = 3.3,
+			minSclReflect = 1, maxSclReflect = 18,
+			minDecayTime = 0.5, maxDecayTime = 3.3,
+			minAPDecay = 0.05, maxAPDecay = 1.5,
 			minMix = 0.2, maxMix = 0.85,
-			minDampFreq = 1700, maxDampFreq = 16500,
-			verbCutTail = 8;
+			minDampFreq = 3500, maxDampFreq = 16500,
+			verbCutTail = 10;
 
 
 			var src, combDels, g, lIn, lOut, delay, combs, ap, out;
