@@ -440,10 +440,12 @@ GrainScanner2 {
 			cluster = 0, clusterSpread = 0.1, distFrmCen = 0, // bookkeeping args
 			buffer, bufnum, pos = 0, replyID = -1,
 			pan = 0, spread = 0.25,
-			fadein = 2, fadeout = 2, amp = 1, gate = 1;
+			fadein = 2, fadeout = 2, amp = 1, gate = 1,
+			pitchDriftPct = 0.12, pitchDriftPer = 5, bw = 1855, bpfDriftPer = 6;
 
 			var env, trig, out, grain_dens, amp_scale, disp, dispNorm, panner;
 			var gRate, gDur, gRand, gDisp, gPan, gSpread, gAmp, cSpread, dFrmCen, gPos;
+			var pitchDrift, bpfFrqDrift;
 
 			// envelope for fading output in and out - re-triggerable
 			env = EnvGen.kr(Env([1,1,0],[fadein, fadeout], \sin, 1), gate, doneAction: 0);
@@ -478,18 +480,32 @@ GrainScanner2 {
 			gPos = (pos + disp).wrap(0,1);
 			panner = WhiteNoise.kr(gSpread, gPan).wrap(-1,1);
 
+			pitchDrift = LFDNoise3.kr(pitchDriftPer.reciprocal, pitchDriftPct);
+
 			out = GrainBufJ.ar(
 				4, //1, // pan to multiple channels
-				trig, gDur, buffer, 1,
+				trig, gDur, buffer, 1+ pitchDrift,//1,
 				gPos,
 				1, interp:1, grainAmp: amp_scale,
 				pan: panner
 			);
 			//out = GrainBuf.ar(numChannels: 4,trigger: trig, dur: gDur,sndbuf: buffer, rate: 1, pos: gPos, interp: 1, pan: panner, mul: amp_scale);
 
+			bpfFrqDrift = LFDNoise3.kr(bpfDriftPer.reciprocal).range(100, 1000);
+			// sweeping BPFs
+			out = Mix.ar(
+				5.collect{ |i|
+					var frq;
+					// frq=mod*(i+1*3);
+					frq= if(i==0,{bpfFrqDrift},{bpfFrqDrift*(i*4)});
+					// Formlet.ar(in, mod*(i+1*3), att, dec)
+					BPF.ar(out, frq, bw/frq)
+				}
+			);
+
 			out = out * env;
 			// out = Pan2.ar(out);
-			Out.ar(outbus, out * gAmp);
+			Out.ar( outbus, out * gAmp );
 		});
 	}
 }
