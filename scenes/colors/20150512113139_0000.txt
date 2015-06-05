@@ -1,0 +1,6 @@
+./textures/tunnel_tex_sm.jpg
+-13.1875
+0,0
+0,0
+20,30
+1
