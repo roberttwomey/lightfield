@@ -8,24 +8,26 @@ s.waitForBoot({
 	~eq = MasterEQ(4,s);
 
 	/* added!! */
-	~motorBuf = CtkBuffer.playbuf("/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/dining_room_capture_EDIT.WAV").load;
-	s.sync;
-	~motorPB = MotorPlayback(0, ~motorBuf);
-	s.sync;
+	// ~motorBuf = CtkBuffer.playbuf("/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/dining_room_capture_EDIT.WAV").load;
+	// s.sync;
+	// ~motorPB = MotorPlayback(0, ~motorBuf);
+	// s.sync;
 
 
 	~gs1 !? {~gs1.free};
 	~gs2 !? {~gs2.free};
 
 		/* source file */
-	intSndPath = "/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/around_the_dining_room_morning_EDIT.WAV";
+	// intSndPath = "/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/around_the_dining_room_morning_EDIT.WAV";
+	intSndPath = "/Volumes/Work/Projects/lightfield/data/audio/EDITS/around_the_dining_room_morning_EDIT.WAV";
 
 	/* GrainScanner1 with 3 GrainScan1's */
 	~gs1 = GrainScanner1( 3, intSndPath );
 	~gs1.presetGUI(3);
 	3.wait;
 
-	extSndPath = "/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/discovery_cliffside_1_EDIT.WAV";
+	// extSndPath = "/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/discovery_cliffside_1_EDIT.WAV";
+	extSndPath = "/Volumes/Work/Projects/lightfield/data/audio/EDITS/discovery_cliffside_1_EDIT.WAV";
 
 	~gs2 = GrainScanner2( 0, extSndPath );
 	5.wait;
@@ -35,9 +37,9 @@ s.waitForBoot({
 
 	~imageCtl = ControlMixMaster(
 		["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ],
-		NetAddr("refocuser.local", 12345));
+		// NetAddr("refocuser.local", 12345));
 	// NetAddr("192.168.2.2", 12345));
-	// NetAddr("192.168.0.100", 12345));
+		NetAddr("192.168.0.100", 12345));
 
 	// NetAddr("localhost", 12345));
 	2.wait;
@@ -134,114 +136,102 @@ s.waitForBoot({
 	~sceneViews = IdentityDictionary(know: true).putPairs([
 		\bookcase,
 		[
-			\bookcase_bed_knob_plant, 10.0, 7.0, // roll right slightly!
-			\bookcase_close, 7.0, 5.0, // focus through it! turn books into abstraction
-			\bookcase_mirror_flat, 10.0, 7.0, // good
-			// \bookcase_mirror_rover, 5.0, 5.0,
-			\bookcase_start, 10.0, 15.0, // still? move on the bush to the left
+			\bookcase_bed_knob_plant, 10.0, 7.0, //
+			\bookcase_close, 7.0, 5.0, //
+			\bookcase_mirror_flat, 10.0, 7.0, //
+			\bookcase_start, 10.0, 15.0, //
 			\bookcase_window, 5.0, 5.0, // too similar to the one below
-			\bookcase_rover_mobile_selfie, 5.0, 30.0, //
 		],
 		\carkeek,
 		[
 			\carkeek_tornado, 5.0, 5.0,
 			\carkeek_train1, 5.0, 5.0,
-			\carkeek_gravel, 5.0, 5.0 // push the abstraction! crop just the gravel
+			\carkeek_gravel, 5.0, 5.0, // not great
 			\carkeek_pile_distant, 5.0, 5.0,
 			// zoom into guts of the pile
 		],
 		\carkeek_night,
 		[
 			\carkeek_night_ground, 5.0, 5.0,
-			\carkeek_night_shore, 5.0, 5.0, // smoothly move left right. focus swim.
+			\carkeek_night_shore, 5.0, 5.0, // push tree in face
 			\carkeek_night_hypercolortree, 5.0, 5.0,
 			// \carkeek_night_oceanblur, 5.0, 5.0,
 		],
 		\cliffside,
 		[
-			\cliffside_shore, 10.0, 25.0, // just slower
+			\cliffside_shore, 10.0, 25.0,
+			\cliffside_leaves, 35.0, 15.0,
 			\cliffside_zoom, 5.0, 5.0, //
-			\cliffside_trees_breathing, 35.0, 15.0,
-			\cliffside_right, 10.0, 20.0,
 			// need 1 or 2 better scenes
 		],
 		\dark_trees,
 		[
 			// \dark_trees_start, 5.0, 5.0,
-			\dark_trees_leaves, 5.0, 5.0, // more images to pop leaves more
-			\dark_trees_whitetree, 5.0, 5.0, // lateral movement from leftmost trunk
-			\dark_trees_deepzoom, 5.0, 5.0, // run for a long time
+			\dark_trees_leaves, 5.0, 5.0, //
+			\dark_trees_whitetree, 5.0, 5.0, //
+			\dark_trees_deepzoom, 5.0, 5.0, //
 		],
 		\diningroom3,
 		[
 			\diningroom3_kaleid, 15.0, 15.0,
 			\diningroom3_detail_books_nofocus, 10.0, 5.0,
 			\diningroom3_detail_books_focus, 5.0, 5.0,
-			// \diningroom3_books3, 5.0, 5.0,
-			\diningroom3_flower, 5.0, 10.0, // different oscillator. too perfect on flower
+			\diningroom3_flower, 5.0, 10.0, //
 			// more lfo displacement
 			\diningroom3_floor, 10.0, 10.0
 		],
-		\mike1,
+		\mike1, // stopped here
 		[
-			\mike1_start, 10.0, 20.0, // bump it off center
 			\mike1_3, 5.0, 5.0, // horizontal
+			\mike1_3_rover, 5.0, 5.0, //
 			\mike1_5_fruitbowl, 25.0, 15.0,
-			\mike1_parallax_left, 5.0, 5.0, // vertical expansion
-			\mike1_window, 5.0, 5.0, // one of
-			\mike1_3_rover, 5.0, 5.0, // these should
-			\mike1_mirrorimage_moving, 5.0, 5.0, // go. good
+			\mike1_mirrorimage_moving, 5.0, 5.0, //
+			\mike1_parallax_left, 5.0, 5.0, //
+			\mike1_start, 10.0, 20.0, //
 			// spend some time with the books
-			// too many mirror shots, too many rover
 		],
 		\mike2,
 		[
-			\mike2_rover, 5.0, 5.0,
-			\mike2_swimmingtrees, 3.0, 20.0, // not enough swim!
-			// \mike2_window, 5.0, 5.0, // too similar!
-			\mike2_strings, 15.0, 5.0, // too similar!
 			\mike2_desk_ironingboard, 10.0, 30.0, // **
+			\mike2_rover, 5.0, 5.0,
+			\mike2_swimmingtrees, 3.0, 20.0, //
+			\mike2_strings, 15.0, 5.0, //
 		],
 		\mike3,
 		[
 			\mike3_book_orbit1, 4.0, 1.0,
-			\mike3_cloth_table, 5.0, 5.0, // stay right!
+			\mike3_cloth_table, 5.0, 5.0, //
 			\mike3_distant_window, 10.0, 15.0, // **
 			\mike3_fence, 10.0, 10.0, // *
 			\mike3_lamp_glow, 5.0, 5.0,
 			\mike3_peeker, 10.0, 15.0,
 			\mike3_sputnik, 10.0, 5.0,
-			\mike3_start, 10.0, 10.0, // still image?
+			\mike3_start, 10.0, 10.0, //
 			\mike3_fruittable, 10.0, 5.0, // *** gauzy
 			\mike3_windowplane, 10.0, 10.0, // **
 		],
 		\outsidelookingin,
 		[
-			\outside_1, 5.0, 5.0, // totally still?
+			\outside_1, 5.0, 5.0, //
 			\outside_2, 5.0, 5.0,
-			\outside_book, 5.0, 5.0, // add verry slow drift up. pan down drift up very slowly. straight
+			\outside_book, 5.0, 5.0, //
 			\outside_book_left, 5.0, 5.0,
 			\outside_bookshelf_lamp, 5.0, 5.0,
-			// \outside_book, 5.0, 5.0,
-			// \outside_book_left, 5.0, 5.0,
-
 			// add lamp focus scene
 		],
 		\tunnel,
 		[
-			\tunnel_tunnels, 5.0, 5.0,
-			\tunnel_start, 5.0, 5.0, // worship the tree! crop top 2/3rds
-			\tunnel_rocks, 5.0, 5.0, // slow the oscillator
+			\tunnel_start, 5.0, 5.0, //
+			\tunnel_rocks, 5.0, 5.0, //
 			\tunnel_textures, 5.0, 5.0 // dope textures. get rid of bars
+			\tunnel_tunnels, 5.0, 5.0,
 		],
 		\yellowcliff,
 		[
 			\yellowcliff_bush, 5.0, 5.0,
-			\yellowcliff_sky_top, 5.0, 5.0,
-			\yellowcliff_sky_bot, 5.0, 5.0,
 			\yellowcliff_bush_left, 5.0, 5.0,
-			\yellowcliff_bush_right, 5.0, 5.0,
 			\yellowcliff_close, 5.0, 5.0,
+			\yellowcliff_sky, 5.0, 5.0,
 		],
 	]);
 
@@ -293,15 +283,15 @@ s.waitForBoot({
 				fork{
 					(dur - (motorDur*motorEnv[0])).wait;
 
-					~motorPB.play(motorDur);
-					~motorPB.synth
-					.fadeIn_(motorEnv[0]).sustain_(motorEnv[1]).fadeOut_(motorEnv[2])
-					.amp_(-2.dbamp)
-					.cutoffHigh_(16000).cutoffLow_(800)
-					.onsetCurveIn_(5).onsetCurveOut_(-5)
-					.ampCurveIn_(3).ampCurveOut_(-3)
-					.mixLow_(0.1).mixHigh_(1)
-					.t60low_(6).t60high_(4);
+					// ~motorPB.play(motorDur);
+					// ~motorPB.synth
+					// .fadeIn_(motorEnv[0]).sustain_(motorEnv[1]).fadeOut_(motorEnv[2])
+					// .amp_(-2.dbamp)
+					// .cutoffHigh_(16000).cutoffLow_(800)
+					// .onsetCurveIn_(5).onsetCurveOut_(-5)
+					// .ampCurveIn_(3).ampCurveOut_(-3)
+					// .mixLow_(0.1).mixHigh_(1)
+					// .t60low_(6).t60high_(4);
 				};
 
 				// choose the views within the scene

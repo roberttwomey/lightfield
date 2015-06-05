@@ -30,8 +30,10 @@ s.waitForBoot({
 
 	~imageCtl = ControlMixMaster(
 		["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ],
-		NetAddr("192.168.0.100", 12345));
-	// NetAddr("refocuser.local", 12345));
+		NetAddr("refocuser.local", 12345));
+	// NetAddr("192.168.2.2", 12345));
+	// NetAddr("192.168.0.100", 12345));
+
 	// NetAddr("localhost", 12345));
 	2.wait;
 	~imageCtl.mixers.do({ |mxr| mxr.plotter.stop });
@@ -150,18 +152,13 @@ s.waitForBoot({
 	~sceneViews = IdentityDictionary(know: true).putPairs([
 		\bookcase,
 		[
-			\bookcase_bed, 5.0, 5.0,
-			\bookcase_close, 7.0, 5.0,
-			\bookcase_doorknob, 5.0, 5.0,
-			\bookcase_mirror, 7.0, 5.0,
-			\bookcase_mirror_flat_up, 5.0, 5.0,
+			\bookcase_bed_knob_plant, 10.0, 7.0, // * moving
+			\bookcase_close, 7.0, 5.0, // *
+			\bookcase_mirror_flat, 10.0, 7.0, // * moving
 			\bookcase_mirror_rover, 5.0, 5.0,
-			\bookcase_plant_books, 5.0, 5.0,
+			\bookcase_rover_mobile_selfie, 5.0, 30.0, // * moving
 			\bookcase_start, 10.0, 15.0,
 			\bookcase_window, 5.0, 5.0,
-
-			\bookcase_mirror_flat, 10.0, 7.0, // * moving
-			\bookcase_rover_mobile_selfie, 5.0, 30.0, // * moving
 		],
 		\carkeek,
 		[
