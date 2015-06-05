@@ -1,3 +1,38 @@
+/* source file */
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/around_the_dining_room_morning_EDIT.WAV";
+// p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_EDIT.WAV";
+
+s.boot
+~eq = MasterEQ(4);
+
+/* GrainScanner1 with 3 GrainScan1's */
+x = GrainScanner1( 3, p )
+x.presetGUI(3)
+// see below for loading scmir frames for "moment" frame locations
+
+// reverb
+	// reverb control
+x.sendToReverb( onsetTime: 25 )
+x.sendToReverb( onsetTime: 10 )
+x.sendToReverb( onsetTime: 5 )
+
+x.verbOnsetCurve_(3)
+(
+x.verbSynths.do(_.maxAPDecay_(1.5));
+x.verbSynths.do(_.maxDecayTime_(6.3));
+x.verbSynths.do(_.minDampFreq_(3500));
+x.verbSynths.do(_.amp_(-8.dbamp));
+x.verbSynths.do(_.maxSclReflect_(23));
+)
+x.verbSynths.do(_.verbCutTail_(10))
+
+x.verbSynths[0].maxDecayTime
+x.verbSynths[0].maxAPDecay
+x.verbSynths[0].minDampFreq
+
+
+
+
 a = CtkAudio.play(2)
 s.scope(1, a.bus)
 (

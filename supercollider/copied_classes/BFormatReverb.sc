@@ -41,7 +41,7 @@ BFormatReverb {
 	*ar {|in, mix=1, predelay=0.05,
 		cutoff=3000, t60low=2.2, t60high=1.5,
 		diffusion=1.0, diffusionLR=1.0, diffusionFB=1.0, mod=1.0,
-		inscale = 1, domGain = -1.5 |
+		inscale = 1, domGain = 0 |
 		var local, sum, delays, delayMod, allpassDelays, lateAllpassDelays;
 		var allpassCoefEarly, allpassCoefLate;
 		var g0late, g1late, a1late, b0late;

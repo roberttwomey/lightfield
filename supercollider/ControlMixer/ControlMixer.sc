@@ -116,7 +116,7 @@ ControlMixer {
 								[ broadcastChk = CheckBox().fixedWidth_(15).value_(broadcasting), a: \right],
 
 								[ StaticText().string_("Hz").align_(\right), a: \right],
-								[ updateBx = NumberBox().fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight).scroll_(false),
+								[ updateBx = NumberBox().minDecimals_(3).fixedWidth_(nBoxWidth).fixedHeight_(nBoxHeight).scroll_(false),
 									a: \right],
 
 								[ StaticText().string_("Plot").align_(\right), a: \right],
