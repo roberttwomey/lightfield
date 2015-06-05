@@ -353,18 +353,18 @@ GrainScanner1 {
 	loadSynthLib {
 
 		verbDef = CtkSynthDef(\verb_localin, {
-			arg outbus = 0, inbus, amp = 0.4,
+			arg outbus = 0, inbus, amp = 1,
 			// unused args with dynamic params
 			decayTime = 2, mix = 0.5, apDecay = 0.2, scaleReflections = 1, dampFreq = 1800,
 			t_auxOnset = 0, auxLag = 10, auxOnsetCurve = 3,
 
 			// dynamic arg params
-			minSclReflect = 1, maxSclReflect = 5.8,
-			minDecayTime = 0.5, maxDecayTime = 2.4,
-			minAPDecay = 0.05, maxAPDecay = 3.3,
+			minSclReflect = 1, maxSclReflect = 18,
+			minDecayTime = 0.5, maxDecayTime = 3.3,
+			minAPDecay = 0.05, maxAPDecay = 1.5,
 			minMix = 0.2, maxMix = 0.85,
-			minDampFreq = 1700, maxDampFreq = 16500,
-			verbCutTail = 8;
+			minDampFreq = 3500, maxDampFreq = 16500,
+			verbCutTail = 10;
 
 
 			var src, combDels, g, lIn, lOut, delay, combs, ap, out;
@@ -387,15 +387,15 @@ GrainScanner1 {
 			xFormEnv = LagUD.kr(xFormEnv, 0.1, verbCutTail);
 
 			sclReflect	= LinLin.kr(longOnsetxFormEnv, 0,1,
-				minSclReflect, TRand.kr( maxSclReflect*0.7, maxSclReflect, t_auxOnset));//.poll(label: "sclReflect");
+				minSclReflect, TRand.kr( maxSclReflect*0.7, maxSclReflect, t_auxOnset)); //.poll(label: "sclReflect");
 			decTime		= LinLin.kr(xFormEnv, 0,1,
-				minDecayTime, TRand.kr( maxDecayTime*0.25, maxDecayTime, t_auxOnset) );//.poll(label: "decTime");
+				minDecayTime, TRand.kr( maxDecayTime*0.25, maxDecayTime, t_auxOnset) ); //.poll(label: "decTime");
 			apDec		= LinLin.kr(longOnsetxFormEnv, 0,1,
-				minAPDecay, TRand.kr( maxAPDecay*0.25, maxAPDecay, t_auxOnset));//.poll(label: "apDec");
+				minAPDecay, TRand.kr( maxAPDecay*0.25, maxAPDecay, t_auxOnset)); //.poll(label: "apDec");
 			verbMix		= LinLin.kr(longOnsetxFormEnv, 0,1,
 				minMix, maxMix);
 			dampFrq		= LinLin.kr(longOnsetxFormEnv, 0,1,
-				maxDampFreq, TRand.kr( minDampFreq, minDampFreq*2, t_auxOnset));//.poll(label: "dampFrq");
+				maxDampFreq, TRand.kr( minDampFreq, minDampFreq*2, t_auxOnset)); //.poll(label: "dampFrq");
 
 			combDels = ([0.0297, 0.0371, 0.0411, 0.0437] + 4.collect({Rand(0.0, 0.004)}));
 			// combDels = combDels * scaleReflections;

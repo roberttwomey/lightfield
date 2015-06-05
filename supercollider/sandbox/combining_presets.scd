@@ -1,39 +1,25 @@
-// Combining presets from another computer with those on this machine
+// read in Robert's backup
+// Archive.read( "/Users/admin/src/rover/supercollider/preset_backups/ControlMixer_presets/ControlMixer_fromRobert_150527_203422.sctxar" )
 
-// 1. read in backup file
-// dynamic presets from container tuesday
-Archive.read( "/Volumes/Work/Projects/lightfield/supercollider/preset_backups/ControlMixer_presets/container_dynamic_tests_MR_archive.sctxar" )
+Archive.read( "/Users/dxlocal/Documents/ROVER/Rover_workFiles/preset_backups/ControlMixer_presets/robert_wed_eve_150603_182230.sctxar" )
 
-// 2. save control mixer settings to a variable
+// save his control mixer settings to a variable
 ~ctlMxrPresets = Archive.global[\roverPresets]
 
-// 3. read in Mike's grain scanner presets
-Archive.read( "/Volumes/Work/Projects/lightfield/supercollider/preset_backups/GrainScanner_presets/archive_BAK_150527_233940_gs1gs2.sctxar" )
+// read in the default Archive
+Archive.read("/Users/dxlocal/Library/Application Support/SuperCollider/archive.sctxar")
 
-// 4. add controlmixer presets to my mike's grain scanner presets
+// add Robert's mixer presets to my Archive
 Archive.global.put(\roverPresets, ~ctlMxrPresets )
 
-// 5. check that things are there
-GrainScanner1.presets.keys
-GrainScanner2.presets.keys
-Archive.global[\roverPresets].keys
-
-// 6. write global archive to default location
+// write Archive to default location
 Archive.write
-
-// 7. read in Global default archive
-Archive.read
-
-// 8. check that things are there
-GrainScanner1.presets.keys
-GrainScanner2.presets.keys
-Archive.global[\roverPresets].keys
-
-// backup presets
 
 
 // read in Mike's backup
 Archive.read("/Users/admin/src/rover/supercollider/preset_backups/GrainScanner_presets/archive_BAK_150527_233940_gs1gs2.sctxar")
+
+
 
 Archive.archiveDir
 
@@ -55,3 +41,5 @@ GrainScanner1.presets.keys
 GrainScanner2.presets.keys
 Archive.global[\roverPresets].keys
 
+// write it to the default location
+Archive.write

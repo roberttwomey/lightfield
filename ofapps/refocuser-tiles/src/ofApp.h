@@ -78,19 +78,19 @@ public:
     float zoom;
     int xcount, ycount, xstart, ystart;
 
-    float minScale, maxScale;
+//    float minScale, maxScale;
     float xoffset, yoffset;
 
     float fade;
 
     // image manipulation
     bool bImageProc;
-    float minInput;
-    float maxInput;
+    float minlevelIn;
+    float maxlevelIn;
     float gamma;
-    float minOutput;
-    float maxOutput;
-    float desaturate;
+    float minlevelOut;
+    float maxlevelOut;
+    float desaturation;
     float brightness;
     float contrast;
 

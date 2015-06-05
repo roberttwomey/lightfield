@@ -181,7 +181,7 @@ fork{ k.reset.update; "done".postln }
 
 
 ~kMeansPath = PathName(p).pathOnly ++ PathName(p).fileNameWithoutExtension++"_KMEANS"++".scmirZ";
-k.save(~kMeansPath)
+// k.save(~kMeansPath)
 ~recalledK = KMeansMod().load(~kMeansPath)
 
 // initialize a grain scanner
