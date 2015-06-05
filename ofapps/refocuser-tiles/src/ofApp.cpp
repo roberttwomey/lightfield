@@ -182,18 +182,24 @@ void ofApp::draw(){
     if(bShowThumbnail == true) {
 
         // thumbnail size
-        float tWidth = 160, tHeight;
+        float tWidth, tHeight;
+        if(subheight * ysubimages > subwidth * xsubimages) {
+          tWidth = 160;
+          tHeight = 160/float(subwidth * xsubimages) * float(subheight * ysubimages);
+        } else {
+          tWidth = 160/float(subheight * ysubimages) * float(subwidth * xsubimages);
+          tHeight = 160;
+        }
+
         float xunit, yunit;
         int tSubWidth, tSubHeight;
 
         if(numlftextures > 1) {
-            tHeight = 160/float(subwidth) * float(subheight);
             tSubWidth = tWidth / xnumtextures;
             tSubHeight = tHeight / ynumtextures;
             xunit = float(tSubWidth) / float(ximagespertex);
             yunit = float(tSubHeight) / float(yimagespertex);
         } else {
-            tHeight = 160/float(subwidth) * float(subheight);
             tSubWidth = tWidth;
             tSubHeight = tHeight;
             xunit = float(tSubWidth) / float(xsubimages);
