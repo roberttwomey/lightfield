@@ -27,8 +27,8 @@ s.waitForBoot({
 
 	~imageCtl = ControlMixMaster(
 		["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ],
-		NetAddr("refocuser.local", 12345));
-	// NetAddr("localhost", 12345));
+		// NetAddr("refocuser.local", 12345));
+		NetAddr("localhost", 12345));
 	2.wait;
 	~imageCtl.mixers.do({ |mxr| mxr.plotter.stop });
 
@@ -103,7 +103,7 @@ s.waitForBoot({
 	]);
 
 	/*tests*/
-/*	~sceneScore = [
+	~sceneScore = [
 		["diningroom3", 15, 4],
 		["cliffside", 15, 2],
 		["dark_trees", 15, 2.rand+1],
@@ -115,147 +115,29 @@ s.waitForBoot({
 		["yellowcliff", 15, 2.rand+1],
 		["mike2", 15, 4],
 		["diningroom3", 15, 3],
-	];*/
-
-	~sceneViews = IdentityDictionary(know: true).putPairs([
-		\bookcase,
-		[
-			\bookcase_start, 10.0, 15.0,
-			\bookcase_bed, 5.0, 5.0,
-			\bookcase_doorknob, 5.0, 5.0,
-			\bookcase_plant_books, 5.0, 5.0,
-			\bookcase_close, 7.0, 5.0,
-			\bookcase_mirror_flat, 10.0, 7.0,
-			\bookcase_window, 5.0, 5.0,
-			\bookcase_mirror, 7.0, 5.0,
-			\bookcase_mirror_flat_up, 5.0, 5.0,
-			\bookcase_mirror_rover, 5.0, 5.0,
-			\bookcase_rover_mobile_selfie, 5.0, 30.0,
-			\bookcase_mirror, 15.0, 5.0,
-		],
-		\cliffside,
-		[
-			\cliffside_shore, 10.0, 25.0,
-			\cliffside_trees_breathing, 35.0, 15.0,
-			// \cliffside_greenery_close, 10.0, 25.0,
-			\cliffside_right, 10.0, 20.0,
-		],
-		\yellowcliff,
-		[
-			\yellowcliff_bush, 5.0, 5.0,
-			\yellowcliff_sky_top, 5.0, 5.0,
-			\yellowcliff_sky_bot, 5.0, 5.0,
-			\yellowcliff_bush_left, 5.0, 5.0,
-			\yellowcliff_bush_right, 5.0, 5.0,
-			\yellowcliff_close, 5.0, 5.0,
-		],
-		\mike1,
-		[
-			\mike1_start, 10.0, 20.0,
-			\mike1_1, 10.0, 5.0,
-			\mike1_1_rover, 5.0, 5.0,
-			\mike1_2, 5.0, 5.0,
-			\mike1_3_rover, 5.0, 5.0,
-			\mike1_4, 5.0, 5.0,
-			\mike1_3, 5.0, 5.0,
-			\mike1_5_fruitbowl, 25.0, 15.0,
-			// \mike1_5_weird, 5.0, 5.0,
-			\mike1_parallax_left, 5.0, 5.0,
-			// \mike1_rover_mirror, 5.0, 5.0,
-			// \mike1_rover, 5.0, 5.0,
-			\mike1_rover_mirror, 10.0, 7.0,
-			\mike1_rover_rover, 10.0, 7.0,
-			\mike1_window, 5.0, 5.0,
-		],
-		\mike2,
-		[
-			\mike2_yellowtunnel, 10.0, 5.0,
-			\mike2_swimmingtrees, 3.0, 20.0,
-			\mike2_window, 5.0, 5.0,
-			\mike2_strings, 15.0, 5.0,
-			\mike2_desk_ironingboard, 10.0, 30.0, // **
-			\mike2_rover, 5.0, 5.0,
-			\mike2_yellowtunnel, 5.0, 5.0
-		],
-		\mike3,
-		[
-
-			\mike3_start, 10.0, 10.0,
-			\mike3_fruittable, 10.0, 5.0,
-
-			// \mike3_lamp, 15.0, 10.0,
-			\mike3_book_orbit2, 10.0, 1.0,
-			\mike3_book_orbit1, 4.0, 1.0,
-			// \mike3_book_orbit3, 5.0, 5.0,
-			\mike3_book_orbit4, 4.0, 5.0,
-			\mike3_distant_window, 10.0, 15.0, // **
-			\mike3_peeker, 10.0, 15.0,
-			\mike3_fence, 10.0, 10.0,
-			\mike3_windowplane, 10.0, 10.0, // **
-			\mike3_cloth_table, 5.0, 5.0,
-			\mike3_cloth_table_pull, 5.0, 5.0,
-			\mike3_sputnik, 10.0, 5.0,
-			\mike3_lamp, 15.0, 10.0,
-			\mike3_lamp_glow, 5.0, 5.0,
-			\mike3_lamp_glow_2, 5.0, 5.0,
-			\mike3_lamp_glow_3, 5.0, 5.0,
-		],
-		\outsidelookingin,
-		[
-			\outside_1, 5.0, 5.0,
-			\outside_2, 5.0, 5.0,
-			\outside_book, 5.0, 5.0,
-			\outside_book_left, 5.0, 5.0,
-			// \outside_book, 5.0, 5.0,
-			// \outside_book_left, 5.0, 5.0,
-		],
-		\carkeek,
-		[
-			\carkeek_train_blur, 5.0, 1.0,
-			\carkeek_train_start, 5.0, 1.0,
-			\carkeek_train1, 1.0, 1.0,
-			\carkeek_train2, 1.0, 1.0,
-			\carkeek_train3, 1.0, 1.0,
-			\carkeek_train4, 1.0, 1.0,
-			\carkeek_pile, 5.0, 7.0,
-			\carkeek_pile_distant, 5.0, 7.0
-		],
-		\diningroom3,
-		[
-			\diningroom3_kaleid, 15.0, 15.0,
-			\diningroom3_detail_books_nofocus, 10.0, 5.0,
-			\diningroom3_detail_books_focus, 5.0, 5.0,
-			\diningroom3_books3, 5.0, 5.0,
-			\diningroom3_books4, 5.0, 5.0,
-			\diningroom3_flower, 5.0, 10.0,
-			\diningroom3_floor, 10.0, 10.0
-		]
-	]);
-
-	~sceneScore = [
-		// scene params
-		//scene, dur, numViews
-
-		// int
-		// ["diningroom3", 130, 4],
-		// ["mike3", 130, 4],
-		// ext
-		["outsidelookingin", 110, 3],
-		["carkeek", 110, 3],
-		// ["tunnel", 150, 4],
-		// int
-		["mike3", 130, 4],
-
-		["mike2", 110, 3],
-		["mike1", 150, 3],
-		// ext
-		["cliffside", 108, 3],
-		["yellowcliff", 78, 3],
-
-		// liminal
-		["bookcase", 90, 4],
-		["diningroom3", 90, 3],
 	];
+
+
+	// ~sceneScore = [
+	// 	// scene params
+	// 	//scene, dur, numViews
+	//
+	// 	// int
+	// 	["diningroom3", 130, 4],
+	// 	["mike3", 130, 4],
+	// 	// ext
+	// 	["tunnel", 150, 4],
+	// 	// int
+	// 	["mike3", 110, 3],
+	// 	["mike1", 150, 3],
+	// 	// ext
+	// 	["cliffside", 108, 3],
+	// 	["carkeek", 78, 3],
+	//
+	// 	// liminal
+	// 	["mike2", 90, 4],
+	// 	["diningroom3", 90, 3],
+	// ];
 
 
 	~scoreTask !? {~scoreTask.stop.clock.clear};
@@ -267,13 +149,12 @@ s.waitForBoot({
 			~sceneScore.do{ |sceneParams|
 				var scene, dur, nViews, sceneFileName, audioScene, whichScanner;
 				var fadeOut = 3, fadeIn = 3, viewPresets, sceneType;
-				var tempPreset, tempTransition, tempLinger;
 				#scene, dur, nViews = sceneParams;
 
 				// fade out
 				~fader.fadeTime_(fadeOut);
 				~fader.value_(1.0);
-				[~gs1, ~gs2].do(_.release(fadeOut*1.5));
+				[~gs1, ~gs2].do(_.release(fadeOut));
 				(fadeOut+1).wait;
 
 				// load scene
@@ -293,16 +174,12 @@ s.waitForBoot({
 				~fader.value_(0.0);
 
 				// choose the views within the scene
-				// viewPresets = ~videoPresets.scramble.keep(nViews);
-				viewPresets = ~sceneViews[scene.asSymbol].clump(3).scramble.keep(nViews);
-
+				viewPresets = ~videoPresets.scramble.keep(nViews);
 
 				viewPresets.do { |vPreset, i|
 					var viewDur, transition, linger;
 					viewDur = dur/nViews; // equal time on each view
-					// transition = rrand(0.3, 0.7) * viewDur;
-					// linger = viewDur - transition;
-					transition = 0;
+					transition = rrand(0.3, 0.7) * viewDur;
 					linger = viewDur - transition;
 
 					switch( sceneType,
@@ -335,13 +212,8 @@ s.waitForBoot({
 					};
 
 					// RECALL video
-
-					#tempPreset, tempTransition, tempLinger = vPreset;
-
-					// postf("recalling scene %, preset %\n", scene, vPreset);
-					// ~imageCtl.recallPreset(vPreset, transition);
-					postf("recalling scene %, preset %\n", scene, tempPreset);
-					~imageCtl.recallPreset(tempPreset, transition);
+					postf("recalling scene %, preset %\n", scene, vPreset);
+					~imageCtl.recallPreset(vPreset, transition);
 
 					postf("waiting % seconds for view to play out\n", viewDur);
 					(transition + linger).wait;
@@ -355,5 +227,3 @@ s.waitForBoot({
 	~scoreTask.play;
 	// ~scoreTask.stop
 });
-
-// ~imageCtl.storePreset(\mike2_long_lens)

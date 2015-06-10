@@ -26,10 +26,7 @@ s.waitForBoot({
 	~gs2.presetGUI(5);
 
 
-	c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ],
-		NetAddr("refocuser.local", 12345)
-		// NetAddr("localhost", 12345)
-	);
+	c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("refocuser.local", 12345));
 	2.wait;
 	c.mixers.do({ |mxr| mxr.plotter.stop });
 

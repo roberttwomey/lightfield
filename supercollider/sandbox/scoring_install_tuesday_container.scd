@@ -27,7 +27,7 @@ s.waitForBoot({
 
 	~imageCtl = ControlMixMaster(
 		["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ],
-		NetAddr("refocuser.local", 12345));
+		NetAddr("192.168.2.2", 12345));
 	// NetAddr("localhost", 12345));
 	2.wait;
 	~imageCtl.mixers.do({ |mxr| mxr.plotter.stop });
@@ -211,13 +211,15 @@ s.waitForBoot({
 		],
 		\carkeek,
 		[
-			\carkeek_train_blur, 5.0, 1.0,
-			\carkeek_train_start, 5.0, 1.0,
-			\carkeek_train1, 1.0, 1.0,
-			\carkeek_train2, 1.0, 1.0,
-			\carkeek_train3, 1.0, 1.0,
-			\carkeek_train4, 1.0, 1.0,
-			\carkeek_pile, 5.0, 7.0,
+			// \carkeek_train_blur, 5.0, 1.0,
+			// \carkeek_train_start, 5.0, 1.0,
+			\carkeek_train1, 1.0, 1.0, // ***
+			\carkeek_tornado, 1.0, 1.0, // ***
+			\carkeek_texture, 1.0, 1.0,
+			// \carkeek_train2, 1.0, 1.0,
+			// \carkeek_train3, 1.0, 1.0,
+			// \carkeek_train4, 1.0, 1.0,
+			// \carkeek_pile, 5.0, 7.0,
 			\carkeek_pile_distant, 5.0, 7.0
 		],
 		\diningroom3,

@@ -12,6 +12,7 @@ r.camAddr.sendMsg("/camera", "paramsnap", "-t 1 -o /home/pi/lfimages/testThisMut
 // DISABLE PREVIEW, -n
 // probably useful
 r.camAddr.sendMsg( "/camera", "paramsnap", format("-t 1 -o /home/pi/lfimages/%.jpg -n", Date.getDate.rawSeconds) )
+r.camAddr.sendMsg( "/camera", "paramsnap", format("-t 1 -o /home/pi/lfimages/%.jpg -n -ss 12000", Date.getDate.rawSeconds) )
 
 
 r.camAddr.sendMsg( "/camera", "paramsnap", format("-t 1 -o /home/pi/lfimages/%.jpg -n -sh 25 -ex snow -mm average -awb sun -ss 1400", Date.getDate.rawSeconds) )
