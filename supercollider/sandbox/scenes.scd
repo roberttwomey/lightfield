@@ -3,7 +3,7 @@
 c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("192.168.0.100", 12345));
 
 // c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("192.168.2.2", 12345));
-//
+
 // c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("refocuser.local", 12345));
 
 ~fader=ControlFade(1.0);
@@ -43,15 +43,15 @@ c.presets.keys.do { |p|
 // set of presets
 
 // create a new preset
-c.storePreset(\yellowcliff_sky)
+c.storePreset(\dark_trees_whitetree)
 
 
 
 // remove a preset
-c.presets.removeAt(\yellowcliff_bush_right)
+c.presets.removeAt(\dark_trees_branch2)
 
 // load a scene
-c.loadScene("./textures/carkeek_night.xml")
+c.loadScene("./textures/dark_trees.xml")
 
 
 

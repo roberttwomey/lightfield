@@ -1,7 +1,5 @@
 // SCORING
 
-thisThread
-
 //get audio initialized
 s.waitForBoot({
 	var intSndPath, extSndPath;

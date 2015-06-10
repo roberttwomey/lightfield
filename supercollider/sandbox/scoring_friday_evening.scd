@@ -8,26 +8,26 @@ s.waitForBoot({
 	~eq = MasterEQ(4,s);
 
 	/* added!! */
-	// ~motorBuf = CtkBuffer.playbuf("/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/dining_room_capture_EDIT.WAV").load;
-	// s.sync;
-	// ~motorPB = MotorPlayback(0, ~motorBuf);
-	// s.sync;
+	~motorBuf = CtkBuffer.playbuf("/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/dining_room_capture_EDIT.WAV").load;
+	s.sync;
+	~motorPB = MotorPlayback(0, ~motorBuf);
+	s.sync;
 
 
 	~gs1 !? {~gs1.free};
 	~gs2 !? {~gs2.free};
 
 		/* source file */
-	// intSndPath = "/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/around_the_dining_room_morning_EDIT.WAV";
-	intSndPath = "/Volumes/Work/Projects/lightfield/data/audio/EDITS/around_the_dining_room_morning_EDIT.WAV";
+	intSndPath = "/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/around_the_dining_room_morning_EDIT.WAV";
+	// intSndPath = "/Volumes/Work/Projects/lightfield/data/audio/EDITS/around_the_dining_room_morning_EDIT.WAV";
 
 	/* GrainScanner1 with 3 GrainScan1's */
 	~gs1 = GrainScanner1( 3, intSndPath );
 	~gs1.presetGUI(3);
 	3.wait;
 
-	// extSndPath = "/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/discovery_cliffside_1_EDIT.WAV";
-	extSndPath = "/Volumes/Work/Projects/lightfield/data/audio/EDITS/discovery_cliffside_1_EDIT.WAV";
+	extSndPath = "/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/discovery_cliffside_1_EDIT.WAV";
+	// extSndPath = "/Volumes/Work/Projects/lightfield/data/audio/EDITS/discovery_cliffside_1_EDIT.WAV";
 
 	~gs2 = GrainScanner2( 0, extSndPath );
 	5.wait;
@@ -38,8 +38,8 @@ s.waitForBoot({
 	~imageCtl = ControlMixMaster(
 		["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ],
 		// NetAddr("refocuser.local", 12345));
-	// NetAddr("192.168.2.2", 12345));
-		NetAddr("192.168.0.100", 12345));
+		NetAddr("192.168.2.2", 12345));
+	// NetAddr("192.168.0.100", 12345));
 
 	// NetAddr("localhost", 12345));
 	2.wait;
@@ -140,14 +140,15 @@ s.waitForBoot({
 			\bookcase_close, 7.0, 5.0, //
 			\bookcase_mirror_flat, 10.0, 7.0, //
 			\bookcase_start, 10.0, 15.0, //
-			\bookcase_window, 5.0, 5.0, // too similar to the one below
+			\bookcase_window, 5.0, 5.0, //
 		],
 		\carkeek,
 		[
 			\carkeek_tornado, 5.0, 5.0,
+			\carkeek_gravel, 5.0, 5.0, //
 			\carkeek_train1, 5.0, 5.0,
-			\carkeek_gravel, 5.0, 5.0, // not great
 			\carkeek_pile_distant, 5.0, 5.0,
+			\cliffside_leaves, 5.0, 5.0, // looks better than the above
 			// zoom into guts of the pile
 		],
 		\carkeek_night,
@@ -182,13 +183,15 @@ s.waitForBoot({
 		],
 		\mike1, // stopped here
 		[
-			\mike1_3, 5.0, 5.0, // horizontal movement, nice
+			\mike1_3, 5.0, 5.0, // horizontal
 			\mike1_3_rover, 5.0, 5.0, //
 			\mike1_5_fruitbowl, 25.0, 15.0,
+			\mike1_5_fruit, 25.0, 15.0,
 			\mike1_mirrorimage_moving, 5.0, 5.0, //
 			\mike1_parallax_left, 5.0, 5.0, //
 			\mike1_start, 10.0, 20.0, //
 			// spend some time with the books
+			\tunnel_tunnels, 5.0, 5.0,
 		],
 		\mike2,
 		[
@@ -221,10 +224,9 @@ s.waitForBoot({
 		],
 		\tunnel,
 		[
-			// \tunnel_start, 5.0, 5.0, //
-			\tunnel_skyscan, 5.0, 5.0, //
 			\tunnel_rocks, 5.0, 5.0, //
-			\tunnel_textures, 5.0, 5.0, // dope textures. get rid of bars
+			\tunnel_textures, 5.0, 5.0, //
+			\tunnel_start, 5.0, 5.0, //
 			\tunnel_tunnels, 5.0, 5.0,
 		],
 		\yellowcliff,
@@ -243,13 +245,14 @@ s.waitForBoot({
 
 		inf.do { |i|
 			// start with second scene for testing
-			// ~sceneScore = ~sceneScore.rotate(-1);
+			~sceneScore = ~sceneScore.rotate(~sceneScore.size.rand);
 
 			~sceneScore.do{ |sceneParams|
 				var scene, dur, nViews, sceneFileName, audioScene, whichScanner;
 				var fadeOut = 3, fadeIn = 3, viewPresets, sceneType;
-				var tempPreset, tempTransition, tempLinger;
+				var randViewsToAdd;
 				var motorDur = 45, motorEnv = [0.4,0.2,0.4];
+
 				#scene, dur, nViews = sceneParams;
 
 				// shorten times for testing
@@ -275,7 +278,7 @@ s.waitForBoot({
 
 				// wait for the scene file to load and motor sound to begin fading
 				// to cue next view
-				(motorDur*motorEnv[0] - fadeOut - fadeIn -3).wait;
+				(motorDur*motorEnv[0] - fadeOut - fadeIn - 3).wait;
 
 				// fade in
 				~fader.fadeTime_(fadeIn+2);
@@ -284,23 +287,34 @@ s.waitForBoot({
 				fork{
 					(dur - (motorDur*motorEnv[0])).wait;
 
-					// ~motorPB.play(motorDur);
-					// ~motorPB.synth
-					// .fadeIn_(motorEnv[0]).sustain_(motorEnv[1]).fadeOut_(motorEnv[2])
-					// .amp_(-2.dbamp)
-					// .cutoffHigh_(16000).cutoffLow_(800)
-					// .onsetCurveIn_(5).onsetCurveOut_(-5)
-					// .ampCurveIn_(3).ampCurveOut_(-3)
-					// .mixLow_(0.1).mixHigh_(1)
-					// .t60low_(6).t60high_(4);
+					// postf("at %, motor sound start", (dur - (motorDur*motorEnv[0])));
+
+					~motorPB.play(motorDur);
+					~motorPB.synth
+					.fadeIn_(motorEnv[0]).sustain_(motorEnv[1]).fadeOut_(motorEnv[2])
+					.amp_(-2.dbamp)
+					.cutoffHigh_(16000).cutoffLow_(800)
+					.onsetCurveIn_(5).onsetCurveOut_(-5)
+					.ampCurveIn_(3).ampCurveOut_(-3)
+					.mixLow_(0.1).mixHigh_(1)
+					.t60low_(6).t60high_(4);
 				};
 
 				// choose the views within the scene
 				// viewPresets = ~videoPresets.scramble.keep(nViews);
-				viewPresets = ~sceneViews[scene.asSymbol].clump(3).scramble.keep(nViews);
-				// nViews = ~sceneViews[scene.asSymbol].clump(3).size;
+				// viewPresets = ~sceneViews[scene.asSymbol].clump(3).scramble.keep(nViews);
 
-				viewPresets.do { |vPreset, viewCount|
+				// choose the views within the scene
+				viewPresets = ~sceneViews[scene.asSymbol].clump(3).scramble.keep(nViews).collect { |item| item[0] };
+
+				// add a few random views
+				randViewsToAdd = 1;
+
+				viewPresets = viewPresets ++ ~imageCtl.presets.keys.asArray.scramble.keep(randViewsToAdd).collect(_.asSymbol);
+				viewPresets = viewPresets.scramble;
+				nViews = nViews + randViewsToAdd;
+
+ 				viewPresets.do { |vPreset, viewCount|
 					var viewDur, transition, linger;
 					viewDur = dur/nViews; // equal time on each view
 					transition = 0.0;//rrand(0.3, 0.7) * viewDur;
@@ -333,11 +347,11 @@ s.waitForBoot({
 						if( sceneType == \ext )
 						{ "forking off".postln;
 							fork({ 4.5.wait;
-								 postf("playing interior % over %", whichScanner, fadeIn);
-								whichScanner.play(fadeIn);}, AppClock)
+								 postf("playing interior % over %", whichScanner, fadeIn*3);
+								whichScanner.play(fadeIn*3);}, AppClock)
 						}
-						{  postf("playing interior % over %", whichScanner, fadeIn);
-							whichScanner.play(fadeIn)
+						{  postf("playing interior % over %", whichScanner, fadeIn*3);
+							whichScanner.play(fadeIn*3)
 						};
 
 						// play the appropriate scanner
@@ -353,12 +367,16 @@ s.waitForBoot({
 
 					// RECALL video
 
-					#tempPreset, tempTransition, tempLinger = vPreset;
+					// #tempPreset, tempTransition, tempLinger = vPreset;
+					// postf("recalling scene %, preset %\n", scene, tempPreset);
+					// ~imageCtl.recallPreset(tempPreset, transition);
 
-					// postf("recalling scene %, preset %\n", scene, vPreset);
-					// ~imageCtl.recallPreset(vPreset, transition);
-					postf("recalling scene %, preset %\n", scene, tempPreset);
-					~imageCtl.recallPreset(tempPreset, transition);
+					// add a random view occasionally
+					// if(0.2.coin) { vPreset = ~imageCtl.presets.keys.choose.asSymbol };
+
+					postf("recalling scene %, preset %\n", scene, vPreset);
+					~imageCtl.recallPreset(vPreset, transition);
+
 
 					postf("waiting % seconds for view to play out\n", viewDur);
 
