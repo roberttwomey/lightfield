@@ -1,10 +1,10 @@
 // control mixer
 
-// c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr(/*"*/192.168.0.100", 12345));
+c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("192.168.0.100", 12345));
 
 // c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("192.168.2.2", 12345));
-
-c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("refocuser.local", 12345));
+//
+// c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("refocuser.local", 12345));
 
 ~fader=ControlFade(1.0);
 ~fader.broadcast( c.broadcastNetAddr, '/fade', 30 );
@@ -51,7 +51,7 @@ c.storePreset(\yellowcliff_sky)
 c.presets.removeAt(\yellowcliff_bush_right)
 
 // load a scene
-c.loadScene("./textures/yellowcliff.xml")
+c.loadScene("./textures/carkeek_night.xml")
 
 
 

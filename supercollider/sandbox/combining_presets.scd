@@ -1,13 +1,14 @@
 // read in Robert's backup
 // Archive.read( "/Users/admin/src/rover/supercollider/preset_backups/ControlMixer_presets/ControlMixer_fromRobert_150527_203422.sctxar" )
 
-Archive.read( "/Users/dxlocal/Documents/ROVER/Rover_workFiles/preset_backups/ControlMixer_presets/robert_wed_eve_150603_182230.sctxar" )
+// Archive.read( "/Users/dxlocal/Documents/ROVER/Rover_workFiles/preset_backups/ControlMixer_presets/robert_wed_eve_150603_182230.sctxar" )
+Archive.read("/Volumes/Work/Projects/lightfield/supercollider/preset_backups/ControlMixer_presets/THURSDAY_NIGHT_150604_222758.sctxar")
 
 // save his control mixer settings to a variable
 ~ctlMxrPresets = Archive.global[\roverPresets]
 
 // read in the default Archive
-Archive.read("/Users/dxlocal/Library/Application Support/SuperCollider/archive.sctxar")
+Archive.read("/Users/rtwomey/Library/Application Support/SuperCollider/archive.sctxar")
 
 // add Robert's mixer presets to my Archive
 Archive.global.put(\roverPresets, ~ctlMxrPresets )

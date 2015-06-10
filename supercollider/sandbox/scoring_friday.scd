@@ -1,5 +1,7 @@
 // SCORING
 
+thisThread
+
 //get audio initialized
 s.waitForBoot({
 	var intSndPath, extSndPath;
@@ -140,14 +142,15 @@ s.waitForBoot({
 			\bookcase_close, 7.0, 5.0, //
 			\bookcase_mirror_flat, 10.0, 7.0, //
 			\bookcase_start, 10.0, 15.0, //
-			\bookcase_window, 5.0, 5.0, // too similar to the one below
+			\bookcase_window, 5.0, 5.0, //
 		],
 		\carkeek,
 		[
 			\carkeek_tornado, 5.0, 5.0,
+			\carkeek_gravel, 5.0, 5.0, //
 			\carkeek_train1, 5.0, 5.0,
-			\carkeek_gravel, 5.0, 5.0, // not great
 			\carkeek_pile_distant, 5.0, 5.0,
+			\cliffside_leaves, 5.0, 5.0, // looks better than the above
 			// zoom into guts of the pile
 		],
 		\carkeek_night,
@@ -185,10 +188,12 @@ s.waitForBoot({
 			\mike1_3, 5.0, 5.0, // horizontal
 			\mike1_3_rover, 5.0, 5.0, //
 			\mike1_5_fruitbowl, 25.0, 15.0,
+			\mike1_5_fruit, 25.0, 15.0,
 			\mike1_mirrorimage_moving, 5.0, 5.0, //
 			\mike1_parallax_left, 5.0, 5.0, //
 			\mike1_start, 10.0, 20.0, //
 			// spend some time with the books
+			\tunnel_tunnels, 5.0, 5.0,
 		],
 		\mike2,
 		[
@@ -221,9 +226,9 @@ s.waitForBoot({
 		],
 		\tunnel,
 		[
-			\tunnel_start, 5.0, 5.0, //
 			\tunnel_rocks, 5.0, 5.0, //
-			\tunnel_textures, 5.0, 5.0 // dope textures. get rid of bars
+			\tunnel_textures, 5.0, 5.0, //
+			\tunnel_start, 5.0, 5.0, //
 			\tunnel_tunnels, 5.0, 5.0,
 		],
 		\yellowcliff,
@@ -247,7 +252,7 @@ s.waitForBoot({
 			~sceneScore.do{ |sceneParams|
 				var scene, dur, nViews, sceneFileName, audioScene, whichScanner;
 				var fadeOut = 3, fadeIn = 3, viewPresets, sceneType;
-				var tempPreset, tempTransition, tempLinger;
+				var randViewsToAdd;
 				var motorDur = 45, motorEnv = [0.4,0.2,0.4];
 				#scene, dur, nViews = sceneParams;
 
@@ -295,9 +300,13 @@ s.waitForBoot({
 				};
 
 				// choose the views within the scene
-				// viewPresets = ~videoPresets.scramble.keep(nViews);
-				viewPresets = ~sceneViews[scene.asSymbol].clump(3).scramble.keep(nViews);
-				// nViews = ~sceneViews[scene.asSymbol].clump(3).size;
+				viewPresets = ~sceneViews[scene.asSymbol].clump(3).scramble.keep(nViews).collect { |item| item[0] };
+
+				// add a few random views
+				randViewsToAdd = 2;
+				viewPresets = viewPresets ++ [~imageCtl.presets.keys.choose(randViewsToAdd).asSymbol];
+				viewPresets = viewPresets.scramble;
+				nViews = nViews + randViewsToAdd;
 
 				viewPresets.do { |vPreset, viewCount|
 					var viewDur, transition, linger;
@@ -351,13 +360,15 @@ s.waitForBoot({
 
 
 					// RECALL video
+					// #tempPreset, tempTransition, tempLinger = vPreset;
+					// postf("recalling scene %, preset %\n", scene, tempPreset);
+					// ~imageCtl.recallPreset(tempPreset, transition);
 
-					#tempPreset, tempTransition, tempLinger = vPreset;
+					// add a random view occasionally
+					// if(0.2.coin) { vPreset = ~imageCtl.presets.keys.choose.asSymbol };
 
-					// postf("recalling scene %, preset %\n", scene, vPreset);
-					// ~imageCtl.recallPreset(vPreset, transition);
-					postf("recalling scene %, preset %\n", scene, tempPreset);
-					~imageCtl.recallPreset(tempPreset, transition);
+					postf("recalling scene %, preset %\n", scene, vPreset);
+					~imageCtl.recallPreset(vPreset, transition);
 
 					postf("waiting % seconds for view to play out\n", viewDur);
 

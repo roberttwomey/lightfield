@@ -11,7 +11,7 @@ a = ArduinoGRBL("/dev/tty.AdafruitEZ-Link418c-SPP", 115200)
 // set the homeing pulloff the first time around
 a.settings
 // pulloff should be less than the distance from the limit switch to the pulley
-a.send("$27=36")
+a.send("$27=48")
 
 // set steps per inch
 a.send("$100=199.66518121")
@@ -32,6 +32,7 @@ a.unlock
 //	cameraNetAddr, << a NetAddr for the pi snapping photos
 //r = RoverDriver(a, NetAddr("localhost", 9000)); // testing
 r = RoverDriver(a, NetAddr("rover.local", 9000));
+r.shutter = (12000)
 
 
 
@@ -65,7 +66,9 @@ a.port
 // MachineX/Y:	after homing and pulling off, MachineX/Y machine coordinates (usually negative)
 // lengthA/B:	after homing and pulling off, lengthA and lengthB are the distance from the pulley to the middle Rover's width (where the cables would intersect if they extended)
 // camOffset:	offset from the end of the cable at the rover to the camera's center
-r.rigDimensions_(motorSeparation: 36.0, machineX: -164, machineY: -164, lengthA: 40, lengthB: 40) //, camOffset: 1.5 );
+
+// lengthA and lengthB are 4 inches + distance marked on string (4 feet = 48" + 4" == 52")
+r.rigDimensions_(motorSeparation: 48.0, machineX: -151.999, machineY: -151.999, lengthA: 52, lengthB: 52) //, camOffset: 1.5 );
 
 
 // check the state
@@ -83,7 +86,7 @@ a.state
 // captureSpanY: height of the capture plane
 // insetY: vertical offset from the rig's pulley height to the 0,0 camera capture position
 // nCols, nRows: number of rows and columns of subimages to capture
-r.captureDimensions_(captureSpanX: 10, captureSpanY: 10, insetY: 20, nCols: 15, nRows: 15 );
+r.captureDimensions_(captureSpanX: 20, captureSpanY: 20, insetY: 18, nCols: 20, nRows: 20 );
 
 
 // set Rover to capture in 1 of 3 ways:
@@ -149,7 +152,7 @@ r.customPathCapture( pointArray: p, displayPath: true)
 //	travelTimeOut,	<< time to wait to timeout in case anything goes wrong waiting for GRBL state to report "Idle"
 //	stateCheckRate	<< number of times GRBL state is queried per second when using auto-advance
 
-r.initCapture( autoAdvance: true, waitToSettle: 1.6, waitAfterPhoto: 1.1, travelTimeOut: 30, stateCheckRate: 5, writePosData: true, fileName: "seaset")
+r.initCapture( autoAdvance: true, waitToSettle: 1.6, waitAfterPhoto: 1.6, travelTimeOut: 30, stateCheckRate: 5, writePosData: true, fileName: "seaset")
 
 
 // set GRBL's feed rate if not set already
