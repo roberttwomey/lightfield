@@ -571,28 +571,10 @@ ControlMixMaster {
 	*presets { ^Archive.global[\roverPresets] }
 	*listPresets { ^this.class.presets.keys.asArray.sort.do(_.postln) }
 
-	backupPreset {
-		format( "cp %% %%%",
-			Archive.archiveDir,
-			"/archive.sctxar",
-			"~/Desktop/archive.sctxar_BAK_",
-			Date.getDate.stamp,
-			".sctxar"
-		).replace(
-			" Support","\\ Support"
-		).unixCmd
-	}
+	backupPreset { this.class.backupPreset }
 
 	*backupPreset {
-		format( "cp %% %%%",
-			Archive.archiveDir,
-			"/archive.sctxar",
-			"~/Desktop/archive.sctxar_BAK_",
-			Date.getDate.stamp,
-			".sctxar"
-		).replace(
-			" Support","\\ Support"
-		).unixCmd
+		Archive.write(format("~/Desktop/archive_ControlMixerBAK_%.sctxar",Date.getDate.stamp).standardizePath)
 	}
 
 

@@ -275,30 +275,13 @@ GrainScanner2 {
 	*presets { ^Archive.global[\grainScanner2] }
 	*listPresets { ^this.class.presets.keys.asArray.sort.do(_.postln) }
 
-	backupPreset {
-		Archive.write(format("~/Desktop/archive_BAK_%.sctxar",Date.getDate.stamp).standardizePath)
-		// format( "cp %% %%%",
-		// 	Archive.archiveDir,
-		// 	"/archive.sctxar",
-		// 	"~/Desktop/archive.sctxar_BAK_",
-		// 	Date.getDate.stamp,
-		// 	".sctxar"
-		// ).replace(
-		// 	" Support","\\ Support"
-		// ).unixCmd
-	}
+	backupPreset { this.class.backupPreset }
 
 	*backupPreset {
-		Archive.write(format("~/Desktop/archive_BAK_%.sctxar",Date.getDate.stamp).standardizePath)
-		// format( "cp %% %%%",
-		// 	Archive.archiveDir,
-		// 	"/archive.sctxar",
-		// 	"~/Desktop/archive.sctxar_BAK_",
-		// 	Date.getDate.stamp,
-		// 	".sctxar"
-		// ).replace(
-		// 	" Support","\\ Support"
-		// ).unixCmd
+		Archive.write(format(
+			"~/Desktop/archive_GrainScanner2BAK_%.sctxar",
+			Date.getDate.stamp).standardizePath
+		)
 	}
 	storePreset { |name, overwrite=false|
 		block{ |break|
