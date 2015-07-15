@@ -9,12 +9,12 @@
 
 uniform sampler2DRect img_tex;
 
-uniform float desaturation;
-uniform float minlevelIn;
-uniform float maxlevelIn;
+uniform float desaturate;
+uniform float minInput;
+uniform float maxInput;
 uniform float gamma;
-uniform float minlevelOut;
-uniform float maxlevelOut;
+uniform float minOutput;
+uniform float maxOutput;
 uniform float brightness;
 uniform float contrast;
 
@@ -109,13 +109,13 @@ void main()
 
     // 1. levels/gamma for RGB color
     // levels input range
-    color = min(max(color - vec3(minlevelIn), vec3(0.0)) / (vec3(maxlevelIn) - vec3(minlevelIn)), vec3(1.0));
+    color = min(max(color - vec3(minInput), vec3(0.0)) / (vec3(maxInput) - vec3(minInput)), vec3(1.0));
 
     //gamma correction
     color = pow(color, vec3(gamma));
 
     //levels output range
-    color = mix(vec3(minlevelOut), vec3(maxlevelOut), color);
+    color = mix(vec3(minOutput), vec3(maxOutput), color);
 
     // yuv -> rgb
 //    color = yuv2rgb(color);
@@ -126,22 +126,22 @@ void main()
 //    float value = hsv.b;
 //
 //    //value input range
-//    value = min(max(value - float(minlevelIn), float(0.0)) / (float(maxlevelIn) - float(minlevelIn)), float(1.0));
+//    value = min(max(value - float(minInput), float(0.0)) / (float(maxInput) - float(minInput)), float(1.0));
 //
 //    //gamma correction
 //    value = pow(value, float(gamma));
 //
 //    //levels output range
-//    vec3 hsv_desat = vec3(hsv.rg, mix(float(minlevelOut), float(maxlevelOut), value));
+//    vec3 hsv_desat = vec3(hsv.rg, mix(float(minOutput), float(maxOutput), value));
 
 
-    // 3. percent desaturation for HSV color
+    // 3. percent desaturate for HSV color
 
     vec3 hsv = rgb2hsv(color.rgb);
-    vec3 hsv_desat = hsv * vec3(1.0, 1.0-desaturation, 1.0);
+    vec3 hsv_desat = hsv * vec3(1.0, 1.0-desaturate, 1.0);
     color = hsv2rgb(hsv_desat);
 
-//    // 4. YUV desaturation
+//    // 4. YUV desaturate
 //    vec3 yuv = rgb2yuv(color.rgb);
 //    vec3 yuv_desat = yuv * vec3(1.0-desat_val, 1.0-brightness, 1.0-contrast);
 //    color = yuv2rgb(yuv_desat);
