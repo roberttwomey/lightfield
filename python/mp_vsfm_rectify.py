@@ -116,10 +116,10 @@ def readCamerasV2File(camerasfile, cameraloc_img):
     
     # plot to screen
     
-    # xcents.append(avgxcenter)
-    # ycents.append(avgycenter)
-    # scatter(xcents, ycents)
-    # savefig(cameraloc_img)
+    xcents.append(avgxcenter)
+    ycents.append(avgycenter)
+    scatter(xcents, ycents)
+    savefig(cameraloc_img)
 
     # show()
 
