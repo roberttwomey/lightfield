@@ -1,7 +1,7 @@
 // read in Robert's backup
 // Archive.read( "/Users/admin/src/rover/supercollider/preset_backups/ControlMixer_presets/ControlMixer_fromRobert_150527_203422.sctxar" )
 
-Archive.read( "/Users/dxlocal/Documents/ROVER/Rover_workFiles/preset_backups/ControlMixer_presets/robert_wed_eve_150603_182230.sctxar" )
+Archive.read("/Users/dxlocal/Desktop/FRIDAY_afternoon_150605_163419.sctxar" )
 
 // save his control mixer settings to a variable
 ~ctlMxrPresets = Archive.global[\roverPresets]

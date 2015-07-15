@@ -236,8 +236,9 @@ RoverDriver {
 
 				// take photo with raspistill, custom file-naming, params settable externally, see top of this class for defaults/setters:
 				camParams = format(
-					"-t 1 -o /home/pi/lfimages/frame_%.jpg  -n -sh % -mm % -awb %",
-					i.asString.padLeft(4, "0"), sharpen, meter, whiteBalance );
+					"-t 1 -o /home/pi/lfimages/frame_%.jpg", i.asString.padLeft(4, "0"));
+				/* -n -sh % -mm % -awb %",
+					i.asString.padLeft(4, "0"), sharpen, meter, whiteBalance ); */
 				shutter !? { camParams = camParams ++ format(" -ss %", shutter) }; // add shutter control if specified
 				camAddr.sendMsg("/camera", "paramsnap", camParams);
 
@@ -268,9 +269,11 @@ RoverDriver {
 		var camParams, fName;
 		fName = fileName ?? {Date.getDate.rawSeconds};
 		camParams = format(
-			"-t 1 -o /home/pi/lfimages/_testShot_%.jpg  -n -sh % -mm % -awb %",
-			fName, sharpen, meter, whiteBalance );
-		shutter !? { camParams = camParams ++ format(" -ss %", shutter) }; // add shutter control if specified
+			"-t 1 -o /home/pi/lfimages/testShot_%.jpg", fName);
+		// camParams = format(
+		// 	"-t 1 -o /home/pi/lfimages/_testShot_%.jpg -n -sh % -mm % -awb %",
+		// fName, sharpen, meter, whiteBalance );
+		// shutter !? { camParams = camParams ++ format(" -ss %", shutter) }; // add shutter control if specified
 		camAddr.sendMsg("/camera", "paramsnap", camParams);
 	}
 

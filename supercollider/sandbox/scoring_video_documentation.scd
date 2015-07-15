@@ -1,8 +1,35 @@
 // SCORING
+s = Server.default;
+s.options.sampleRate_(44100);
+s.options.numOutputBusChannels_(8);
+s.options.numInputBusChannels_(2);
+s.options.numWireBufs_(64*8);
+s.options.memSize_(8192*8);
+
+"startup loaded, initializing ROVER".postln;
+
+// setup audio recording
+s.recChannels_(4);
+s.recSampleFormat_("float");// or: "int8", "int16", "int24", "int32"
+s.recHeaderFormat_("wav");
+
+// once booted
+s.prepareForRecord
+
+// start audio
+s.record
+
+s.stopRecording
+
+
+// start rover
+// SCORING
 
 //get audio initialized
 s.waitForBoot({
 	var intSndPath, extSndPath;
+
+	thisThread.randSeed_(12345);
 
 	1.wait;
 	~eq = MasterEQ(4,s);
@@ -17,8 +44,9 @@ s.waitForBoot({
 	~gs1 !? {~gs1.free};
 	~gs2 !? {~gs2.free};
 
-		/* source file */
+	/* source file */
 	intSndPath = "/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/around_the_dining_room_morning_EDIT.WAV";
+	// intSndPath = "/Volumes/Work/Projects/lightfield/data/audio/EDITS/around_the_dining_room_morning_EDIT.WAV";
 
 	/* GrainScanner1 with 3 GrainScan1's */
 	~gs1 = GrainScanner1( 3, intSndPath );
@@ -26,6 +54,7 @@ s.waitForBoot({
 	3.wait;
 
 	extSndPath = "/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/discovery_cliffside_1_EDIT.WAV";
+	// extSndPath = "/Volumes/Work/Projects/lightfield/data/audio/EDITS/discovery_cliffside_1_EDIT.WAV";
 
 	~gs2 = GrainScanner2( 0, extSndPath );
 	5.wait;
@@ -36,7 +65,7 @@ s.waitForBoot({
 	~imageCtl = ControlMixMaster(
 		["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ],
 		NetAddr("refocuser.local", 12345));
-	// NetAddr("192.168.2.2", 12345));
+		// NetAddr("localhost", 12345));
 	// NetAddr("192.168.0.100", 12345));
 
 	// NetAddr("localhost", 12345));
@@ -98,6 +127,37 @@ s.waitForBoot({
 	]);
 
 
+	// ~sceneScore = [
+	// 	// scene params
+	// 	//scene, dur, numViews
+	// 	// int
+	// 	["bookcase", 240, 5],
+	// 	// ext
+	// 	["cliffside", 120, 3],
+	// 	// ext
+	// 	["carkeek", 120, 3],
+	// 	// int
+	// 	["diningroom3", 240, 5],
+	// 	// ext
+	// 	["tunnel", 150, 3],
+	// 	// int
+	// 	["mike1", 240, 5],
+	// 	// lim
+	// 	["outsidelookingin", 130, 3],
+	// 	// ext
+	// 	["dark_trees", 120, 3],
+	// 	// int
+	// 	["mike3", 240, 5],
+	// 	// ext
+	// 	["carkeek_night", 120, 2],
+	// 	// ext
+	// 	["yellowcliff", 90, 2],
+	// 	// lim
+	// 	["mike2", 90, 3],
+	// ];
+	//
+
+	// score for rovercap1
 	~sceneScore = [
 		// scene params
 		//scene, dur, numViews
@@ -105,27 +165,28 @@ s.waitForBoot({
 		["bookcase", 240, 5],
 		// ext
 		["cliffside", 120, 3],
-		// ext
-		["carkeek", 120, 3],
-		// int
-		["diningroom3", 240, 5],
-		// ext
-		["tunnel", 150, 3],
-		// int
-		["mike1", 240, 5],
-		// lim
-		["outsidelookingin", 130, 3],
-		// ext
-		["dark_trees", 120, 3],
-		// int
-		["mike3", 240, 5],
-		// ext
-		["carkeek_night", 120, 2],
-		// ext
 		["yellowcliff", 90, 2],
-		// lim
+		["mike1", 240, 5],
 		["mike2", 90, 3],
+		["tunnel", 150, 3],
+		["carkeek", 120, 3],
+		["outsidelookingin", 130, 3],
+		["mike3", 240, 5],
+		["dark_trees", 120, 3],
+		["carkeek_night", 120, 2],
+ 		["diningroom3", 240, 5],
+		// int
+		// ext
+		// int
+		// lim
+		// ext
+		// int
+		// ext
+		// ext
+		// lim
+
 	];
+
 
 	// need to edit:
 	//   yellowcliff
@@ -134,114 +195,105 @@ s.waitForBoot({
 	~sceneViews = IdentityDictionary(know: true).putPairs([
 		\bookcase,
 		[
-			\bookcase_bed_knob_plant, 10.0, 7.0, // roll right slightly!
-			\bookcase_close, 7.0, 5.0, // focus through it! turn books into abstraction
-			\bookcase_mirror_flat, 10.0, 7.0, // good
-			// \bookcase_mirror_rover, 5.0, 5.0,
-			\bookcase_start, 10.0, 15.0, // still? move on the bush to the left
-			\bookcase_window, 5.0, 5.0, // too similar to the one below
-			\bookcase_rover_mobile_selfie, 5.0, 30.0, //
+			\bookcase_bed_knob_plant, 10.0, 7.0, //
+			\bookcase_close, 7.0, 5.0, //
+			\bookcase_mirror_flat, 10.0, 7.0, //
+			\bookcase_start, 10.0, 15.0, //
+			\bookcase_window, 5.0, 5.0, //
 		],
 		\carkeek,
 		[
 			\carkeek_tornado, 5.0, 5.0,
+			\carkeek_gravel, 5.0, 5.0, //
 			\carkeek_train1, 5.0, 5.0,
-			\carkeek_gravel, 5.0, 5.0 // push the abstraction! crop just the gravel
 			\carkeek_pile_distant, 5.0, 5.0,
+			//\cliffside_leaves, 5.0, 5.0, // looks better than the above
 			// zoom into guts of the pile
 		],
 		\carkeek_night,
 		[
 			\carkeek_night_ground, 5.0, 5.0,
-			\carkeek_night_shore, 5.0, 5.0, // smoothly move left right. focus swim.
+			\carkeek_night_shore, 5.0, 5.0, // push tree in face
 			\carkeek_night_hypercolortree, 5.0, 5.0,
 			// \carkeek_night_oceanblur, 5.0, 5.0,
 		],
 		\cliffside,
 		[
-			\cliffside_shore, 10.0, 25.0, // just slower
+			\cliffside_shore, 10.0, 25.0,
+			\cliffside_leaves, 35.0, 15.0,
 			\cliffside_zoom, 5.0, 5.0, //
-			\cliffside_trees_breathing, 35.0, 15.0,
-			\cliffside_right, 10.0, 20.0,
 			// need 1 or 2 better scenes
 		],
 		\dark_trees,
 		[
 			// \dark_trees_start, 5.0, 5.0,
-			\dark_trees_leaves, 5.0, 5.0, // more images to pop leaves more
-			\dark_trees_whitetree, 5.0, 5.0, // lateral movement from leftmost trunk
-			\dark_trees_deepzoom, 5.0, 5.0, // run for a long time
+			\dark_trees_leaves, 5.0, 5.0, //
+			\dark_trees_whitetree, 5.0, 5.0, //
+			\dark_trees_deepzoom, 5.0, 5.0, //
 		],
 		\diningroom3,
 		[
 			\diningroom3_kaleid, 15.0, 15.0,
 			\diningroom3_detail_books_nofocus, 10.0, 5.0,
 			\diningroom3_detail_books_focus, 5.0, 5.0,
-			// \diningroom3_books3, 5.0, 5.0,
-			\diningroom3_flower, 5.0, 10.0, // different oscillator. too perfect on flower
+			\diningroom3_flower, 5.0, 10.0, //
 			// more lfo displacement
 			\diningroom3_floor, 10.0, 10.0
 		],
-		\mike1,
+		\mike1, // stopped here
 		[
-			\mike1_start, 10.0, 20.0, // bump it off center
 			\mike1_3, 5.0, 5.0, // horizontal
+			\mike1_3_rover, 5.0, 5.0, //
 			\mike1_5_fruitbowl, 25.0, 15.0,
-			\mike1_parallax_left, 5.0, 5.0, // vertical expansion
-			\mike1_window, 5.0, 5.0, // one of
-			\mike1_3_rover, 5.0, 5.0, // these should
-			\mike1_mirrorimage_moving, 5.0, 5.0, // go. good
+			\mike1_5_fruit, 25.0, 15.0,
+			\mike1_mirrorimage_moving, 5.0, 5.0, //
+			\mike1_parallax_left, 5.0, 5.0, //
+			\mike1_start, 10.0, 20.0, //
 			// spend some time with the books
-			// too many mirror shots, too many rover
+			\tunnel_tunnels, 5.0, 5.0,
 		],
 		\mike2,
 		[
-			\mike2_rover, 5.0, 5.0,
-			\mike2_swimmingtrees, 3.0, 20.0, // not enough swim!
-			// \mike2_window, 5.0, 5.0, // too similar!
-			\mike2_strings, 15.0, 5.0, // too similar!
 			\mike2_desk_ironingboard, 10.0, 30.0, // **
+			\mike2_rover, 5.0, 5.0,
+			\mike2_swimmingtrees, 3.0, 20.0, //
+			\mike2_strings, 15.0, 5.0, //
 		],
 		\mike3,
 		[
 			\mike3_book_orbit1, 4.0, 1.0,
-			\mike3_cloth_table, 5.0, 5.0, // stay right!
+			\mike3_cloth_table, 5.0, 5.0, //
 			\mike3_distant_window, 10.0, 15.0, // **
 			\mike3_fence, 10.0, 10.0, // *
 			\mike3_lamp_glow, 5.0, 5.0,
 			\mike3_peeker, 10.0, 15.0,
 			\mike3_sputnik, 10.0, 5.0,
-			\mike3_start, 10.0, 10.0, // still image?
+			\mike3_start, 10.0, 10.0, //
 			\mike3_fruittable, 10.0, 5.0, // *** gauzy
 			\mike3_windowplane, 10.0, 10.0, // **
 		],
 		\outsidelookingin,
 		[
-			\outside_1, 5.0, 5.0, // totally still?
+			\outside_1, 5.0, 5.0, //
 			\outside_2, 5.0, 5.0,
-			\outside_book, 5.0, 5.0, // add verry slow drift up. pan down drift up very slowly. straight
+			\outside_book, 5.0, 5.0, //
 			\outside_book_left, 5.0, 5.0,
 			\outside_bookshelf_lamp, 5.0, 5.0,
-			// \outside_book, 5.0, 5.0,
-			// \outside_book_left, 5.0, 5.0,
-
 			// add lamp focus scene
 		],
 		\tunnel,
 		[
+			\tunnel_rocks, 5.0, 5.0, //
+			\tunnel_textures, 5.0, 5.0, //
+			\tunnel_start, 5.0, 5.0, //
 			\tunnel_tunnels, 5.0, 5.0,
-			\tunnel_start, 5.0, 5.0, // worship the tree! crop top 2/3rds
-			\tunnel_rocks, 5.0, 5.0, // slow the oscillator
-			\tunnel_textures, 5.0, 5.0 // dope textures. get rid of bars
 		],
 		\yellowcliff,
 		[
 			\yellowcliff_bush, 5.0, 5.0,
-			\yellowcliff_sky_top, 5.0, 5.0,
-			\yellowcliff_sky_bot, 5.0, 5.0,
 			\yellowcliff_bush_left, 5.0, 5.0,
-			\yellowcliff_bush_right, 5.0, 5.0,
 			\yellowcliff_close, 5.0, 5.0,
+			\yellowcliff_sky, 5.0, 5.0,
 		],
 	]);
 
@@ -252,13 +304,15 @@ s.waitForBoot({
 
 		inf.do { |i|
 			// start with second scene for testing
-			// ~sceneScore = ~sceneScore.rotate(-1);
+			// ~sceneScore = ~sceneScore.rotate(~sceneScore.size.rand);
+			~sceneScore = ~sceneScore.rotate(0);
 
 			~sceneScore.do{ |sceneParams|
 				var scene, dur, nViews, sceneFileName, audioScene, whichScanner;
 				var fadeOut = 3, fadeIn = 3, viewPresets, sceneType;
-				var tempPreset, tempTransition, tempLinger;
+				var randViewsToAdd;
 				var motorDur = 45, motorEnv = [0.4,0.2,0.4];
+
 				#scene, dur, nViews = sceneParams;
 
 				// shorten times for testing
@@ -277,14 +331,14 @@ s.waitForBoot({
 				~interiors.collect(_.asSymbol).includes(sceneFileName.asSymbol).if({
 					"new scene is INTERIOR".postln;
 					sceneType = \int;
-					},{
-						"new scene is EXTERIOR".postln;
-						sceneType = \ext;
+				},{
+					"new scene is EXTERIOR".postln;
+					sceneType = \ext;
 				});
 
 				// wait for the scene file to load and motor sound to begin fading
 				// to cue next view
-				(motorDur*motorEnv[0] - fadeOut - fadeIn -3).wait;
+				(motorDur*motorEnv[0] - fadeOut - fadeIn - 3).wait;
 
 				// fade in
 				~fader.fadeTime_(fadeIn+2);
@@ -292,6 +346,8 @@ s.waitForBoot({
 
 				fork{
 					(dur - (motorDur*motorEnv[0])).wait;
+
+					// postf("at %, motor sound start", (dur - (motorDur*motorEnv[0])));
 
 					~motorPB.play(motorDur);
 					~motorPB.synth
@@ -306,8 +362,17 @@ s.waitForBoot({
 
 				// choose the views within the scene
 				// viewPresets = ~videoPresets.scramble.keep(nViews);
-				viewPresets = ~sceneViews[scene.asSymbol].clump(3).scramble.keep(nViews);
-				// nViews = ~sceneViews[scene.asSymbol].clump(3).size;
+				// viewPresets = ~sceneViews[scene.asSymbol].clump(3).scramble.keep(nViews);
+
+				// choose the views within the scene
+				viewPresets = ~sceneViews[scene.asSymbol].clump(3).scramble.keep(nViews).collect { |item| item[0] };
+
+				// add a few random views
+				randViewsToAdd = 1;
+
+				viewPresets = viewPresets ++ ~imageCtl.presets.keys.asArray.scramble.keep(randViewsToAdd).collect(_.asSymbol);
+				viewPresets = viewPresets.scramble;
+				nViews = nViews + randViewsToAdd;
 
 				viewPresets.do { |vPreset, viewCount|
 					var viewDur, transition, linger;
@@ -342,11 +407,11 @@ s.waitForBoot({
 						if( sceneType == \ext )
 						{ "forking off".postln;
 							fork({ 4.5.wait;
-								 postf("playing interior % over %", whichScanner, fadeIn);
-								whichScanner.play(fadeIn);}, AppClock)
+								postf("playing interior % over %", whichScanner, fadeIn*3);
+								whichScanner.play(fadeIn*3);}, AppClock)
 						}
-						{  postf("playing interior % over %", whichScanner, fadeIn);
-							whichScanner.play(fadeIn)
+						{  postf("playing interior % over %", whichScanner, fadeIn*3);
+							whichScanner.play(fadeIn*3)
 						};
 
 						// play the appropriate scanner
@@ -362,12 +427,16 @@ s.waitForBoot({
 
 					// RECALL video
 
-					#tempPreset, tempTransition, tempLinger = vPreset;
+					// #tempPreset, tempTransition, tempLinger = vPreset;
+					// postf("recalling scene %, preset %\n", scene, tempPreset);
+					// ~imageCtl.recallPreset(tempPreset, transition);
 
-					// postf("recalling scene %, preset %\n", scene, vPreset);
-					// ~imageCtl.recallPreset(vPreset, transition);
-					postf("recalling scene %, preset %\n", scene, tempPreset);
-					~imageCtl.recallPreset(tempPreset, transition);
+					// add a random view occasionally
+					// if(0.2.coin) { vPreset = ~imageCtl.presets.keys.choose.asSymbol };
+
+					postf("recalling scene %, preset %\n", scene, vPreset);
+					~imageCtl.recallPreset(vPreset, transition);
+
 
 					postf("waiting % seconds for view to play out\n", viewDur);
 

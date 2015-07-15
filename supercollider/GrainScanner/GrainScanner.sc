@@ -225,7 +225,7 @@ GrainScanner1 {
 	}
 
 	*backupPreset {
-		Archive.write(format("~/Desktop/archive_BAK_%.sctxar",Date.getDate.stamp).standardizePath)
+		Archive.write(format("~/Desktop/archive_GrainScanner1BAK_%.sctxar",Date.getDate.stamp).standardizePath)
 	}
 
 	initBuffer { |bufOrPath, finishCond|
