@@ -4,7 +4,7 @@ c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart"
 
 // c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("192.168.2.2", 12345));
 
-// c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("refocuser.local", 12345));
+c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ], NetAddr("refocuser.local", 12345));
 
 ~fader=ControlFade(1.0);
 ~fader.broadcast( c.broadcastNetAddr, '/fade', 30 );
