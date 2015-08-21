@@ -19,6 +19,10 @@ export DISPLAY=:0
 # python mp_vsfm_rectify.py --laptop 16x14 ~/code/lightfield/data/shoots/precise/undistorted/*.jpg
 # python mp_vsfm_rectify.py --reorder wrap --laptop 20x15 ~/code/lightfield/data/shoots/towers/undistorted/*.jpg
 # python mp_vsfm_rectify.py --reorder wrap --laptop 20x15 ~/code/lightfield/data/shoots/tivon1/undistorted/*.jpg
+python mp_vsfm_rectify.py --reorder verticalwrap --laptop 15x15 ~/code/lightfield/data/shoots/basement1/undistorted/*.jpg
+python mp_vsfm_rectify.py --reorder verticalwrap --laptop 20x20 ~/code/lightfield/data/shoots/classroom_s3/undistorted/*.jpg
+python mp_vsfm_rectify.py --reorder verticalwrap --laptop 20x20 ~/code/lightfield/data/shoots/davb/undistorted/*.jpg
+python mp_vsfm_rectify.py --reorder verticalwrap --laptop 20x20 ~/code/lightfield/data/shoots/tivon3/undistorted/*.jpg
 
 
 # python mp_vsfm_rectify.py --reorder wrap --laptop 20x15 /Volumes/LIGHTBOX/shoots/tivon1/undistorted/*.jpg
@@ -41,6 +45,7 @@ export DISPLAY=:0
 # python mp_vsfm_rectify.py --single 16x14 ~/code/lightfield/data/shoots/precise/undistorted/*.jpg
 # python mp_vsfm_rectify.py --reorder wrap --single 20x15 ~/code/lightfield/data/shoots/towers/undistorted/*.jpg
 # python mp_vsfm_rectify.py --reorder wrap --single 15x20 ~/code/lightfield/data/shoots/tivon1/undistorted/*.jpg
+# python mp_vsfm_rectify.py --reorder verticalwrap --single 15x15 ~/code/lightfield/data/shoots/basement1/undistorted/*.jpg
 
 
 # # ==== medium tiled versions
@@ -64,6 +69,7 @@ export DISPLAY=:0
 # python mp_vsfm_rectify.py --medium 16x14 ~/code/lightfield/data/shoots/precise/undistorted/*.jpg
 # python mp_vsfm_rectify.py --reorder wrap --medium 20x15 ~/code/lightfield/data/shoots/towers/undistorted/*.jpg
 # python mp_vsfm_rectify.py --reorder wrap --medium 15x20 ~/code/lightfield/data/shoots/tivon1/undistorted/*.jpg
+# python mp_vsfm_rectify.py --reorder verticalwrap --medium 15x15 ~/code/lightfield/data/shoots/basement1/undistorted/*.jpg
 
 
 # ==== full res tiled versions
@@ -82,6 +88,7 @@ export DISPLAY=:0
 # python mp_vsfm_rectify.py --fullres 20x10 ~/code/lightfield/data/shoots/ballard_wall/undistorted/*.jpg
 # python mp_vsfm_rectify.py --fullres 16x14 ~/code/lightfield/data/shoots/precise/undistorted/*.jpg
 # python mp_vsfm_rectify.py --reorder wrap --fullres 15x20 ~/code/lightfield/data/shoots/tivon1/undistorted/*.jpg
+#python mp_vsfm_rectify.py --reorder verticalwrap --fullres 15x15 ~/code/lightfield/data/shoots/basement1/undistorted/*.jpg
 
 
 # multiple independent models (12)

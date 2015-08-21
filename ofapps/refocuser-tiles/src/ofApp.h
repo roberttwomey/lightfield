@@ -9,7 +9,7 @@
 #define MAX_LF_TILES 20
 
 #define SCREEN_WIDTH 55.0
-#define SCREEN_HEIGHT 52.0
+#define SCREEN_HEIGHT 50.0
 
 
 class ofApp : public ofBaseApp{
@@ -78,19 +78,19 @@ public:
     float zoom;
     int xcount, ycount, xstart, ystart;
 
-//    float minScale, maxScale;
+    float minScale, maxScale;
     float xoffset, yoffset;
 
     float fade;
 
     // image manipulation
     bool bImageProc;
-    float minlevelIn;
-    float maxlevelIn;
+    float minInput;
+    float maxInput;
     float gamma;
-    float minlevelOut;
-    float maxlevelOut;
-    float desaturation;
+    float minOutput;
+    float maxOutput;
+    float desaturate;
     float brightness;
     float contrast;
 

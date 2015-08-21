@@ -28,12 +28,12 @@ void ofApp::setup(){
     // image processing
     bImageProc = true;
 
-    desaturation = 0.0;
-    minlevelIn = 0.0;
-    maxlevelIn = 1.0;
+    desaturate = 0.0;
+    minInput = 0.0;
+    maxInput = 1.0;
     gamma = 1.0;
-    minlevelOut = 0.0;
-    maxlevelOut = 1.0;
+    minOutput = 0.0;
+    maxOutput = 1.0;
     brightness = 1.0;
     contrast = 1.0;
 }
@@ -109,12 +109,12 @@ void ofApp::update(){
         image_shader.begin();
 
         image_shader.setUniformTexture("img_tex", fbo->getTextureReference(), 13);
-        image_shader.setUniform1f("desaturation", desaturation);
-        image_shader.setUniform1f("minlevelIn", minlevelIn);
-        image_shader.setUniform1f("maxlevelIn", maxlevelIn);
+        image_shader.setUniform1f("desaturate", desaturate);
+        image_shader.setUniform1f("minInput", minInput);
+        image_shader.setUniform1f("maxInput", maxInput);
         image_shader.setUniform1f("gamma", gamma);
-        image_shader.setUniform1f("minlevelOut", minlevelOut);
-        image_shader.setUniform1f("maxlevelOut", maxlevelOut);
+        image_shader.setUniform1f("minOutput", minOutput);
+        image_shader.setUniform1f("maxOutput", maxOutput);
         image_shader.setUniform1f("brightness", brightness);
         image_shader.setUniform1f("contrast", contrast);
 
@@ -160,7 +160,7 @@ void ofApp::draw(){
     }
 
     // crop to 50 x 55 screen size
-    float cwidth = height / screen_height * screen_width;
+    float cwidth = height / SCREEN_HEIGHT * SCREEN_WIDTH;
     float bar = (width-cwidth)/2.0;
     ofSetColor(0);
     ofFill();
@@ -182,24 +182,18 @@ void ofApp::draw(){
     if(bShowThumbnail == true) {
 
         // thumbnail size
-        float tWidth, tHeight;
-        if(subheight * ysubimages > subwidth * xsubimages) {
-          tWidth = 160;
-          tHeight = 160/float(subwidth * xsubimages) * float(subheight * ysubimages);
-        } else {
-          tWidth = 160/float(subheight * ysubimages) * float(subwidth * xsubimages);
-          tHeight = 160;
-        }
-
+        float tWidth = 160, tHeight;
         float xunit, yunit;
         int tSubWidth, tSubHeight;
 
         if(numlftextures > 1) {
+            tHeight = 160/xnumtextures * ynumtextures;
             tSubWidth = tWidth / xnumtextures;
             tSubHeight = tHeight / ynumtextures;
             xunit = float(tSubWidth) / float(ximagespertex);
             yunit = float(tSubHeight) / float(yimagespertex);
         } else {
+            tHeight = 160/xsubimages * ysubimages;
             tSubWidth = tWidth;
             tSubHeight = tHeight;
             xunit = float(tSubWidth) / float(xsubimages);
@@ -211,7 +205,7 @@ void ofApp::draw(){
         for (int x = 0; x < xnumtextures; x++){
             for (int y = 0; y < ynumtextures; y++){
                 int i = x + y * xnumtextures;
-                lfplanes[i].draw(5 + tSubWidth * x ,5 + tSubHeight * y, tSubWidth, tSubHeight);
+                lfplanes[i].draw(5 + tSubWidth * x ,5 + tSubWidth * y, tSubWidth, tSubHeight);
             }
         }
 
@@ -227,9 +221,8 @@ void ofApp::draw(){
         ofTranslate(10, ofGetHeight()-90);
 //        ofDrawBitmapString("tilenum:  \t"+ofToString(tilenum), 0, -15);
 //        ofDrawBitmapString("b/c:      \t"+ofToString(brightness)+" "+ofToString(contrast), 0, -60);
-        ofDrawBitmapString("imageproc:\t"+ofToString(bImageProc), 0, -60);
-        ofDrawBitmapString("desat:    \t"+ofToString(desaturation), 0, -45);
-        ofDrawBitmapString("img-proc: \t"+ofToString(minlevelIn)+":"+ofToString(maxlevelIn) +" "+ofToString(minlevelOut)+":"+ofToString(maxlevelOut)+" "+ofToString(gamma), 0, -30);
+        ofDrawBitmapString("desat:    \t"+ofToString(desaturate), 0, -45);
+        ofDrawBitmapString("img:      \t"+ofToString(minInput)+" "+ofToString(maxInput) +" "+ofToString(minOutput)+" "+ofToString(maxOutput)+" "+ofToString(gamma), 0, -30);
         ofDrawBitmapString("fade:     \t"+ofToString(fade), 0, -15);
         ofDrawBitmapString("scale:    \t"+ofToString(focus), 0, 0);
         ofDrawBitmapString("roll:     \t"+ofToString(xoffset)+" "+ofToString(yoffset), 0, 15);
@@ -307,16 +300,8 @@ void ofApp::loadXMLScene(string scenefile) {
     yimagespertex = xml.getValue("yimagespertex", ysubimages);
 
     // refocusing params //
-//    minScale = xml.getValue("minscale", 0);
-//    maxScale = xml.getValue("maxscale", 0);
-    minlevelIn = xml.getValue("minlevelin", 0.0);
-    maxlevelIn = xml.getValue("maxlevelin", 1.0);
-    minlevelOut = xml.getValue("minlevelout", 0.0);
-    maxlevelOut = xml.getValue("maxlevelout", 1.0);
-    gamma = xml.getValue("gamma", 1.0);
-    desaturation = xml.getValue("desaturation", 0.0);
-
-    // image postprocessing
+    minScale = xml.getValue("minscale", 0);
+    maxScale = xml.getValue("maxscale", 0);
 
     // rendering state //
     xstart = xml.getValue("xstart", 0);
@@ -539,7 +524,7 @@ void ofApp::setupGraphics() {
 
 //    ofLog(OF_LOG_NOTICE, "combine shader end");
 
-    // setup desaturation shader
+    // setup desaturate shader
     image_shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/image_proc.frag");
     image_shader.linkProgram();
 
@@ -594,7 +579,7 @@ void ofApp::keyPressed(int key){
         ycountStart = ycount;
         xstartStart = xstart;
         ystartStart = ystart;
-        desatStart = desaturation;
+        desatStart = desaturate;
     }
 
     if(key=='s')
@@ -607,23 +592,23 @@ void ofApp::keyPressed(int key){
         bImageProc = !bImageProc;
     }
     if(key=='1') {
-        minlevelIn = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
+        minInput = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
     }
     if(key=='2') {
-        maxlevelIn = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
+        maxInput = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
     }
     if(key=='3') {
-        minlevelOut = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
+        minOutput = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
     }
     if(key=='4') {
-        maxlevelOut = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
+        maxOutput = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
     }
     if(key=='5') {
         gamma= ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
     }
     if(key=='6') {
-        // desaturation
-        desaturation = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
+        // desaturate
+        desaturate = ofClamp(ofMap(mouseX, 0.0, ofGetWindowWidth(), 0.0, 1.01), 0.0, 1.0);
     }
     if(key=='7') {
         brightness = ofMap(mouseX, 0.0, ofGetWindowWidth(), 0, 2.0);//, 1.0);
@@ -633,12 +618,12 @@ void ofApp::keyPressed(int key){
     }
     if(key=='r') {
         // reset image params
-        desaturation = 0.0;
-        minlevelIn = 0.0;
-        maxlevelIn = 1.0;
+        desaturate = 0.0;
+        minInput = 0.0;
+        maxInput = 1.0;
         gamma = 1.0;
-        minlevelOut = 0.0;
-        maxlevelOut = 1.0;
+        minOutput = 0.0;
+        maxOutput = 1.0;
         brightness = 1.0;
         contrast = 1.0;
         zoom = 1.0;
@@ -968,10 +953,10 @@ void ofApp::snapshot() {
 
     // dump image processing parameters if necessary
     if(bImageProc) {
-        file << minlevelIn << "," << maxlevelIn << endl;
-        file << minlevelOut << "," << maxlevelOut << endl;
+        file << minInput << "," << maxInput << endl;
+        file << minOutput << "," << maxOutput << endl;
         file << gamma << endl;
-        file << desaturation << endl;
+        file << desaturate << endl;
     };
 
     file.close();

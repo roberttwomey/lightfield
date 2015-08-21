@@ -28,9 +28,9 @@ e.g. tiled for tiled refocuser, laptop for laptop, single for single.
 <!-- refocuser settings -->
 
 <!-- debug information (text, mouse, thumbnail) -->
-<drawthumbnail>1</drawthumbnail>
+<drawthumbnail>0</drawthumbnail>
 <hidecursor>1</hidecursor>
-<debug>1</debug>
+<debug>0</debug>
 <fullscreen>1</fullscreen>
 
 <screenwidth>55.0;</screenwidth>
