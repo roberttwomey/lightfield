@@ -2,7 +2,7 @@
 // workaround - use gridCapture and be sure wrap = true so the steps are small
 
 RoverDriver {
-	var <arduino, <>camAddr;
+	var <grbl, <>camAddr;
 	var <>mSeparation, <>x0, <>y0, <>cOffset = 2.5;
 	var <>numCols, <>numRows, <>spanX, <>spanY, <xStep, <yStep, <lenA, <lenB;
 	var <pulloffHome;
@@ -15,8 +15,8 @@ RoverDriver {
 	var <>sharpen = 25, <>meter = "average", <>whiteBalance = "auto";
 	var <>shutter; // specified in microseconds, max 6000000 (6s)
 
-	*new { |anArduinoGRBL, cameraNetAddr|
-		^super.newCopyArgs( anArduinoGRBL, cameraNetAddr );
+	*new { |aGrbl, cameraNetAddr|
+		^super.newCopyArgs( aGrbl, cameraNetAddr );
 	}
 
 	// all args in inches
@@ -25,8 +25,8 @@ RoverDriver {
 	// lengthA/B:	after homing and pulling off, lengthA and lengthB are the distance from the pulley to the middle Rover's width (where the cables would intersect if they extended)
 	// camOffset:	offset from the end of the cable at the rover to the camera's center
 	rigDimensions_ { | motorSeparation, machineX, machineY, lengthA, lengthB | //, camOffset |
-		// set the arduino world offset from the machine coordinate space
-		arduino.worldOffset_( (lengthA.neg + machineX),  (lengthB.neg + machineY));
+		// set the grbl world offset from the machine coordinate space
+		grbl.worldOffset_( (lengthA.neg + machineX),  (lengthB.neg + machineY));
 		motorSeparation !? { mSeparation = motorSeparation };
 		// camOffset !? { cOffset = camOffset };
 		pulloffHome = lengthA@lengthB;
@@ -153,7 +153,7 @@ RoverDriver {
 	}
 
 	goTo_ { |xPos, yPos, feed|
-		arduino.goTo_(*this.xy2ab(xPos, yPos));
+		grbl.goTo_(*this.xy2ab(xPos, yPos));
 	}
 
 	initCapture { | autoAdvance=true, handShake=false, stepWait=5, waitToSettle=1.0, waitAfterPhoto=1.0, travelTimeOut=30, stateCheckRate=5, writePosData=true, dataDirectory, fileName |
@@ -163,7 +163,7 @@ RoverDriver {
 		captureData = Order(numRows*numCols);
 
 		captureTask !? { captureTask.stop.clock.clear };
-		arduino.state; // update internal ArduinoGRBL state bookkeeping
+		grbl.state; // update internal ArduinoGRBL state bookkeeping
 
 		// only send start if using raspifastcamd
 		//camAddr.sendMsg("/camera", "start"); // make sure Rover is ready to take photos
@@ -179,8 +179,8 @@ RoverDriver {
 			stateCheckWait = stateCheckRate.reciprocal;
 
 			advanceFunc = handShake.if(
-				{{ (arduino.mode != "Idle") and: ( now < travelTimeOut ) and: (photoTaken == true) }},
-				{{ (arduino.mode != "Idle") and: ( now < travelTimeOut ) }}
+				{{ (grbl.mode != "Idle") and: ( now < travelTimeOut ) and: (photoTaken == true) }},
+				{{ (grbl.mode != "Idle") and: ( now < travelTimeOut ) }}
 			);
 
 
@@ -204,14 +204,14 @@ RoverDriver {
 					{
 						// let the motor get going, GRBLE state will be "Run"
 						0.2.wait;
-						arduino.state; // update the state
+						grbl.state; // update the state
 						0.2.wait;
 
 						// looping to wait for the motore to have reached it's destination and
 						// to have taken the last photo (if handshaking)
 						while( advanceFunc, {
 							(stateCheckWait/2).wait;
-							arduino.state;
+							grbl.state;
 							(stateCheckWait/2).wait;
 							now  = Main.elapsedTime - moveStart;
 						});
@@ -331,7 +331,7 @@ RoverDriver {
 
 
 	// return to the location Rover is after pulloff (to check no slippage)
-	goTopulloffHome { arduino.goTo_(pulloffHome.x, pulloffHome.y) }
+	goTopulloffHome { grbl.goTo_(pulloffHome.x, pulloffHome.y) }
 
 	goToFirstCapturePoint { this.goTo_( camPts[0].x * xStep, camPts[0].y * yStep ); }
 	goToTopLeft		{ this.goTo_(0,0) }
@@ -343,7 +343,7 @@ RoverDriver {
 	goToLeft		{ this.goTo_(0,spanY/2) }
 	goToBottom		{ this.goTo_(spanX/2,spanY) }
 
-	feed_ {|rate| arduino.feed_(rate) }
+	feed_ {|rate| grbl.feed_(rate) }
 
 	prCreateHandshakeResponder {
 		handshakeResponder = OSCdef(\cameraHandshake, {

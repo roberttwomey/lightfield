@@ -2,9 +2,10 @@ SerialPort.listDevices
 SerialPort.closeAll
 
 // Connect arduino to Computer
-a = ArduinoGRBL("/dev/tty.usbserial-A9I19RNV", 115200)
+a = Grbl("/dev/tty.usbserial-A9I19RNV", 115200)
+a = Grbl("/dev/tty.usbserial-A98Z75T9", 115200)
 
-a = ArduinoGRBL("/dev/tty.AdafruitEZ-Link418c-SPP", 115200)
+a = Grbl("/dev/tty.AdafruitEZ-Link418c-SPP", 115200)
 
 // /dev/tty.usbserial-A9I19RNV
 
@@ -28,7 +29,7 @@ a.unlock
 // dhcp
 
 // args:
-//	anArduinoGRBL, << an instance of ArduinoGRBL that is driving the rig
+//	aGrbl, << an instance of Grbl that is driving the rig
 //	cameraNetAddr, << a NetAddr for the pi snapping photos
 //r = RoverDriver(a, NetAddr("localhost", 9000)); // testing
 r = RoverDriver(a, NetAddr("rover.local", 9000));
@@ -83,7 +84,7 @@ a.state
 // captureSpanY: height of the capture plane
 // insetY: vertical offset from the rig's pulley height to the 0,0 camera capture position
 // nCols, nRows: number of rows and columns of subimages to capture
-r.captureDimensions_(captureSpanX: 10, captureSpanY: 10, insetY: 20, nCols: 15, nRows: 15 );
+r.captureDimensions_(captureSpanX: 10, captureSpanY: 10, insetY: 20, nCols: 17, nRows: 17 );
 
 
 // set Rover to capture in 1 of 3 ways:
@@ -94,6 +95,7 @@ r.captureDimensions_(captureSpanX: 10, captureSpanY: 10, insetY: 20, nCols: 15, 
 //	displayPath << bool to show the resultant path order
 
 r.gridCapture( rowsFirst: false, leftToRight: true, topDown: true, wrap: true, displayPath: true )
+r.gridCapture( rowsFirst: false, leftToRight: false, topDown: true, wrap: false, displayPath: true )
 
 
 /*
@@ -120,7 +122,7 @@ p = r.getCamPointRows;
 p = p.flat;
 
 // collect the points with their associated distance from the specified origin
-~radialOrigin = Point(7,13);
+~radialOrigin = Point(7,9);
 ~distancesFromOrigin = p.collect{ |pt, i| Dictionary[ \dist->pt.dist(~radialOrigin), \pt->pt ] };
 
 // sort them in ascending order (capture outward from origin)
@@ -151,10 +153,13 @@ r.customPathCapture( pointArray: p, displayPath: true)
 
 r.initCapture( autoAdvance: true, waitToSettle: 1.6, waitAfterPhoto: 1.1, travelTimeOut: 30, stateCheckRate: 5, writePosData: true, fileName: "seaset")
 
+r.initCapture( autoAdvance: true, waitToSettle: 1.2, waitAfterPhoto: 4.3, travelTimeOut: 30, stateCheckRate: 8, writePosData: false, fileName: "seaset")
+
 
 // set GRBL's feed rate if not set already
 r.feed_(400)
 r.feed_(350)
+r.feed_(200)
 // a.send("G0F500")
 r.reset
 
@@ -249,7 +254,7 @@ a.free
 // setting steps/mm
 //////////////////////////////////////////////
 
-a = ArduinoGRBL("/dev/tty.usbserial-A94JRL5D", 115200)
+a = Grbl("/dev/tty.usbserial-A94JRL5D", 115200)
 
 // home
 a.home
