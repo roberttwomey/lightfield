@@ -42,7 +42,8 @@
 	} {
 		"New file...beginning analysis".postln;
 		// analysis = SCMIRAudioFile(path, [[MFCC,4],[SpecCentroid],[Chromagram]]);
-		analysis = SCMIRAudioFile(path, [[MFCC,4],[SpecCentroid],[Chromagram, 6], [FFTCrest]]);
+		// analysis = SCMIRAudioFile(path, [[MFCC,4],[SpecCentroid],[Chromagram, 6], [FFTCrest]]);
+		analysis = SCMIRAudioFile(path, [[MFCC,11],[FFTCrest],[Chromagram, 3]]);
 		analysis.extractFeatures();
 		analysis.extractBeats();
 		analysis.save(scmirZTestFile);
@@ -72,6 +73,7 @@
 )
 
 p = "/Users/admin/src/rover/data/AUDIO/discovery_cliffside_CLIP.WAV"
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/around_the_dining_room_morning_EDIT.WAV"
 
 ~mirPath = PathName(p).pathOnly ++ PathName(p).fileNameWithoutExtension++".scmirZ";
 File.exists(~mirPath)
@@ -150,16 +152,19 @@ p = "/Users/admin/src/rover/data/AUDIO/EDITS/carkeek_seaside_train_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_yellow_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_1_EDIT.WAV";
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_1_EDIT_v2.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_2_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/garden_morning1_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/garden_morning2_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_central_dist_clear_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_porch_13min_EDIT.WAV";
-
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_central_dist_clear_EDIT_v2.WAV"
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_capture_EDIT.WAV"
-
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/carkeek_seaside_train_EDIT_v2.WAV"
+p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_capture2_EDIT_v2.WAV"
 (
-~data = ~loadOrProcess.(p, true);
+// ~data = ~loadOrProcess.(p, true);
+~data = ~loadOrProcess.(p, false);
 "done".postln;
 )
 ~data.beatdata
@@ -169,7 +174,7 @@ p = "/Users/admin/src/rover/data/AUDIO/EDITS/dining_room_capture_EDIT.WAV"
 // define vectors
 (
 ~vectors = ~data.analysis.featuredata.clump( ~data.analysis.numfeatures );
-~numClusters = 4;
+~numClusters = 8;
 k = KMeansMod(~numClusters);
 ~vectors.do{|vec, i| k.add(vec) };
 )
@@ -190,7 +195,7 @@ s.boot
 g = GrainScanner2( 0, p )
 
 // add as many scanners as are needed
-g.addScanner(2)
+g.addScanner(1)
 
 g.prepareNewDataSet(p)
 

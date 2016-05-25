@@ -37,6 +37,7 @@ s.boot
 
 /* GrainScanner1 with 3 GrainScan1's */
 x = GrainScanner1( 3, p )
+x = GrainScanner1( 1, p )
 x.presetGUI(3)
 // see below for loading scmir frames for "moment" frame locations
 
@@ -155,9 +156,27 @@ p = "/Users/admin/src/rover/data/AUDIO/EDITS/garden_morning2_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_central_dist_clear_EDIT.WAV";
 p = "/Users/admin/src/rover/data/AUDIO/EDITS/night_porch_13min_EDIT.WAV";
 
+Archive.read("/Users/admin/src/rover/supercollider/preset_backups/GrainScanner_presets/archive.sctxar_BAK_150527_215832.sctxar")
+
+/* for documentation, gather the 4 output channels to 2 */
+~dec = FoaDecoderKernel.newUHJ(2048);
+(
+d = CtkSynthDef(\Quad2UHJ, { arg outbus = 0, inbus = 0, amp =1, hpf=75;
+	var in, enc, dec, enc_mtx;
+	in = In.ar(inbus, 4);
+	enc_mtx = FoaEncoderMatrix.newDirections([30, -30, -135, 135].degrad, 0.6);
+	enc = FoaEncode.ar(in, enc_mtx);
+	dec = FoaDecode.ar(enc, ~dec);
+	ReplaceOut.ar(outbus, HPF.ar(dec, hpf)*amp)
+});
+)
+x = d.note(addAction: \tail).play
+x.inbus_(2)
+x.amp_(18.dbamp)
+x.free
 // initialize a grain scanner
 s.boot
-g = GrainScanner2( 0, p )
+g = GrainScanner2(2, p )
 
 3.do{|i|g.addScanner(i)} // add scanners
 g.presetGUI(5)

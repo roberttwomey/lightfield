@@ -365,23 +365,26 @@ GrainScanner2 {
 	}
 
 	presetGUI { |numCol=1|
-		var presetsClumped, ftBox, varBox, msg_Txt, presetLayouts, maxRows;
-		maxRows = (this.presets.size / numCol).ceil.asInt;
+		var presetsClumped, ftBox, varBox, msg_Txt, presetLayouts, maxRows, nPsets, cnt;
+		cnt = -1;
+		nPsets = this.presets.size;
+		maxRows = (nPsets / numCol).ceil.asInt;
 
 		presetsClumped = this.presets.keys.asArray.sort.clump(maxRows);
 
-		presetLayouts = presetsClumped.collect({ |presetGroup|
+		presetLayouts = presetsClumped.collect({ |presetGroup, j|
 			VLayout(
 				*presetGroup.extend(maxRows,nil).collect({ |name, i|
 					var lay;
+					cnt = cnt+1;
 					name.notNil.if({
 						lay = HLayout(
-							[ Button().states_([[name]])
+							[ Button().states_([[name, Color.black, Color.hsv(0.9-(nPsets.reciprocal*cnt*0.3),0.6,1,0.25)]])
 								.action_({
 									this.recallPreset(name.asSymbol, ftBox.value);
 									msg_Txt.string_(format(
 										"preset % updated.", name.asSymbol)).stringColor_(Color.black);
-							}), a: \top]
+								}), a: \top ]
 						)
 					},{
 						nil
@@ -393,8 +396,8 @@ GrainScanner2 {
 		presetWin = Window("Presets", Rect(0,0,100, 100)).view.layout_(
 			VLayout(
 				[ Button().states_([
-					["Play", Color.black, Color.grey],
-					["Release", Color.white, Color.red]
+					["Play", Color.black, Color.hsv(0.55,0.65,1,0.25)],
+					["Release", Color.white, Color.red.alpha_(0.4)]
 
 				]).action_({ |but|
 					switch( but.value,
@@ -405,15 +408,16 @@ GrainScanner2 {
 				HLayout(
 					nil,
 					StaticText().string_("Fade Time").align_(\right).fixedHeight_(25),
-					ftBox = NumberBox().value_(1.0).maxWidth_(35).fixedHeight_(25)
+					ftBox = NumberBox().value_(1.0).maxWidth_(35).fixedHeight_(25).align_(\center)
 				),
 				HLayout(
-					msg_Txt = StaticText().string_("Select a preset to recall.").fixedHeight_(35),
-					Button().states_([["Update Preset"]]).action_({this.updatePreset}).fixedWidth_(95)
+					msg_Txt = StaticText().string_("Select a preset to recall.").stringColor_(Color.new255(*80!3)).fixedHeight_(35),
+					Button().states_([["Update Preset", Color.black, Color.new255(*180!3)]])
+					.action_({this.updatePreset}).fixedWidth_(95)
 				),
 				HLayout( *presetLayouts )
 			)
-		).front;
+		).background_(Color.hsv(0.55,0.3,1)).front;
 	}
 
 	loadGlobalSynthLib {
@@ -719,12 +723,14 @@ GrainScan2View {
 
 	// TODO: make a class to handle grouping widgets (like EZ) that works with layouts
 	buildControls {
+		var bw = 40;
 
 		controls.putPairs([
 			\grnDur, ()
 			.numBox_( NumberBox()
 				.action_({ |bx|scanner.grnDur_(bx.value) })
 				.value_(scanner.master.grnDurSpec.default)
+				.fixedWidth_(bw).align_(\center)
 				.maxDecimals_(3)
 			)
 			.knob_(	Knob().step_(0.001)
@@ -738,6 +744,7 @@ GrainScan2View {
 				.action_({ |bx|
 					scanner.grnRate_(bx.value) })
 				.value_(scanner.master.grnRateSpec.default)
+				.fixedWidth_(bw).align_(\center)
 				.maxDecimals_(3)
 			)
 			.knob_(	Knob().step_(0.001)
@@ -751,6 +758,7 @@ GrainScan2View {
 				.action_({ |bx|
 					scanner.grnRand_(bx.value) })
 				.value_(scanner.master.grnRandSpec.default)
+				.fixedWidth_(bw).align_(\center)
 				.maxDecimals_(3)
 			)
 			.knob_(	Knob().step_(0.001)
@@ -764,6 +772,7 @@ GrainScan2View {
 				.action_({ |bx|
 					scanner.grnDisp_(bx.value) })
 				.value_(scanner.master.grnDispSpec.default)
+				.fixedWidth_(bw).align_(\center)
 				.maxDecimals_(3)
 			)
 			.knob_(	Knob().step_(0.001)
@@ -782,6 +791,7 @@ GrainScan2View {
 			.numBox_( NumberBox()
 				.action_({ |bx|
 					scanner.amp_(bx.value.dbamp) })
+				.fixedWidth_(bw).align_(\center)
 				.value_(scanner.master.ampSpec.default)
 			)
 			.txt_( StaticText().string_("dB").align_(\center)
@@ -794,6 +804,7 @@ GrainScan2View {
 				.action_({ |bx|
 					scanner.clusterSpread_(bx.value) })
 				.value_(scanner.master.clusterSpreadSpec.default)
+				.fixedWidth_(bw).align_(\center)
 				.maxDecimals_(3)
 			)
 			.knob_(	Knob().step_(0.001)
@@ -807,6 +818,7 @@ GrainScan2View {
 				.action_({ |bx|
 					scanner.distFrmCen_(bx.value) })
 				.value_(scanner.master.distFrmCenSpec.default)
+				.fixedWidth_(bw).align_(\center)
 				.maxDecimals_(3)
 			)
 			.knob_(	Knob().step_(0.001)
@@ -818,6 +830,7 @@ GrainScan2View {
 			\newCluster, ()
 			.numBox_( NumberBox()
 				.action_({ |bx| scanner.cluster_(bx.value.asInt) }).value_(scanner.curCluster) )
+			.fixedWidth_(bw).align_(\center)
 			.txt_( StaticText().string_("Cluster") ),
 
 
@@ -827,6 +840,7 @@ GrainScan2View {
 				.action_({ |bx|
 					scanner.pan_(bx.value) })
 				// .value_(scanner.azSpec.default)
+				.fixedWidth_(bw).align_(\center)
 				.value_(scanner.master.panSpec.default)
 			)
 			.knob_(	Knob().step_(0.001).centered_(true)
@@ -842,6 +856,7 @@ GrainScan2View {
 				.action_({ |bx|
 					scanner.spread_(bx.value) })
 				// .value_(scanner.xformAmtSpec.default)
+				.fixedWidth_(bw).align_(\center)
 				.value_(scanner.master.spreadSpec.default)
 			)
 			.knob_(	Knob().step_(0.001)
@@ -870,47 +885,60 @@ GrainScan2View {
 	}
 
 	makeWin {
+		var bw = 40;
 		win = Window("a GrainScanner", Rect(200,200,450,100)).layout_(
 			HLayout(
 				VLayout(
 					[controls[\amp].slider.maxWidth_(30), a: \center],
-					controls[\amp].numBox.fixedWidth_(45),
-					controls[\amp].txt.maxWidth_(45),
+					controls[\amp].txt.maxWidth_(45).align_(\center),
+					[controls[\amp].numBox.fixedWidth_(bw), a: \bottom],
 				),
 				VLayout(
 					HLayout(
 						*[\grnDur, \grnRate, \grnRand, \grnDisp].collect({ |key|
-							VLayout( StaticText().string_(key).align_(\center),
-								HLayout( controls[key].numBox.maxWidth_(55), controls[key].knob.mode_(\vert) )
+							var col = Color.hsv(0, 0.65, 1);
+							VLayout( StaticText().string_(key).align_(\center).background_(col),
+								HLayout(
+									controls[key].numBox.fixedWidth_(bw).background_(col).background_(col.alpha_(0.2)),
+									controls[key].knob.mode_(\vert).background_(col.alpha_(0.2))
+								)
 							)
 						})
-					),
+					).spacing_(2),
 					HLayout(
 						VLayout(
-							[controls[\newCluster].txt.align_(\left), a: \topLeft ],
-							[controls[\newCluster].numBox.maxWidth_(55), a: \topLeft],
+							[controls[\newCluster].txt.align_(\center), a: \topLeft ],
+							[controls[\newCluster].numBox.fixedWidth_(bw).align_(\center).background_(Color.yellow.alpha_(0.2)), a: \topLeft],
 							nil
 						),
 						nil,
 						*[\distFrmCen, \clusterSpread].collect({ |key|
-							VLayout( StaticText().string_(key).align_(\center),
-								HLayout( controls[key].numBox.maxWidth_(55), controls[key].knob.mode_(\vert) )
+							var col = Color.hsv(0.3, 0.6, 1);
+							VLayout( StaticText().string_(key).align_(\center).background_(col),
+								HLayout(
+									controls[key].numBox.fixedWidth_(bw).background_(col.alpha_(0.2)),
+									controls[key].knob.mode_(\vert).background_(col.alpha_(0.2))
+								)
 							)
 						})
-					),
+					).spacing_(2),
 					HLayout(
 						nil, nil,
 						*[\pan, \spread].collect({ |key|
-							VLayout( StaticText().string_(key).align_(\center),
-								HLayout( controls[key].numBox.maxWidth_(55), controls[key].knob.mode_(\vert) )
+							var col = Color.hsv(0.6, 0.65, 1);
+							VLayout( StaticText().string_(key).align_(\center).background_(col),
+								HLayout(
+									controls[key].numBox.fixedWidth_(bw).background_(col.alpha_(0.2)),
+									controls[key].knob.mode_(\vert).background_(col.alpha_(0.2))
+								)
 							)
 						})
-					),
+					).spacing_(2),
 					nil,
 					HLayout(
-						[controls[\fadeIO].button.fixedWidth_(35), a: \left],
+						nil,
 						[controls[\fadeIO].txt.align_(\left), a: \left ],
-						nil
+						[controls[\fadeIO].button.fixedWidth_(35), a: \left],
 					),
 				)
 			)

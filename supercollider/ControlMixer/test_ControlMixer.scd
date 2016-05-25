@@ -4,7 +4,10 @@ c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount"], NetAddr
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("192.168.0.102", 12345) )
 
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("localhost", 12345) )
+c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("refocuser.local", 12345) )
 
+
+c.mixers.collect(_.plotter).do(_.bounds_(\auto))
 
 // test snapshot loading
 c = ControlMixMaster( ["focus", "xstart", "ystart", "xcount", "ycount", "xscroll", "yscroll", "zoom"], NetAddr("localhost", 57120) )

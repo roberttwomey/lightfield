@@ -915,9 +915,13 @@ GrainScan1View {
 		win = Window("a GrainScanner", Rect(200,200,100,100)).layout_(
 			VLayout(
 				HLayout(
-					*[\grnDur, \grnRate, \grnRand, \pntrRate].collect({ |key|
-						VLayout( StaticText().string_(key).align_(\center),
-							HLayout( controls[key].numBox.fixedWidth_(35), controls[key].knob.mode_(\vert) )
+					*[\grnDur, \grnRate, \grnRand, \pntrRate].collect({ |key, i|
+						var col = Color.hsv(0.05, 0.45, 1);
+						VLayout( StaticText().string_(key).align_(\center).background_(col),
+							HLayout(
+								controls[key].numBox.fixedWidth_(35).background_(col.alpha_(0.5)),
+								controls[key].knob.mode_(\vert).background_(col.alpha_(0.5))
+							)
 						)
 					})
 				),
@@ -929,34 +933,37 @@ GrainScan1View {
 					// 	// ),
 					VLayout(
 						[controls[\amp].slider.orientation_(\vertical).minHeight_(200), a: \left],
-						[controls[\amp].numBox.fixedWidth_(35), a: \left],
+						[controls[\amp].numBox.fixedWidth_(35).align_(\center), a: \left],
 					),
-					VLayout( *[\newPos, \syncPntr, \fadeIO].collect({ |key|
+					VLayout( *[\fadeIO, \newPos, \syncPntr].collect({ |key|
 						HLayout(
 							[controls[key].button.fixedWidth_(35), a: \left],
-							[controls[key].txt.align_(\left), a: \left ]
+							[controls[key].txt.align_(\left), a: \bottomLeft ]
 						)
 					})
 					// ++ [nil, [StaticText().string_("pntr Dispersion").align_(\left), a: \bottom]]
-					++ [nil, [StaticText().string_("dB").align_(\left), a: \bottom]]
+					++ [nil, [StaticText().string_("dB").align_(\left), a: \bottomLeft]]
 					),
 					nil,
 					VLayout( *[\minDisp, \maxDisp].collect({ |key|
+						var col = Color.hsv(0.1, 0.45, 1);
 						VLayout(
-							StaticText().string_(key.asString).align_(\center),
-							controls[key].numBox.fixedWidth_(35),
+							StaticText().string_(key.asString).align_(\center).background_(col),
+							[controls[key].numBox.fixedWidth_(35).align_(\center).background_(col.alpha_(0.5)), a: \center],
 						)
 					}) ++ [nil]
 					),
+					10,
 					VLayout( *[\density, \fluxRate].collect({ |key|
+						var col = Color.hsv(0.15, 0.45, 1);
 						VLayout(
-							StaticText().string_(key.asString).align_(\center),
+							StaticText().string_(key.asString).align_(\center).background_(col),
 							HLayout(
-								controls[key].numBox.fixedWidth_(35),
-								controls[key].knob.mode_(\vert).fixedWidth_(35),
+								controls[key].numBox.fixedWidth_(35).align_(\center).background_(col.alpha_(0.5)),
+								controls[key].knob.mode_(\vert).fixedWidth_(35).background_(col.alpha_(0.5)),
 							)
 						)
-					})
+					}) ++ [nil]
 					),
 				),
 			)
