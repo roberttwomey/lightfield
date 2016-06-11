@@ -7,57 +7,50 @@
 SerialPort.listDevices
 SerialPort.cleanupAll
 
-// start ArduinoGRBL with the Arduino serial address, baudrate 115200
-// a = ArduinoGRBL("/dev/tty.usbserial-A9KBFHXP", 115200)
-// ~a2 = ArduinoGRBL("/dev/tty.usbserial-A9M55Z3B", 115200)
-// a = ArduinoGRBL("/dev/tty.usbserial-A9ONJ9TP", 115200)
-// a = ArduinoGRBL("/dev/tty.usbserial-A9ETD3VR", 115200)
-// a = ArduinoGRBL("/dev/tty.usbserial-A9CBV1D5", 115200)
+// start Grbl with the Arduino serial address, baudrate 115200
+a = Grbl("/dev/tty.usbserial-A9ETD3VR", 115200)
+// a = Grbl("/dev/tty.usbserial-A9CBV1D5", 115200)
 
-a = ArduinoGRBL("/dev/tty.usbserial-A103SYVB", 115200)
-// a = ArduinoGRBL("/dev/tty.usbserial-A103SYFS", 115200)
-// a = ArduinoGRBL("/dev/tty.usbserial-A6040PYI", 115200)
-// a = ArduinoGRBL("/dev/tty.usbserial-A6040PW3", 115200)
-// m = MotorDriver(a);
-
-// m.free;
 a.free
 // 0.exit
 
-SkipJack.verbose_(true)
+a.postState_(true)
+a.state
 
-// optionally speed up the drawing of the:
-// speaker display
-m.gui.frameRate_(24)
-// control signal plotters
-[m.plotterX, m.plotterY].do({|pltr| pltr.mon.monitor.watcher.dt = 30.reciprocal})
+a.unlock
+a.reset
 
+a.home
+a.reset
 
 a.settings
 
-// here's how mike set up his motor stepping translation:
+a.worldOffset_(0,0)
+
+a.goTo_(0,0,300)
+
+/* for testing a new rover motor */
+a.enableSoftLimit_(false)
+
+
 // (steps_per_revolution*microsteps)/mm_per_rev
 // 50:1 gearing (50x down per step), * 16 microsteps (configured in motor driver wiring), treating mm as degrees (360mm/revolution)
 // 200*50*16/360 = 444.444
 // or put another way...
 // For steps/degree(mm) 50*16 / 1.8 = 444.4444... steps per degree
 
-// only need to set these once, they're stored in the EEPROM memory:
-// a.stepPerMmX_(444.444)
-// a.stepPerMmY_(444.444)
-// a.stepPerMmZ_(444.444)
+// Rover2 - suspended setup
+a.stepPerMmX_(431.708)
+a.stepPerMmY_(431.708)
 
-/* for testing a new rover motor */
-a.enableSoftLimit_(false)
-a.reset
-a.unlock
-a.free
+
+/* The code below doesn't necessarily pertain to the rover 2 setup
 
 // 200 steps/rev * 16 microsteps / 360 deg/rev
-a.stepPerMmX_(8.889)
-a.stepPerMmY_(8.889)
-a.maxRateX_(30000)
-a.maxRateY_(30000)
+a.stepPerMmX_()
+a.stepPerMmY_()
+a.maxRateX_()
+a.maxRateY_()
 a.maxAccelX_(500)
 a.maxAccelY_(500)
 
@@ -72,8 +65,6 @@ a.y_(1290)
 a.y_(-10)
 a.y_(10)
 
-a.goTo_(-10, -10, 2000)
-a.goTo_(-50, -50, 4000)
 a.goTo_(50, 50, 4000)
 
 a.free;
@@ -96,66 +87,16 @@ a.maxTravelZ_(360)
 a.send("$3=6") // invert Y
 // a.send("$3=4") // don't invert either
 
-// new to GRBL 0.9i,
-// when homing, GRBL first seeks to the limit (first pass),
-// pulls off HOMING PULL-OFF ($27) distance then enters a "locate" phase
-// at a slower HOMING FEED ($24) rate.
-// Once the limit is located again, it pulls off HOMING PULL-OFF again
-// so... to do: the pulloff needs to be a move instruction stored in
-a.send("$26=25") // was 250
-a.send("$24=550") // Homeing seek was 25
 
+// // new to GRBL 0.9i,
+// // when homing, GRBL first seeks to the limit (first pass),
+// // pulls off HOMING PULL-OFF ($27) distance then enters a "locate" phase
+// // at a slower HOMING FEED ($24) rate.
+// // Once the limit is located again, it pulls off HOMING PULL-OFF again
+// // so... to do: the pulloff needs to be a move instruction stored in
+// a.send("$26=25") // was 250
+// a.send("$24=550") // Homeing seek was 25
 
-
-// this isn't all the grbl settings, but any setting can be set using it's reference number, e.g.
-a.send("$100=444.444") // x, step/mm
-
-a.send("$11=0.02") // junction dev, def 0.02
-a.send("$11=0.002")
-a.send("$11=0.3")
-
-
-a.postState = true // allow posting the state when requested
-a.state
-
-a.unlock
-
-// I just hit a limit switch to test if it works
-// ALARM!...
-a.reset
-a.unlock // twice
-
-// all my limits are working, time to HOME
-// (plug in your motor power)
-a.home
-// change your homing pulloff if you want
-a.send("$27=25")
-
-
-
-// set your "world offset", i.e. the coordinates you want to use to drive it,
-// not its machine coordinates
-// this just needs to happen once
-a.worldOffset_(-150, -84); // under the hood: a.send("G10L2P0X-150Y-84")
-
-// make sure a feed is set! This must happen at least once every session before moving
-a.feed_(1000)
-a.goTo_(0,10)
-a.goTo_(-10,0)
-a.goTo_(10,0)
-
-a.goTo_(-45,50, 3000)
-a.goTo_(0,10)
-
-( // send a few instructions at "once"
-fork {
-	a.goTo_(-30,10,700);
-	a.goTo_(0,-20, 300);
-	a.goTo_(0,10, 2000)
-}
-)
-
-a.state
 
 // do something based on the motor's position
 (
@@ -319,7 +260,7 @@ a.home
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Advanced settings for ArduinoGRBL
+// Advanced settings for Grbl
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // first time setting or when resetting EEPROM
