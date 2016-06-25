@@ -8,16 +8,15 @@
 RoverDriver2 {
 	var <grbl, <>camAddr;
 
-	var machSpan; // dist between cable axis points
-	var pulloff; // grbl pulloff after finding limit
-	var capWidth, capHeight; // width and height of capture area
-	var yOffset; // offset between the height of the axis points and the top of the capture area
-	var limOffset; // distance between pivot point and rover tie point when retracted to limit point
+	var <machSpan; // dist between cable axis points
+	var <pulloff; // grbl pulloff after finding limit
+	var <capWidth, <capHeight; // width and height of capture area
+	var <yOffset; // offset between the height of the axis points and the top of the capture area
+	var <limOffset; // distance between pivot point and rover tie point when retracted to limit point
 
 
 	var <>mSeparation, <>x0, <>y0, <>cOffset = 2.5;
-	var <>numCols, <>numRows, <>spanX, <>spanY, <xStep, <yStep, <lenA, <lenB;
-	var <pulloffHome;
+	var <>numCols, <>numRows, <xStep, <yStep;
 	var <captureTask, <camPts;
 	var <posTxtList, <photoTaken = false, <handshakeResponder;
 	var rigDimDefined = false, capDimDefined = false;
@@ -72,47 +71,20 @@ RoverDriver2 {
 	}
 
 	// all args in inches
-	// captureSpanX: width of the capture plane
-	// captureSpanY: height of the capture plane
-	// insetY: vertical offset from the rig's pulley height to the 0,0 camera capture position
 	// nCols, nRows: number of rows and columns of subimages to capture
-	captureDimensions_ { |captureSpanX, captureSpanY, insetY, nCols, nRows |
-		var insetX;
+	captureDimensions_ { |nCols, nRows |
 
-		rigDimDefined.not.if{ error("rig dimensions are not yet defined!") };
+		rigDimDefined.not.if{ Error("rig dimensions are not yet defined!").throw };
+		nCols ?? { Error("Number of columns is undefined.").throw };
+		nRows ?? { Error("Number of rows is undefined.").throw };
 
-		captureSpanX !? { spanX = captureSpanX };
-		captureSpanY !? { spanY = captureSpanY };
+		numCols = nCols;
+		numRows = nRows;
 
-		insetX = mSeparation - spanX / 2;
-		x0 = insetX;
-		insetY !? { y0 = insetY };
-
-		nCols !? { numCols = nCols };
-		nRows !? { numRows = nRows };
-
-		xStep = spanX / (numCols-1);
-		yStep = spanY / (numRows-1);
-
-		this.checkCornerExtents;
+		xStep = capWidth / (numCols-1);
+		yStep = capHeight / (numRows-1);
 
 		capDimDefined = true;
-	}
-
-	checkCornerExtents {
-		var widthLim, hypotLim;
-
-		widthLim = spanX + ((mSeparation - spanX) / 2);
-		hypotLim = hypot(spanX + x0, spanY + y0);
-
-		if( (lenA < widthLim) or: (lenB < widthLim) ){
-			warn( "Rover will not reach the top corners at the specified X span"; );
-		};
-
-		if( (lenA < hypotLim) or: (lenB < hypotLim) ){
-			warn( "Rover will not reach the bottom corners at the specified capture dimensions"; );
-		};
-
 	}
 
 	// Returns a 2D array of of rows capture points for subsequent processing.
@@ -181,9 +153,9 @@ RoverDriver2 {
 
 	checkCaptureDimInit {
 
-		[numCols, numRows, spanX, spanY].includes(nil).if{
+		[numCols, numRows, capWidth, capHeight].includes(nil).if{
 			format(
-				"Not all capture dimensions are defined:\n\tnumCols %\n\tnumRows %\n\tspanX %\n\tspanY %\nUse .captureDimensions to set all of these values.", numCols, numRows, spanX, spanY
+				"Not all capture dimensions are defined:\n\tnumCols %\n\tnumRows %\n\tcapWidth %\n\tcapHeight %\nUse .captureDimensions to set all of these values.", numCols, numRows, capWidth, capHeight
 		).throw };
 
 	}
@@ -369,17 +341,17 @@ RoverDriver2 {
 
 
 	// return to the location Rover is after pulloff (to check no slippage)
-	goTopulloffHome { grbl.goTo_(0,0) }
+	goTopulloffHome { grbl.goTo_(0,0) } // note use of grbl goTo, not this.goTo
 
 	goToFirstCapturePoint { this.goTo_( camPts[0].x * xStep, camPts[0].y * yStep ); }
 	goToTopLeft			{ this.goTo_(0,0) }
-	goToTopRight		{ this.goTo_(spanX,0) }
-	goToBottomLeft	{ this.goTo_(0,spanY) }
-	goToBottomRight	{ this.goTo_(spanX, spanY) }
-	goToTop				{ this.goTo_(spanX/2,0) }
-	goToRight				{ this.goTo_(spanX,spanY/2) }
-	goToLeft				{ this.goTo_(0,spanY/2) }
-	goToBottom			{ this.goTo_(spanX/2,spanY) }
+	goToTopRight		{ this.goTo_(capWidth,0) }
+	goToBottomLeft	{ this.goTo_(0,capHeight) }
+	goToBottomRight	{ this.goTo_(capWidth, capHeight) }
+	goToTop				{ this.goTo_(capWidth/2,0) }
+	goToRight				{ this.goTo_(capWidth,capHeight/2) }
+	goToLeft				{ this.goTo_(0,capHeight/2) }
+	goToBottom			{ this.goTo_(capWidth/2,capHeight) }
 
 	feed_ {|rate| grbl.feed_(rate) }
 
