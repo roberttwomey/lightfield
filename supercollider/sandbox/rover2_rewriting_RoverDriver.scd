@@ -10,9 +10,9 @@ var limOffset; // distance between pivot point and rover tie point when retracte
 
 e = (
 	init: {{
-		|mSeparation, limitOffset=0, width, height, yOffset|
+		|mSeparation, limitOffset=0, tetherSeparation=1, width, height, yOffset|
 
-		motorSeparation = mSeparation;
+		motorSeparation = mSeparation - tetherSeparation; // subtract span of tie points on camera mount
 		// motorSeparation = mSeparation - limitSeparation;
 		if (width >= (motorSeparation-(2*limitOffset))) {"width must be less than [motorSeparation - (2*limitOffset)]".throw};
 
@@ -53,7 +53,90 @@ e = (
 );
 )
 
-e.init.( mSeparation:15, width:10, height:6, yOffset: 8 )
+e.init.( mSeparation:10.125, width:6, height:6, yOffset: 4 )
 // goto is in canvas coordinates
+e.goto.( 0,0 )
 e.goto.( 5+2, 3 )
-e.goto.( 5-2, 3 ) 
+e.goto.( 5-2, 3 )
+
+/* ----------------------------------------------------------------
+// test driving
+----------------------------------------------------------------*/
+
+SerialPort.listDevices
+SerialPort.closeAll
+
+// Connect arduino to Computer
+g = Grbl("/dev/tty.usbserial-A9ETD3VR", 115200)
+g.postState_(true)
+
+// g.invertAxes_(false, false)
+// g.homingInvertDirection_(true, true)
+
+// set the homeing pulloff the first time around
+g.settings
+g.state
+
+// if homing initially, set pulloff to more than the machine separation
+g.homingPullOff_(45)
+
+// home the first time around
+// confirm pulloff first
+g.home
+g.reset
+g.unlock
+
+// Turn on Rover
+// Connect to Rover_AP. pwd: roverrover
+// dhcp
+
+// args:
+//	aGrbl, << an instance of Grbl that is driving the rig
+//	cameraNetAddr, << a NetAddr for the pi snapping photos
+r = RoverDriver2(g, NetAddr("localhost", 9000)); // testing
+// r = RoverDriver2(g, NetAddr("rover.local", 9000));
+// r.free
+
+
+
+
+r.rigDimensions_(machineSpan:33,  limitOffset:0 , tetherSeparation: 2.375, captureWidth: 20, captureHeight: 34, captureYoffset: 3 );
+// .rigDimensions_ sets the homingPulloff, so home after setting rig dimensions
+g.home
+
+r.goToTopLeft // should shift x positive
+r.goToTopRight // should shift x negative
+r.goToBottomRight
+r.goToBottomLeft
+r.goTo_(0,0,500)
+r.goTo_(0,34,500)
+r.goTo_(20,34,500)
+r.goTo_(20,0,500)
+r.goTo_(10,17,500)
+g.goTo_(0,0,500)
+
+g.goTo_(0, 0,500) // r 0,0
+g.goTo_(-2, 0,500) // r 0,0
+g.goTo_(0, -2,500) // r 0,0
+g.goTo_(-6.708, 2.208,500) // r 0,0
+g.goTo_(-2.208, 6.708,500) // r.goTo_(6,0,500)
+g.reset
+
+// check the state
+g.state
+
+g.free
+
+// the world position (first two numbers after Idle) should be the length mentioned above (pulley>Roverhole), eg:
+// [ Idle, [ 72.499, 72.499, 0 ], [ -135.001, -135.001, 0 ] ]
+
+// now the rig is initialized!
+
+
+// set up capture dimensions: dimensions of your capture grid
+// all args in inches
+// captureSpanX: width of the capture plane
+// captureSpanY: height of the capture plane
+// insetY: vertical offset from the rig's pulley height to the 0,0 camera capture position
+// nCols, nRows: number of rows and columns of subimages to capture
+r.captureDimensions_(captureSpanX: 10, captureSpanY: 10, insetY: 20, nCols: 17, nRows: 17 );

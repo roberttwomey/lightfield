@@ -13,6 +13,7 @@ RoverDriver2 {
 	var <capWidth, <capHeight; // width and height of capture area
 	var <yOffset; // offset between the height of the axis points and the top of the capture area
 	var <limOffset; // distance between pivot point and rover tie point when retracted to limit point
+	var <tetherSep; // distance between 2 tether points on the camera mount
 
 
 	var <>mSeparation, <>x0, <>y0, <>cOffset = 2.5;
@@ -30,6 +31,17 @@ RoverDriver2 {
 		^super.newCopyArgs( aGrbl, cameraNetAddr );
 	}
 
+	printOn { arg stream;
+		// not a compileable string
+		stream << this.class.name
+		<< "\nmachSpan\t" << machSpan
+		<< "\ncapWidth\t" << capWidth
+		<< "\ncapHeight\t" << capHeight
+		<< "\nyOffset\t" << yOffset
+		<< "\nlimOffset\t" << limOffset
+		<< "\npulloff\t"<< pulloff
+		<< "\ntetherSeparation\t"<< tetherSep;
+	}
 	/*
 	// All args in inches.
 	// -machineSpan: dist between cable axis points
@@ -37,32 +49,37 @@ RoverDriver2 {
 	// -captureWidth, captureHeight: width and height of capture area
 	// -captureYoffset: offset between the height of the axis points and the top of the capture area
 	*/
-	rigDimensions_ { |machineSpan, limitOffset=0, captureWidth, captureHeight, captureYoffset|
-		var poH, poW, po;
+	rigDimensions_ { |machineSpan, limitOffset=0, tetherSeparation=0, captureWidth, captureHeight, captureYoffset|
+		var mSpan, poH, poW, po;
+
+		mSpan = machineSpan - tetherSeparation;
 
 		if (captureWidth >= (machineSpan-(2*limitOffset))) {
-			"width must be less than [motorSeparation - (2*limitOffset)]".throw
+			Error("width must be less than [motorSeparation - (2*limitOffset)]").throw
 		};
 
 		poH = captureHeight + captureYoffset;
-		poW = machineSpan/2;
+		poW = mSpan/2;
 		po = (poH.squared + poW.squared).sqrt - limitOffset;
+
+		[poH, poW, po].postln;
 
 		if (po < (machineSpan - (2*limitOffset))) {
 			postf("(pulloff + limOffset) : %\nmotorSeparation : %\n", (po + limitOffset), machineSpan);
-			(
+			Error(
 				"Pulloff must be larger than the motor separation. " ++
 				"Consider lowering the bottom bound of the canvas or bringing the motors closer together."
 			).throw
 		};
-
+		"here".postln;
 		// after error checks, set instance vars
-		machSpan = machineSpan;
+		machSpan = mSpan;
 		capWidth = captureWidth;
 		capHeight = captureHeight;
 		yOffset = captureYoffset;
 		limOffset = limitOffset;
-		pulloff = po; // instance var
+		pulloff = po;
+		tetherSep = tetherSeparation;
 
 		// set grbl pulloff
 		grbl.homingPullOff_(pulloff);
@@ -163,7 +180,13 @@ RoverDriver2 {
 	// xPos, yPos: x and y coords, in capture area space
 	// [0,0] is the top left of the capture area
 	goTo_ { |xPos, yPos, feed|
-		grbl.goTo_(*this.captureToMachineCoords(xPos, yPos));
+		var grblx, grbly;
+		#grblx, grbly = this.captureToMachineCoords(xPos, yPos);
+		if (feed.notNil) {
+			grbl.goTo_(grblx, grbly, feed);
+		} {
+			grbl.goTo_(grblx, grbly);
+		};
 	}
 
 	initCapture { | autoAdvance=true, handShake=false, stepWait=5, waitToSettle=1.0, waitAfterPhoto=1.0, travelTimeOut=30, stateCheckRate=5, writePosData=true, dataDirectory, fileName |
@@ -401,12 +424,21 @@ RoverDriver2 {
 		var machx, machy;	// the destination, in machine space, defined by limits
 		var macha, machb;	// length a and b (cable lengths from axis points)
 		var destx, desty;		// x,y destination sent to grbl
+		var offsetx, offsety;  // offset applied to machine x and y on account of tilted camera mount
 
 		machx = captureX + ((machSpan-capWidth)/2);
 		machy = captureY + yOffset;
 
-		macha = (machx.squared + machy.squared).sqrt;
-		machb = ((machSpan-machx).squared + machy.squared).sqrt;
+		// macha = (machx.squared + machy.squared).sqrt;
+		// machb = ((machSpan-machx).squared + machy.squared).sqrt;
+
+		// turn machine xy position into cable lengths A and B
+		#macha, machb = this.getMachineAB( machx, machy );
+		// compensate for the tilt in the camera mount
+		#offsetx, offsety = this.addTiltOffset(macha, machb);
+		// recalc with new x and y machine coords
+		// note this isn't totally accurate but should help some...
+		#macha, machb = this.getMachineAB( machx+offsetx, machy+offsety);
 
 		destx = macha - pulloff + limOffset;
 		desty = machb - pulloff + limOffset;
@@ -414,4 +446,54 @@ RoverDriver2 {
 		^[destx, desty]
 	}
 
+	getMachineAB { |machx, machy|
+		var macha, machb;
+		macha = (machx.squared + machy.squared).sqrt;
+		machb = ((machSpan-machx).squared + machy.squared).sqrt;
+		^[macha, machb]
+	}
+
+	addTiltOffset {|lenA, lenB|
+		var a,b,c; // angles
+		var sideA, sideB, sideC; // sides
+		var sideA_sqr, sideB_sqr, sideC_sqr; // sides
+		var macha, machb; // resulting cable lengths
+		var tilt; // tilt from vertical
+		var tiltleft; // bool if tilt is to left
+		var shiftup, shiftright;
+		var abRatio;
+
+		/* establish amount of tilt */
+		sideA = lenA;
+		sideB = lenB;
+		sideC = machSpan - tetherSep;
+
+		#sideA_sqr, sideB_sqr, sideC_sqr = [sideA, sideB, sideC].collect(_.squared);
+
+		a = acos( (sideB_sqr + sideC_sqr - sideA_sqr) / (2*sideB*sideC));
+		b = acos( (sideC_sqr + sideA_sqr - sideB_sqr) / (2*sideC*sideA));
+		// a = acos( (sideB_sqr + sideC_sqr − sideA_sqr) / (2*sideB*sideC) );
+		// b = acos( sideC_sqr + sideA_sqr − sideB_sqr / (2*sideC*sideA) );
+		c = pi - (a+b);
+
+		tilt = c.half + b - (pi/2);
+		tiltleft = tilt.isNegative;
+
+		postf("[a,b,c]: %\n[sideA, sideB, sideC]: %\ntilting left: %: %\n", [a,b,c].raddeg, [sideA, sideB, sideC], tiltleft, tilt.raddeg);
+
+		/* calc offset */
+		sideC = tetherSep/2;
+		sideA = cos(tilt)*sideC;
+		sideB = sin(tilt.abs)*sideC;
+
+		abRatio = lenB/lenA;
+		if (tiltleft) { abRatio = abRatio.reciprocal };
+		shiftup = ((sideC - sideA) * abRatio);
+		shiftright = sideB * abRatio;
+		if (tiltleft) { shiftright = shiftright.neg };
+		postf("abRatio: %\n", abRatio);
+		"shifting coords: ".post; [shiftright, shiftup.neg].postln;
+
+		^[shiftright, shiftup.neg]
+	}
 }
