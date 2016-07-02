@@ -435,10 +435,10 @@ RoverDriver2 {
 		// turn machine xy position into cable lengths A and B
 		#macha, machb = this.getMachineAB( machx, machy );
 		// compensate for the tilt in the camera mount
-		#offsetx, offsety = this.addTiltOffset(macha, machb);
-		// recalc with new x and y machine coords
-		// note this isn't totally accurate but should help some...
-		#macha, machb = this.getMachineAB( machx+offsetx, machy+offsety);
+		// #offsetx, offsety = this.addTiltOffset(macha, machb);
+		// // recalc with new x and y machine coords
+		// // note this isn't totally accurate but should help some...
+		// #macha, machb = this.getMachineAB( machx+offsetx, machy+offsety);
 
 		destx = macha - pulloff + limOffset;
 		desty = machb - pulloff + limOffset;
@@ -453,6 +453,7 @@ RoverDriver2 {
 		^[macha, machb]
 	}
 
+	// this hasn't been properly worked out...
 	addTiltOffset {|lenA, lenB|
 		var a,b,c; // angles
 		var sideA, sideB, sideC; // sides
@@ -460,6 +461,7 @@ RoverDriver2 {
 		var macha, machb; // resulting cable lengths
 		var tilt; // tilt from vertical
 		var tiltleft; // bool if tilt is to left
+		var sideX, sideY, sideH; // sides of the tilt offset triangle
 		var shiftup, shiftright;
 		var abRatio;
 
@@ -482,14 +484,16 @@ RoverDriver2 {
 		postf("[a,b,c]: %\n[sideA, sideB, sideC]: %\ntilting left: %: %\n", [a,b,c].raddeg, [sideA, sideB, sideC], tiltleft, tilt.raddeg);
 
 		/* calc offset */
-		sideC = tetherSep/2;
-		sideA = cos(tilt)*sideC;
-		sideB = sin(tilt.abs)*sideC;
+		sideH = tetherSep/2; // div by 2 because reference is center of tetherSep
+		sideX = cos(tilt)*sideH;
+		sideY = sin(tilt.abs)*sideH;
 
-		abRatio = lenB/lenA;
-		if (tiltleft) { abRatio = abRatio.reciprocal };
-		shiftup = ((sideC - sideA) * abRatio);
-		shiftright = sideB * abRatio;
+		abRatio = lenA/lenB;
+		if (tiltleft.not) { abRatio = abRatio.reciprocal };
+		// shiftup = ((sideC - sideA) * abRatio);
+		// shiftright = sideB * abRatio;
+		shiftup = sideY * abRatio;
+		shiftright = (sideH - sideX) * abRatio;
 		if (tiltleft) { shiftright = shiftright.neg };
 		postf("abRatio: %\n", abRatio);
 		"shifting coords: ".post; [shiftright, shiftup.neg].postln;

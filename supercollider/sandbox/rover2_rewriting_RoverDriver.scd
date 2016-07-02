@@ -70,6 +70,8 @@ SerialPort.closeAll
 g = Grbl("/dev/tty.usbserial-A9ETD3VR", 115200)
 g.postState_(true)
 
+g.send("$10=7") // report world and machine coords, and planning buffer
+
 // g.invertAxes_(false, false)
 // g.homingInvertDirection_(true, true)
 
