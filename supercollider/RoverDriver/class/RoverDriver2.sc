@@ -434,6 +434,7 @@ RoverDriver2 {
 
 		// turn machine xy position into cable lengths A and B
 		#macha, machb = this.getMachineAB( machx, machy );
+
 		// compensate for the tilt in the camera mount
 		// #offsetx, offsety = this.addTiltOffset(macha, machb);
 		// // recalc with new x and y machine coords
