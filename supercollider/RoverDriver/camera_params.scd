@@ -4,6 +4,11 @@ unixCmd("ssh" + "pi@rover2.local -t".quote + "kill -USR1 $(pgrep raspistill)".qu
 "ssh pi@rover2.local -t 'kill -USR1 1629; exec $SHELL -l'".unixCmd
 
 
+
+raspistill -o /home/pi/lfimages/image%04d.jpg -s -t 0 -th none
+
+a = unixCmd("ssh pi@rover2.local 'raspistill image0004.jpg -t 1000 -n'")
+a
 a = unixCmd("ssh pi@rover2.local 'test -e image0004.jpg && echo"+"true".quote+"|| echo"+"false".quote+"'")
 a = ("ssh pi@rover2.local 'test -e image0004.jpg && echo"+"true".quote+"|| echo"+"false".quote+"'").unixCmd({|...args| "received".postln; args.postln; \n.post; })
 
@@ -13,11 +18,31 @@ a = ("ssh pi@rover2.local 'test -e image0004.jpg && echo"+"true".quote+"|| echo"
 // http://www.vineetmanohar.com/2009/07/howto-ssh-without-password/
 // (instead of 'vi', use 'nano' for editing the text file)
 unixCmd("ssh pi@rover2.local 'kill -USR1 $(pgrep raspistill)'")
+unixCmd("ssh pi@rover2.local 'kill $(pgrep raspistill)'")
 
+// take a photo
+unixCmd("ssh pi@rover2.local 'raspistill -o /home/pi/lfimages/image%04d.jpg -t 5000 -th none'")
 
+// take numerous photos in appropriate directory
+unixCmd("ssh pi@rover2.local 'raspistill -o /home/pi/lfimages/run1/image%04d.jpg -s -t 0 -th none'")
+// fire off pics regularly
+(
+var waittime = 2;
+f = fork{
+	50.do{
+	unixCmd("ssh pi@rover2.local 'kill -USR1 $(pgrep raspistill)'");
+	"snapped".postln;
+	waittime.wait;
+	}
+}
+)
+f.stop
+
+// get process ID
 a = ("ssh pi@rover2.local pgrep raspistill").unixCmdGetStdOut
 ~pid = a.split[0].asInt
 
+// kill raspistill
 unixCmd("ssh pi@rover2.local 'kill $(pgrep raspistill)'")
 
 (// find out of the file was created by getting stdout from this test:
@@ -27,6 +52,8 @@ a.contains("true").postln;
 nil
 )
 
+// copy files to local machine from terminal
+// scp pi@rover2.local:/home/pi/lfimages/run1/image0004.jpg ~/Desktop/test/
 
 pid
 
