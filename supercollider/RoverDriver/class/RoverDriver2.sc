@@ -482,7 +482,8 @@ RoverDriver2 {
 		tilt = c.half + b - (pi/2);
 		tiltleft = tilt.isNegative;
 
-		postf("[a,b,c]: %\n[sideA, sideB, sideC]: %\ntilting left: %: %\n", [a,b,c].raddeg, [sideA, sideB, sideC], tiltleft, tilt.raddeg);
+		postf("[a,b,c]: %\n[sideA, sideB, sideC]: %\ntilting left: %: %\n",
+			[a,b,c].raddeg, [sideA, sideB, sideC], tiltleft, tilt.raddeg);
 
 		/* calc offset */
 		sideH = tetherSep/2; // div by 2 because reference is center of tetherSep
