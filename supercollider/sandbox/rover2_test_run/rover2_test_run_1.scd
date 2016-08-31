@@ -16,7 +16,7 @@
 // -q 100 // quality
 
 unixCmd("ssh pi@rover2.local 'raspistill -o /home/pi/lfimages/run1/image%04d.jpg -s -t 0 -th none -q 100'")
-unixCmd("ssh pi@rover2.local 'raspistill -o /media/pi/ROVER2/run6/image%04d.jpg -s -t 0 -th none -q 100'")
+unixCmd("ssh pi@rover2.local 'raspistill -o /media/pi/ROVER2/run11/image%04d.jpg -s -t 0 -th none -q 100'")
 
 // take a photo
 unixCmd("ssh pi@rover2.local 'kill -USR1 $(pgrep raspistill)'");
@@ -49,6 +49,9 @@ d.goTo_(-75, -55, 500)
 d.goTo_(-75, -3, 1500)
 d.goTo_(-3, -3, 1500)
 
+d.goTo_(-45, -3, 1500)
+d.goTo_(-45, -55, 1500)
+
 d.pause
 d.resume
 
@@ -74,17 +77,19 @@ d.resume
 
 // gather the points
 // .neg for machine coordinates
-~pnts = ~getPoints.(numCols: 17, numRows: 1, canvasWidth: 72, canvasHeight: 1, canvasTopLeft: Point(2,62)).neg
+~pnts = ~getPoints.(numCols: 17, numRows: 17, canvasWidth: 25, canvasHeight: 20, canvasTopLeft: Point(45,20)).neg
 ~pnts
 // help rover out by going to the first point
 d.goTo_(~pnts[0].x, ~pnts[0].y, 1000)
+d.goTo_(-70, -40, 1000)
 
 (
-~travelTime = 2;
-~waitTime=2;
+~travelTime = 1;
+~waitTime = 1;
+~startWait = 1;
 // routine to drive through the points
 ~captureRoutine = Task( {
-
+	~startWait.wait;
 	~pnts.do{ |pnt, i|
 		// travel to point
 		d.goToDur_(pnt.x, pnt.y, ~travelTime);
@@ -101,9 +106,10 @@ d.goTo_(~pnts[0].x, ~pnts[0].y, 1000)
 
 ~captureRoutine.stop
 ~captureRoutine.play
+~captureRoutine.reset
 
 ~travelTime = 1;
-~waitTime=1;
+~waitTime=2;
 
 d.postState=true
 d.state
