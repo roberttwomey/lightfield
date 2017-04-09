@@ -13,3 +13,4 @@ Thumbs.DB
 *.jpg
 scratch
 textures
+*.pyc
