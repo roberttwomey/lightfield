@@ -1,0 +1,15 @@
+00000000.jpg                                                        # Filename (of the undistorted image in visualize folder)
+/Volumes/work/Rover2/vsfm_processed/run3/img_edits/image0270.jpg    # Original filename
+2545.5859375                                                        # Focal Length (of the undistorted image)
+1640 1232                                                           # 2-vec Principal Point (image center in px)
+0.681567988707 -1.57090114365 -0.217608647159                       # 3-vec Translation T (as in P = K[R T])
+                                                                    #  - redundant to 3-vec Camera position
+-0.688948036129 0.023688671924 1.58252538312                        # 3-vec Camera Position C (as in P = K[R -RC])
+                                                                    #  - the pinhole camera projection center in project units
+-1.4075238172 -0.0138277146054 -0.0232888795758                     # 3-vec Axis Angle format of R (camera rotation around the 3 axes)
+0.762331165651 -0.647070454533 -0.00635691237725 -0.0107064233717   # 4-vec Quaternion format of R
+0.999695525625 0.0245504527345 0.00416341680773                     # 3x3 Matrix format of R
+-0.00809690810101 0.162375302963 0.986699079896
+0.0235477064977 -0.986428815554 0.162524395904
+-0.0640503842114                                                    # [Normalized radial distortion] = [radial distortion] * [focal length]^2
+0 0 0                                                               # 3-vec Lat/Lng/Alt from EXIF
