@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
     multi-threaded program to apply homographies 
     calculated with Visual SFM on windows to 
@@ -118,8 +118,8 @@ def readCamerasV2File(camerasfile, cameraloc_img):
     
     xcents.append(avgxcenter)
     ycents.append(avgycenter)
-    scatter(xcents, ycents)
-    savefig(cameraloc_img)
+    # scatter(xcents, ycents)
+    # savefig(cameraloc_img)
 
     # show()
 
@@ -997,7 +997,8 @@ if __name__ == '__main__':
     
     
     # texroot = "/Volumes/Work/Projects/lightfield/data/textures/"
-    texroot = "/home/rtwomey/code/lightfield/data/textures/"
+    # texroot = "/home/rtwomey/code/lightfield/data/textures/"
+    texroot = datapath
     
     # outputs
     if do_laptop:
