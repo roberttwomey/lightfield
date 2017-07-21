@@ -65,8 +65,10 @@ s.waitForBoot({
 	~loadOrProcess = { |path,auto_segment=true|
 		var name, event=(), buffer, analysis, frames, beatdata, segments;
 		var blind_segment_grain_size=0.1, scmirZTestFile;
+		path.postln;
 
 		name = PathName(path).fileNameWithoutExtension.split($ ).collect({|x|x}).join;
+		name.postln;
 		event.name = name;
 		"Loading Buffer".postln;
 		buffer = Buffer.readChannel(s,path,channels:[0]);
@@ -117,6 +119,7 @@ s.waitForBoot({
 
 // 1.
 // auto-segment
+~data = ~loadOrProcess.("/Volumes/Work/Projects/housemachine/data/audionode/pi0/20170710.wav", true)
 ~data = ~load.("/Volumes/Work/Sounds/housemachine/02/STE-001.wav", true)
 ~data = ~load.("/Users/admin/src/rover/data/AUDIO/discovery_cliffside_clip.WAV", true)
 ~data = ~load.("/Users/admin/Documents/Rover/recordings/scmir_test_files/STE-010_curbside1.wav", true)
