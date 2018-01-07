@@ -120,6 +120,8 @@ s.waitForBoot({
 // 1.
 // auto-segment
 ~data = ~loadOrProcess.("/Volumes/Work/Projects/housemachine/data/audionode/pi0/20170710.wav", true)
+~data = ~loadOrProcess.("/Volumes/Work/Projects/housemachine/data/audionode/pi0/20170711_5secmin.wav", true)
+
 ~data = ~load.("/Volumes/Work/Sounds/housemachine/02/STE-001.wav", true)
 ~data = ~load.("/Users/admin/src/rover/data/AUDIO/discovery_cliffside_clip.WAV", true)
 ~data = ~load.("/Users/admin/Documents/Rover/recordings/scmir_test_files/STE-010_curbside1.wav", true)
@@ -169,10 +171,11 @@ File.exists("/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_CLIP.WA
 //2. define vectors
 (
 ~vectors = ~data.analysis.featuredata.clump( ~data.analysis.numfeatures );
-~numClusters = 6;
+~numClusters = 20;//6;
 k = KMeansMod(~numClusters);
 ~vectors.do{|vec, i| k.add(vec) };
 )
+
 // then... recenter the centroids
 // k.update
 k.reset.update // make sure centroids aren't too heavily weighted toward first entries
@@ -248,6 +251,12 @@ postf("of % samples, used % unique frames from a set of %\n", sampleSize, unique
 nil
 )
 
+// 3. Save K-Means
+p = "/Volumes/Work/Projects/housemachine/data/audionode/pi0/20170711_5secmin.wav"
+~kMeansPath = PathName(p).pathOnly ++ PathName(p).fileNameWithoutExtension++"_KMEANS"++".scmirZ";
+k.save(~kMeansPath)
+
+
 
 ~framesByDistance[2][6]
 
@@ -257,8 +266,6 @@ nil
 //  PLOTTING
 
 (
-
-
 var w,but,f,width,isPlaying={false}!x.size,osc,height;
 var plot;
 var cenDistsNorm, clusterDistMax;
