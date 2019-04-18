@@ -1,6 +1,7 @@
 // SCORING
 
 //get audio initialized
+(
 s.waitForBoot({
 	var intSndPath, extSndPath;
 
@@ -38,10 +39,10 @@ s.waitForBoot({
 	~imageCtl = ControlMixMaster(
 		["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ],
 		// NetAddr("refocuser.local", 12345));
-		NetAddr("192.168.2.2", 12345));
-	// NetAddr("192.168.0.100", 12345));
+		// NetAddr("192.168.2.2", 12345));
+		// NetAddr("192.168.0.100", 12345));
 
-	// NetAddr("localhost", 12345));
+		NetAddr("localhost", 12345));
 	2.wait;
 	~imageCtl.mixers.do({ |mxr| mxr.plotter.stop });
 
@@ -392,3 +393,4 @@ s.waitForBoot({
 	~scoreTask.play;
 	// ~scoreTask.stop
 });
+)

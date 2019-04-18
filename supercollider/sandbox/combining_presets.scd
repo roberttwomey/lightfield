@@ -36,6 +36,8 @@ GrainScanner2.backupPreset
 // read it in
 Archive.read("/Users/dxlocal/Documents/ROVER/Rover_workFiles/preset_backups/COMBINED_presets/archive_BAK_150529_221131_combined_revisedInt.sctxar")
 
+Archive.read("/Users/rtwomey/projects/lightfield/supercollider/preset_backups/COMBINED_presets/ALL_SCENES_150603_120355.sctxar")
+
 // test
 GrainScanner1.presets.keys
 GrainScanner2.presets.keys

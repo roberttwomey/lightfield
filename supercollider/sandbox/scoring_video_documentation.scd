@@ -32,7 +32,7 @@ s.waitForBoot({
 	thisThread.randSeed_(12345);
 
 	1.wait;
-	~eq = MasterEQ(4,s);
+	// ~eq = MasterEQ(4,s);
 
 	/* added!! */
 	~motorBuf = CtkBuffer.playbuf("/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/dining_room_capture_EDIT.WAV").load;
