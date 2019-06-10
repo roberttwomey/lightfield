@@ -128,6 +128,8 @@ s.waitForBoot({
 ~data = ~load.("/Users/admin/Documents/Rover/recordings/scmir_test_files/STE-015_curbside2.wav", true)
 ~data = ~load.("/Users/admin/Documents/Rover/recordings/scmir_test_files/STE-023_walkinggull.wav", true)
 ~data = ~load.("/Users/admin/Documents/Rover/recordings/scmir_test_files/STE-004_44k_underpass.wav", true)
+~data = ~loadOrProcess.("/Users/admin/Desktop/ZOOM0004_mono.wav", true)
+~data = ~load.("/Users/admin/Desktop/ZOOM0004_mono.wav", true)
 
 File.exists("/Users/admin/src/rover/data/AUDIO/EDITS/discovery_cliffside_CLIP.WAV")
 
