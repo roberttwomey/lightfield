@@ -8,8 +8,8 @@
 #define MAX_OFFSETS 1200
 
 // physical setup
-#define SCREEN_WIDTH 55.0
-#define SCREEN_HEIGHT 52.0
+#define SCREEN_WIDTH 40.0
+#define SCREEN_HEIGHT 30.0
 
 
 class ofApp : public ofBaseApp{
