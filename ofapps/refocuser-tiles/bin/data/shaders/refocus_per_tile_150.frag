@@ -68,12 +68,11 @@ void main (void){
             vec2 thispos = atlaspos - tilepixoffset;
 
             // debugging positions, etc.
-//            color += vec4(subimg_corner / (resolution * subimages), 0.0, 1.0); // check subimage corners
-//            color += vec4(atlaspos / (resolution * subimages), 0.0, 1.0); // check atlas position
-//            color += vec4(tilepixoffset / (halfres * subiofClamp(fade, 0.0, 1.0)));
-//    ofSetColor(255, fade);mages), 0.0, 1.0); // check that tilepixoffset is working
-//            color += vec4(tilepixoffset / vec2(14560, 16380), 0.0, 1.0); // check that tilepixoffset is working
-//            color += vec4(pos / (resolution * subimages), 0.0, 1.0); // check tile texture position
+           // color += vec4(subimg_corner / (resolution * subimages), 0.0, 1.0); // check subimage corners
+           // color += vec4(atlaspos / (resolution * subimages), 0.0, 1.0); // check which refocuser square we are in
+           // color += vec4(tilepixoffset / (halfres * subimages), 0.0, 1.0); // check that tilepixoffset is working
+           // color += vec4(tilepixoffset / vec2(14560, 16380), 0.0, 1.0); // check that tilepixoffset is working
+           // color += vec4(pos / (resolution * subimages), 0.0, 1.0); // check tile texture position
 
             // zero out color if we are out of bounds for the current tile
             vec2 minedge = step(vec2(0.0), thispos);//pos-tilepixoffset);//step(tilepixoffset, pos);
@@ -83,12 +82,11 @@ void main (void){
             float mask = minmask * maxmask;
 
             // debugging
-//            color += vec4(minedge, 0.0ofClamp(fade, 0.0, 1.0)));
-//    ofSetColor(255, fade);, 1.0); // check lower edge mask
-//            color += vec4(maxedge, 0.0, 1.0); // check lower edge mask
-//            color += vec4(vec3(minmask), 1.0); // check lower edge mask
-//            color += vec4(vec3(maxmask), 1.0); // check lower edge mask
-//            color += vec4(vec3(mask), 1.0);// check lower edge mask
+           // color += vec4(minedge, 0.0, 1.0); // check lower edge mask
+           // color += vec4(maxedge, 0.0, 1.0); // check lower edge mask
+           // color += vec4(vec3(minmask), 1.0); // check lower edge mask
+           // color += vec4(vec3(maxmask), 1.0); // check lower edge mask
+           // color += vec4(vec3(mask), 1.0);// check lower edge mask
 
             if(mask > 0.0)
                 count += 1;
