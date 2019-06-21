@@ -27,7 +27,8 @@ Install the following quarks:
 ```
 Quarks.install("https://github.com/ambisonictoolkit/atk-sc3.git");
 ```
-
+  - Install ATK kernels, matrices, and sound files: [http://www.ambisonictoolkit.net/download/supercollider/](http://www.ambisonictoolkit.net/download/supercollider/)
+  
 5. Download and install mtm extensions: 
 [https://github.com/mtmccrea/mtm-sc-extensions](https://github.com/mtmccrea/mtm-sc-extensions)
 
