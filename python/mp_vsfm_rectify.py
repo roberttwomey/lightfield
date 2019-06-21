@@ -231,7 +231,6 @@ def warpAvg(src, params, R_avg, C_avg):
     
     w = src_img_rgb.shape[1]
     h = src_img_rgb.shape[0]
-
     w_translate = 0#(C1[0] - C_avg[0]) #* f1 #* 200#w/2
     h_translate = 0#(C1[2] - C_avg[1]) #* f1 #* 200# w/2
 

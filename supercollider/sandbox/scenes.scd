@@ -318,14 +318,14 @@ c.loadSnapshot("/Users/admin/Downloads/loadsnapshotparamsintocontrolmixer/201505
 
 // BOOKCASE
 
-// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0000.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0000.txt")
 // c.storePreset(\bookcase_close)
-// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0006.txt")
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0006.txt")
 // c.storePreset(\bookcase_bed)
-// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0007.txt")
-// c.storePreset(\bookcase_mirror)
-// c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/diningroom3_0008.txt")
-
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/bookcase_0007.txt")
+c.storePreset(\bookcase_mirror)
+c.loadSnapshot("/Volumes/Work/Projects/lightfield/scenes/orbits/diningroom3_0008.txt")
+//
 // [
 // 	"./textures/bookcase.xml",
 // 	[

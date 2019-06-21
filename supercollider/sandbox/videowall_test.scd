@@ -1,3 +1,5 @@
+// Robert Twomey - testing video wall 2016
+
 c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" , "fade"], NetAddr("refocuser.local", 12345));
 
 ~fader=ControlFade(1.0);
@@ -30,6 +32,9 @@ Quarks.gui
 //   SenseWorld
 //   Ctk
 //   arduino
+//
+Quarks.install("https://github.com/ambisonictoolkit/atk-sc3.git");
+
 
 // Read in presets.
 Archive.read("/Volumes/Work/Projects/lightfield/supercollider/preset_backups/COMBINED_presets/ALL_SCENES_150603_120355.sctxar")
