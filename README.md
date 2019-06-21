@@ -19,13 +19,17 @@ Install the following quarks:
 - KMeans. Edit KMeans.quark and remove the `UnitTesting` dependency.
 - SenseWorld
 - Ctk
-- Atk
 - arduino
 - MathLib
 - FileLog
 
-3. Download and install mtm extensions: 
+4. Install ATK (cause it wasn't working out of the box with sc3-plugins as I had hoped):
+```
+Quarks.install("https://github.com/ambisonictoolkit/atk-sc3.git");
+```
+
+5. Download and install mtm extensions: 
 [https://github.com/mtmccrea/mtm-sc-extensions](https://github.com/mtmccrea/mtm-sc-extensions)
 
-4. Recompile class library. 
+6. Recompile class library. 
 
