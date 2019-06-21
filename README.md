@@ -21,6 +21,8 @@ Install the following quarks:
 - Ctk
 - Atk
 - arduino
+- MathLib
+- FileLog
 
 3. Download and install mtm extensions: 
 [https://github.com/mtmccrea/mtm-sc-extensions](https://github.com/mtmccrea/mtm-sc-extensions)
