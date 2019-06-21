@@ -84,9 +84,10 @@ void ofApp::update(){
 
         combineShader.begin();
 
-    //    for(int i=0; i < numlftextures; i++) {
-    //        combineShader.setUniformTexture("refocustex[" + ofToString(i) + "]", refocusFbo[i].getTextureReference(), i+9);
-    //    }
+        // KEEP COMMENTED 2019
+        // for(int i=0; i < numlftextures; i++) {
+        //    combineShader.setUniformTexture("refocustex[" + ofToString(i) + "]", refocusFbo[i]->getTexture(), i+6);
+        // }
 
         maskFbo->draw(0, 0);
 
@@ -168,15 +169,16 @@ void ofApp::draw(){
     ofRect(xoff+width-bar, 0, width, height);
     ofSetColor(255);
 
-//    refocusFbo[0].draw(xoff, 0, width, height);
+   // refocusFbo[0].draw(xoff, 0, width, height);
 
-    // debugging, five up
-//    refocusFbo[0]->draw(xoff, 0, width/2, height/2);
-//    refocusFbo[1]->draw(xoff+width/2, 0, width/2, height/2);
-//    refocusFbo[2]->draw(xoff, 0+height/2, width/2, height/2);
-//    refocusFbo[3]->draw(xoff+width/2, 0+height/2, width/2, height/2);
-//
-//    fbo->draw(xoff+width/4, height/4, width/2, height/2);
+    // debugging, draw five up total
+   //  // four refocus framebuffers
+   // refocusFbo[0]->draw(xoff, 0, width/2, height/2);
+   // refocusFbo[1]->draw(xoff+width/2, 0, width/2, height/2);
+   // refocusFbo[2]->draw(xoff, 0+height/2, width/2, height/2);
+   // refocusFbo[3]->draw(xoff+width/2, 0+height/2, width/2, height/2);
+   // // one combined framebuffer
+   // fbo->draw(xoff+width/4, height/4, width/2, height/2);
 
     // draw thumbnail with indicator
     if(bShowThumbnail == true) {
@@ -401,25 +403,8 @@ void ofApp::setupGraphics() {
     image_fbo->end();
 
 
-    // load camera positions into texture
+    // create a texture to hold float camera positions
     int numCams = xsubimages * ysubimages;
-
-    // reserve space for refocus fbos
-    refocusFbo.clear();
-    refocusFbo.reserve(numCams);
-
-    for(int i=0; i < numlftextures; i++) {
-        ofLog(OF_LOG_NOTICE, "allocating refocus fbo " + ofToString(i));
-
-        ofPtr<ofFbo> thisFbo = ofPtr<ofFbo>(new ofFbo());
-        thisFbo->allocate(subwidth,subheight);
-        thisFbo->begin();
-        ofClear(0,0,0,255);
-        thisFbo->end();
-
-        refocusFbo.push_back(thisFbo);
-
-    }
 
     // make array of float pixels with camera position information
     float * pos = new float[numCams*3];
@@ -467,66 +452,99 @@ void ofApp::setupGraphics() {
 //    updateAperture();
 
 
-    // setup refocus shader per tile texture
-    int tn = 1;
+    // create an Fbo to hold refocused image for each tiled texture
+    refocusFbo.clear();
+    refocusFbo.reserve(numlftextures);//numCams);
 
+    for(int i=0; i < numlftextures; i++) {
+        ofLog(OF_LOG_NOTICE, "allocating refocusFbo[" + ofToString(i) +"]");
+
+        ofPtr<ofFbo> thisFbo = ofPtr<ofFbo>(new ofFbo());
+        thisFbo->allocate(subwidth,subheight);
+        thisFbo->begin();
+        ofClear(0,0,0,255);
+        thisFbo->end();
+
+        refocusFbo.push_back(thisFbo);
+
+        // if(refocusFbo[i]->isAllocated())
+        //     ofLog(OF_LOG_NOTICE, "refocusFbo[" + ofToString(i) + "] is Allocated");
+
+    }
+    ofLog(OF_LOG_NOTICE, "created " + ofToString(refocusFbo.size()) + " refocus FBOs");
+
+    
+    // setup a refocus shader for each tiled texture
+    int tn = 2;
     for(int y = 0; y < ynumtextures; y++) {
         for(int x = 0; x < xnumtextures; x++) {
             int i = x + y * xnumtextures;
 
             // initialize shader
-            ofLog(OF_LOG_NOTICE, "initializing shader " + ofToString(i));
+            ofLog(OF_LOG_NOTICE, "initializing refocusshader[" + ofToString(i) + "]");
 //            shader[i].setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus_per_tile_120.frag");
             shader[i].setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/refocus_per_tile_150.frag");
             shader[i].linkProgram();
 
             shader[i].begin();
 
+            // set texture references
+            shader[i].setUniformTexture("campos_tex", campos_tex, 1);
             shader[i].setUniformTexture("lftex", lfplanes[i], tn++);
-//            shader[i].setUniform2f("size", tilewidth, tileheight);
+            ofLog(OF_LOG_NOTICE, "refocusshader["+ofToString(i)+"]: currently set lftex location "+ ofToString(tn-1));
 
             // data textures for shader
         //    shader[0].setUniformTexture("aperture_mask_tex", aperture_mask_tex, i++);
-            shader[i].setUniformTexture("campos_tex", campos_tex, tn++);
 
-            // set texture pixel offsets to index from virtual, large texture atlas
-            // to individual tile coords
+            // set pixel offsets to align local tile coords with large tiled layout
             float xtilepixoffset = x * lfplanes[i].getWidth();
             float ytilepixoffset = y * lfplanes[i].getHeight();
-
             shader[i].setUniform2f("tilepixoffset", xtilepixoffset, ytilepixoffset );//[i], tn++);
 
-            // one-time data setparameters
+            // set one-time parameters
             shader[i].setUniform2f("resolution", subwidth, subheight);
             shader[i].setUniform2i("subimages", xsubimages, ysubimages);
             shader[i].setUniform2i("subimagestart", x * xsubimages, y * ysubimages);
             shader[i].end();
 
-//            ofLog(OF_LOG_NOTICE, "shader end " + ofToString(i));
+           // ofLog(OF_LOG_NOTICE, "shader end " + ofToString(i));
         }
     }
 
-    // set up shader to combine the four refocus fbos
-    ofLog(OF_LOG_NOTICE, "initializing combine shader ");
-//    combineShader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/blend_per_tile_120.frag");
-    combineShader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/blend_per_tile_150.frag");
+    // set up combine shader to combine the four refocus fbos
+    ofLog(OF_LOG_NOTICE, "initializing combine shader. have created " + ofToString(tn) + " textures so far");
+    combineShader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/blend_tiles_150.frag");
     combineShader.linkProgram();
 
     combineShader.begin();
     combineShader.setUniform1i("numtextures", numlftextures);
 
     // TODO: uncommenting this prevents refocusFbo from working
+    // tn = 4;
+    for(int i=0; i < numlftextures; i++) {
+        // combineShader.setUniformTexture("refocustex[" + ofToString(i) + "]", refocusFbo[i]->getTextureReference(0),  tn++);
+        combineShader.setUniformTexture("rtex"+ofToString(i+1), refocusFbo[i]->getTexture(), tn++);
+        // combineShader.setUniformTexture("refocustex[" + ofToString(i) + "]", refocusFbo[i]->getTexture(), tn++);
+        ofLog(OF_LOG_NOTICE, "refocustex["+ofToString(i)+"]: currently set location "+ ofToString(tn-1));
+    }
 
-    for(int i=0; i < numlftextures; i++)
-        combineShader.setUniformTexture("refocustex[" + ofToString(i) + "]", refocusFbo[i]->getTextureReference(), tn++);
+    // combineShader.setUniformTexture("refocustex[0]", refocusFbo[0]->getTexture(), 6);
+    // combineShader.setUniformTexture("refocustex[1]", refocusFbo[1]->getTexture(), 7);
+    // combineShader.setUniformTexture("refocustex[2]", refocusFbo[2]->getTexture(), 8);
+    // combineShader.setUniformTexture("refocustex[3]", refocusFbo[3]->getTexture(), 9);
+
+    // combineShader.setUniformTexture("rtex5", refocusFbo[0]->getTexture(), tn++);
+    // combineShader.setUniformTexture("rtex6", refocusFbo[1]->getTexture(), tn++);
+    // combineShader.setUniformTexture("rtex7", refocusFbo[2]->getTexture(), tn++);
+    // combineShader.setUniformTexture("rtex8", refocusFbo[3]->getTexture(), tn++);
 
     combineShader.end();
 
-//    ofLog(OF_LOG_NOTICE, "combine shader end");
 
-    // setup desaturate shader
+    // setup image processing shader
     image_shader.setupShaderFromFile(GL_FRAGMENT_SHADER, "./shaders/image_proc.frag");
     image_shader.linkProgram();
+
 
 //        GLint maxTextureSize;
 //        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
