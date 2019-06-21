@@ -160,7 +160,10 @@ def readSceneFile(scenefile):
 
 def getReorderedNum(reorder, x, y, grid_w):
     imagenum = x + y * grid_w
-    imagenum = reorder[imagenum]
+    if reorder == None:
+        return imagenum
+    else:
+        imagenum = reorder[imagenum]
     return imagenum
 
 def nextFileName(filebase):
@@ -211,7 +214,8 @@ if __name__ == '__main__':
     warped = os.path.join(lfdatapath, 'warped')
     # output = outfile
     # output = nextFileName(outfile)
-    output = nextFileName(os.path.join("/Volumes/Work/Projects/lightfield/data/highres_stills", os.path.splitext(os.path.basename(snapshotfile))[0]+".tif"))
+    # output = nextFileName(os.path.join("/Volumes/Work/Projects/lightfield/data/highres_stills", os.path.splitext(os.path.basename(snapshotfile))[0]+".tif"))
+    output = nextFileName(os.path.join("/Volumes/Work/Projects/lightfield/data/highres_stills", os.path.splitext(os.path.basename(snapshotfile))[0]+".jpg"))
 
     scenefile = os.path.join(lfdatapath,os.path.basename(xmlfile))
     
@@ -219,7 +223,7 @@ if __name__ == '__main__':
     
     # fscale = fscale * subimagewidth
 
-    reorder = calcReordering(grid_w, grid_h, 'wrap')
+    reorder = calcReordering(grid_w, grid_h, None)
     # print(reorder)
 
     imagefiles = readImageFilenames(warped)

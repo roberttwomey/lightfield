@@ -1,6 +1,6 @@
 // One time setup:
 
-Quarks.install("https://github.com/ambisonictoolkit/atk-sc3.git");
+/*Quarks.install("https://github.com/ambisonictoolkit/atk-sc3.git");
 
 (
 // Create ATK support directory
@@ -10,14 +10,29 @@ Atk.createUserSupportDir;
 Atk.openUserSupportDir;
 )
 
-// Read in presets.
-Archive.read("/Volumes/Work/Projects/lightfield/supercollider/preset_backups/COMBINED_presets/ALL_SCENES_150603_120355.sctxar")
+// get correct presets
 
-GrainScanner1.presets.keys
-GrainScanner2.presets.keys
-Archive.global[\roverPresets].keys
+// read in controlmixers for video documentation script
+Archive.read("/Volumes/Work/Projects/lightfield/supercollider/preset_backups/ControlMixer_presets/FRIDAY_afternoon_150605_163419.sctxar")
+// save his control mixer settings to a variable
+~ctlMxrPresets = Archive.global[\roverPresets]
+// read in grainscanner presets for video documentation script
+Archive.read("/Volumes/Work/Projects/lightfield/supercollider/preset_backups/GrainScanner_presets/archive_BAK_150527_233940_gs1gs2.sctxar")
+// add Robert's mixer presets to my Archive
+Archive.global.put(\roverPresets, ~ctlMxrPresets )
+Archive.global[\roverPresets]
+Archive.write(format("/Users/rtwomey/Desktop/archive_BAK_%.sctxar",Date.getDate.stamp))
 
-Archive.write
+*/
+
+// load old archives
+// Archive.read("/Volumes/Work/Projects/lightfield/supercollider/preset_backups/COMBINED_presets/DOCUMENTATION_archive_BAK_190621_101042.sctxar");
+// Archive.global[\roverPresets].keys
+
+
+// manually load scene
+~imageCtl.loadScene("./textures/dark_trees.xml")
+
 
 
 // Actual Code for SCORING
@@ -48,6 +63,9 @@ s.stopRecording
 // start rover
 // SCORING
 (
+
+~refocuser_ip = "192.168.1.10";
+
 //get audio initialized
 s.waitForBoot({
 	var intSndPath, extSndPath;
@@ -89,7 +107,8 @@ s.waitForBoot({
 	~imageCtl = ControlMixMaster(
 		["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ],
 		// NetAddr("refocuser.local", 12345));
-		NetAddr("localhost", 12345));
+		NetAddr(~refocuser_ip, 12345));
+		// NetAddr("localhost", 12345));
 	// NetAddr("192.168.0.100", 12345));
 
 	// NetAddr("localhost", 12345));
