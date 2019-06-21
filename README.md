@@ -15,7 +15,12 @@ This is a digital arts project using structure from motion, computational photog
 QuarksGui.new
 ```
 
-Install KMeans. Edit KMeans.quark and remove the `UnitTesting` dependency.
+Install the following quarks: 
+- KMeans. Edit KMeans.quark and remove the `UnitTesting` dependency.
+- SenseWorld
+- Ctk
+- Atk
+- arduino
 
 3. Download and install mtm extensions: 
 [https://github.com/mtmccrea/mtm-sc-extensions](https://github.com/mtmccrea/mtm-sc-extensions)
