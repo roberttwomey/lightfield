@@ -46,6 +46,7 @@ s.options.memSize_(8192*8);
 
 "startup loaded, initializing ROVER".postln;
 )
+
 // setup audio recording
 s.recChannels_(4);
 s.recSampleFormat_("float");// or: "int8", "int16", "int24", "int32"
@@ -58,6 +59,12 @@ s.prepareForRecord
 s.record.
 
 s.stopRecording
+
+// setup control signal recording
+~numChannels = ~imageCtl.mixers.size()
+s.scope(~imageCtl.mixers.size(), ~imageCtl.mixers[0].busnum, rate: 'control')
+~recorder = RecordControl( ~imageCtl.mixers[0].busnum, ~imageCtl.mixers.size(), "rover", "~/Desktop".standardizePath,  makeGui: true )
+
 
 
 // start rover
@@ -121,6 +128,12 @@ s.waitForBoot({
 	// ~fader.fadeTime_(6.0);
 	// ~fader.value_(1.0)
 	// ~fader.value_(0.0)
+
+	// control signal recording
+	// setup control signal recording
+	~numChannels = ~imageCtl.mixers.size();
+	s.scope(~imageCtl.mixers.size(), ~imageCtl.mixers[0].busnum, rate: 'control');
+	~recorder = RecordControl( ~imageCtl.mixers[0].busnum, ~imageCtl.mixers.size(), "rover", "~/Desktop".standardizePath,  makeGui: true );
 
 
 	// interiors
@@ -368,9 +381,12 @@ s.waitForBoot({
 				[~gs1, ~gs2].do(_.release(fadeOut));
 				(fadeOut+1).wait;
 
+
 				// load scene
 				sceneFileName = format("./textures/%.xml", scene);
 				~imageCtl.loadScene(format("./textures/%.xml", scene));
+				~recorder.record; // start image control recording
+
 				~interiors.collect(_.asSymbol).includes(sceneFileName.asSymbol).if({
 					"new scene is INTERIOR".postln;
 					sceneType = \int;
@@ -485,7 +501,8 @@ s.waitForBoot({
 
 					(transition + linger).wait;
 				};
-
+				~recorder.stop;
+				~scoreTask.stop;
 			};
 		}
 	}, AppClock);
