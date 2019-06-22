@@ -1,40 +1,3 @@
-// One time setup:
-
-/*Quarks.install("https://github.com/ambisonictoolkit/atk-sc3.git");
-
-(
-// Create ATK support directory
-// Place unzipped matrices in the directory opened
-
-Atk.createUserSupportDir;
-Atk.openUserSupportDir;
-)
-
-// get correct presets
-
-// read in controlmixers for video documentation script
-Archive.read("/Volumes/Work/Projects/lightfield/supercollider/preset_backups/ControlMixer_presets/FRIDAY_afternoon_150605_163419.sctxar")
-// save his control mixer settings to a variable
-~ctlMxrPresets = Archive.global[\roverPresets]
-// read in grainscanner presets for video documentation script
-Archive.read("/Volumes/Work/Projects/lightfield/supercollider/preset_backups/GrainScanner_presets/archive_BAK_150527_233940_gs1gs2.sctxar")
-// add Robert's mixer presets to my Archive
-Archive.global.put(\roverPresets, ~ctlMxrPresets )
-Archive.global[\roverPresets]
-Archive.write(format("/Users/rtwomey/Desktop/archive_BAK_%.sctxar",Date.getDate.stamp))
-
-*/
-
-// load old archives
-// Archive.read("/Volumes/Work/Projects/lightfield/supercollider/preset_backups/COMBINED_presets/DOCUMENTATION_archive_BAK_190621_101042.sctxar");
-// Archive.global[\roverPresets].keys
-
-
-// manually load scene
-~imageCtl.loadScene("./textures/dark_trees.xml")
-
-
-
 // Actual Code for SCORING
 (
 s = Server.default;
@@ -61,9 +24,9 @@ s.record.
 s.stopRecording
 
 // setup control signal recording
-~numChannels = ~imageCtl.mixers.size()
-s.scope(~imageCtl.mixers.size(), ~imageCtl.mixers[0].busnum, rate: 'control')
-~recorder = RecordControl( ~imageCtl.mixers[0].busnum, ~imageCtl.mixers.size(), "rover", "~/Desktop".standardizePath,  makeGui: true )
+// ~numChannels = ~imageCtl.mixers.size()
+// s.scope(~imageCtl.mixers.size(), ~imageCtl.mixers[0].busnum, rate: 'control')
+// ~recorder = RecordControl( ~imageCtl.mixers[0].busnum, ~imageCtl.mixers.size(), "rover", "~/Desktop".standardizePath,  makeGui: true )
 
 
 
@@ -94,7 +57,6 @@ s.waitForBoot({
 	~gs2 !? {~gs2.free};
 
 	/* source file */
-	// intSndPath = "/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/around_the_dining_room_morning_EDIT.WAV";
 	intSndPath = "/Volumes/Work/Projects/lightfield/data/audio/EDITS/around_the_dining_room_morning_EDIT.WAV";
 
 	/* GrainScanner1 with 3 GrainScan1's */
@@ -102,7 +64,6 @@ s.waitForBoot({
 	~gs1.presetGUI(3);
 	3.wait;
 
-	// extSndPath = "/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/discovery_cliffside_1_EDIT.WAV";
 	extSndPath = "/Volumes/Work/Projects/lightfield/data/audio/EDITS/discovery_cliffside_1_EDIT.WAV";
 
 	~gs2 = GrainScanner2( 0, extSndPath );
@@ -132,8 +93,8 @@ s.waitForBoot({
 	// control signal recording
 	// setup control signal recording
 	~numChannels = ~imageCtl.mixers.size();
-	s.scope(~imageCtl.mixers.size(), ~imageCtl.mixers[0].busnum, rate: 'control');
-	~recorder = RecordControl( ~imageCtl.mixers[0].busnum, ~imageCtl.mixers.size(), "rover", "~/Desktop".standardizePath,  makeGui: true );
+	// s.scope(~imageCtl.mixers.size(), ~imageCtl.mixers[0].busnum, rate: 'control');
+	~recorder = RecordControl( ~imageCtl.mixers[0].busnum, ~imageCtl.mixers.size(), "rover", "~/Desktop".standardizePath,  makeGui: true, overwrite: true );
 
 
 	// interiors
@@ -355,6 +316,9 @@ s.waitForBoot({
 
 	~scoreTask !? {~scoreTask.stop.clock.clear};
 
+	~recorder.record; // start image control recording
+
+
 	~scoreTask = Task({
 		var name, fade, waittime;
 
@@ -368,6 +332,8 @@ s.waitForBoot({
 				var fadeOut = 3, fadeIn = 3, viewPresets, sceneType;
 				var randViewsToAdd;
 				var motorDur = 45, motorEnv = [0.4,0.2,0.4];
+
+				// ~recorder.stop;
 
 				#scene, dur, nViews = sceneParams;
 
@@ -385,7 +351,6 @@ s.waitForBoot({
 				// load scene
 				sceneFileName = format("./textures/%.xml", scene);
 				~imageCtl.loadScene(format("./textures/%.xml", scene));
-				~recorder.record; // start image control recording
 
 				~interiors.collect(_.asSymbol).includes(sceneFileName.asSymbol).if({
 					"new scene is INTERIOR".postln;
@@ -424,13 +389,16 @@ s.waitForBoot({
 				// viewPresets = ~sceneViews[scene.asSymbol].clump(3).scramble.keep(nViews);
 
 				// choose the views within the scene
-				viewPresets = ~sceneViews[scene.asSymbol].clump(3).scramble.keep(nViews).collect { |item| item[0] };
+				// viewPresets = ~sceneViews[scene.asSymbol].clump(3).scramble.keep(nViews).collect { |item| item[0] };
 
-				// add a few random views
-				randViewsToAdd = 1;
+				// did not scramble in original documentation / run
+				viewPresets = ~sceneViews[scene.asSymbol].clump(3).keep(nViews).collect { |item| item[0] };
+
+				// do not add random views in original documentation / run
+				randViewsToAdd = 0;//1;
 
 				viewPresets = viewPresets ++ ~imageCtl.presets.keys.asArray.scramble.keep(randViewsToAdd).collect(_.asSymbol);
-				viewPresets = viewPresets.scramble;
+				// viewPresets = viewPresets.scramble;
 				nViews = nViews + randViewsToAdd;
 
 				viewPresets.do { |vPreset, viewCount|
@@ -501,8 +469,6 @@ s.waitForBoot({
 
 					(transition + linger).wait;
 				};
-				~recorder.stop;
-				~scoreTask.stop;
 			};
 		}
 	}, AppClock);
@@ -513,3 +479,42 @@ s.waitForBoot({
 	// ~scoreTask.stop
 });
 )
+
+~scoreTask.stop
+
+
+// One time setup:
+
+/*Quarks.install("https://github.com/ambisonictoolkit/atk-sc3.git");
+
+(
+// Create ATK support directory
+// Place unzipped matrices in the directory opened
+
+Atk.createUserSupportDir;
+Atk.openUserSupportDir;
+)
+
+// get correct presets
+
+// read in controlmixers for video documentation script
+Archive.read("/Volumes/Work/Projects/lightfield/supercollider/preset_backups/ControlMixer_presets/FRIDAY_afternoon_150605_163419.sctxar")
+// save his control mixer settings to a variable
+~ctlMxrPresets = Archive.global[\roverPresets]
+// read in grainscanner presets for video documentation script
+Archive.read("/Volumes/Work/Projects/lightfield/supercollider/preset_backups/GrainScanner_presets/archive_BAK_150527_233940_gs1gs2.sctxar")
+// add Robert's mixer presets to my Archive
+Archive.global.put(\roverPresets, ~ctlMxrPresets )
+Archive.global[\roverPresets]
+Archive.write(format("/Users/rtwomey/Desktop/archive_BAK_%.sctxar",Date.getDate.stamp))
+
+*/
+
+// load old archives
+// Archive.read("/Volumes/Work/Projects/lightfield/supercollider/preset_backups/COMBINED_presets/DOCUMENTATION_archive_BAK_190621_101042.sctxar");
+// Archive.global[\roverPresets].keys
+
+
+// manually load scene
+~imageCtl.loadScene("./textures/dark_trees.xml")
+

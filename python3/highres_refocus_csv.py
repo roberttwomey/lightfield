@@ -76,6 +76,8 @@ def calcReordering(grid_w, grid_h, order = None):
                 reorder += range(i*grid_w, (i+1)*grid_w)
             else:
                 reorder += range((i+1)*grid_w-1,i*grid_w-1, -1)
+                # reorder += range((i+1)*grid_w+1,i*grid_w+1, -1)
+                # reorder += range((i+1)*grid_w-1,i*grid_w-1, -1)
 
     elif order=='colsfirstwrap':
         print("columns first, wrapped")
@@ -157,10 +159,10 @@ def getReorderedNum(reorder, x, y, grid_w):
         if reorder == None:
             return imagenum
         else:
-            imagenum = reorder[imagenum]
+            return reorder[imagenum]
     except:
         print(imagenum, size(reorder), x, y)
-    return imagenum
+        exit()
 
 def nextFileName(filebase):
     fname, ext = filebase.split('.')
@@ -228,29 +230,46 @@ if __name__ == '__main__':
     # print(grid_w*grid_h, size(reorder))            
     # print(reorder)
 
+    # read image file names
+    imagefiles = readImageFilenames(warped)
+    # for i, image in enumerate(imagefiles):
+    #     print(image, "->", reorder[i])
+
+    # exit()
+    # print(imagefiles)
+
+
+
     with open(csvfile) as signalfile:
         signalreader = csv.reader(signalfile)
-        for row in signalreader:
+        rows = list(signalreader)
+        # for i in [0 49 97 145 193]:#range(len(rows)):
+        for i in range(0, 49):
+            row = rows[i]
 
             # get image params for current frame
             fscale = float(row[0])
             zoom = float(row[1])
-            roll = [float(row[2]), float(row[3])]
-            ap_loc = [int(float(row[4])), int(float(row[5]))]
-            ap_size = [int(float(row[6])), int(float(row[7]))]
+            roll = np.array([float(row[2]), float(row[3])])
+            ap_loc = np.array([int(float(row[4])), int(float(row[5]))])
+            ap_size = np.array([int(float(row[6])), int(float(row[7]))])
             print(xmlfile, fscale, zoom, roll, ap_loc, ap_size)
 
             # create output filename
-            output = nextFileName(os.path.join(outpath, outfilename))
-
-            # read image file names
-            imagefiles = readImageFilenames(warped)
-            # print(imagefiles)
-            
-            ap_center = np.round(np.array(ap_loc) + np.array(ap_size)/2).astype(int);
-            centernum = ap_center[0] + ap_center[1] * grid_w
+            fname, ext = os.path.splitext(outfilename)
+            output = (fname+'_%05d'+ext) % i
+            output = nextFileName(os.path.join(outpath, output))
+            # print(ap_loc,ap_size, ap_loc+ap_size)
+            ap_max = np.minimum((ap_loc+ap_size), np.array([grid_w, grid_h]))
+            # ap_max = ap_loc+ap_size
+            ap_center = np.round((ap_loc+ap_max)/2.0).astype(int)
+            # ap_center = np.round(np.array(ap_loc) + np.array(ap_size)/2.0).astype(int);
+            print(ap_loc, ap_max, ap_center)
+            centernum = ap_center[0] + (ap_center[1] * grid_w)
+            print(centernum)
             centerpos = np.array(camera_offsets[centernum])
-            # print(ap_center)
+            
+            ap_size = ap_max - ap_loc
             # print(centerpos)
 
             # average over a large number of images
@@ -269,20 +288,23 @@ if __name__ == '__main__':
             # combined_image=np.zeros((h, w, channels),np.float128)
             
             numimages = ap_size[0] * ap_size[1]
+
             for y in range(ap_size[1]):
-                print("row"+str(y))
-                if ap_loc[1]+y >= grid_h:
+                ypos = ap_loc[1]+y
+                print("row"+str(ypos))
+                if ypos >= grid_h or ypos < 0:
                     break
                 for x in range(ap_size[0]):
-                    if ap_loc[0]+x >= grid_w:
+                    xpos = ap_loc[0]+x
+                    if xpos >= grid_w or xpos < 0:
                         break
 
                     # find the file number that corresponds to curent position
-                    imagenum = ap_loc[0]+x + (ap_loc[1]+y) * grid_w
-
+                    imagenum = xpos + ypos * grid_w
 
                     # reorder
-                    reorderednum = getReorderedNum(reorder, ap_loc[0]+x, ap_loc[1]+y, grid_w)
+                    reorderednum = getReorderedNum(reorder, xpos, ypos, grid_w)
+                    print([xpos, ypos], imagenum, "->", reorderednum)
 
                     # open image
                     src_img_rgb = cv2.imread(imagefiles[reorderednum])
@@ -293,12 +315,32 @@ if __name__ == '__main__':
                     # offset = np.array([camera_offsets[imagenum][0], -1.0 * camera_offsets[imagenum][1]])
                     offset = np.array([camera_offsets[imagenum][0], camera_offsets[imagenum][1]])
                     
-                    print(imagenum, reorderednum, offset)
+                    # focal shift with zoom
+                    fshift = (offset - centerpos) * fscale * neww/zoom
 
-                    # with zoom and roll
-                    shift = (offset - centerpos) * fscale * neww
-                    Ho = np.array([[upres/zoom, 0, shift[0]+roll[0]*neww],
-                        [0, upres/zoom, -1.0 * shift[1]+roll[1]*newh],
+                    # Ho = np.array([[upres/zoom, 0, shift[0]+roll[0]*neww],
+                    #     [0, upres/zoom, -1.0 * shift[1]+roll[1]*newh],
+                    #     [0, 0,     1]], dtype=float)
+
+                    # worked for view 1
+                    # Ho = np.array([[upres/zoom, 0, shift[0]+roll[0]*neww - halfx],
+                    #     [0, upres/zoom, -1.0 * shift[1]-roll[1]*neww + halfy*zoom],
+                    #     [0, 0,     1]], dtype=float)
+
+                    # 0.3 offsets not working
+                    # Ho = np.array([[upres/zoom, 0, fshift[0]-(1-zoom)*halfx+roll[0]*neww],
+                    #     [0, upres/zoom, -1.0 * fshift[1]-(1-zoom)*halfx+roll[1]*neww],
+                    #     [0, 0,     1]], dtype=float)
+
+                    recenterx = (1.0-zoom)*halfx
+                    recentery = (1.0-zoom)*halfx
+                    # print(recenterx, recentery)
+                    pixelrollx = float(roll[0])*float(w)
+                    pixelrolly = float(roll[1])*float(w)
+                    # print(pixelrollx, pixelrolly)
+
+                    Ho = np.array([[upres/zoom, 0, fshift[0]-recenterx+pixelrollx],
+                        [0, upres/zoom, -1.0 * fshift[1]-recentery+pixelrolly],
                         [0, 0,     1]], dtype=float)
 
                     im2 = np.zeros((newh, neww, channels))
@@ -314,6 +356,9 @@ if __name__ == '__main__':
             # write results to file
             # cv2.imwrite(output, combined_image.astype(np.float64))
             # cv2.imwrite(output, combined_image, [int(cv2.IMWRITE_PNG_COMPRESSION), png_compression=9])
-            cv2.imwrite(output, combined_image, [int(cv2.IMWRITE_PNG_COMPRESSION), 9])
+            if os.path.splitext(output)[1]==".png":
+                cv2.imwrite(output, combined_image, [int(cv2.IMWRITE_PNG_COMPRESSION), 9])
+            else:
+                cv2.imwrite(output, combined_image.astype(np.float64))
             
             

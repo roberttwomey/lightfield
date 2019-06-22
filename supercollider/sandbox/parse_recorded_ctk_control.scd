@@ -64,7 +64,7 @@ Useful so you don't need to select the folder to record to with the dialog every
 
 (
 // the path to your recorded file:
-~path = "/Users/rtwomey/Desktop/rover_fs689.0625.WAV";
+~path = "/Users/rtwomey/Desktop/rover_5_fs689.0625.WAV";
 ~numChannels = 8;
 // enter sample rate of the control data: it's appended to the filename!
 ~dataFs = 689.0625;
@@ -118,6 +118,7 @@ var resampleStep, resampIndices;
 
 // Pick your favorite rate:
 // ~newFs = 60; // for the heads
+// ~newFs = 30; // 2009
 ~newFs = 1; // 2009
 // ~newFs = 24; // for the cinema lovers
 
@@ -163,7 +164,7 @@ resampIndices = (0, resampleStep .. ~numDataFrames).round.asInteger;
 var wr, line;
 
 // Where do you want to save the txt file?
-~txtPath = "/Users/rtwomey/Desktop/rover_scene1_resampled.csv"; // or .csv?
+~txtPath = "/Volumes/Work/Projects/lightfield/data/control_signals/rover_5_resampled_1fs.csv"; // or .csv?
 
 wr = CSVFileWriter(~txtPath, "w");
 // if you prefer a different delimiter, there's also

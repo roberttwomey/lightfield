@@ -2,7 +2,7 @@
 
 // c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" , "fade"], NetAddr("refocuser.local", 12345));
 
-c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" , "fade"], NetAddr("localhost", 12345));
+c = ControlMixMaster( ["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" , "fade"], NetAddr("192.168.1.10", 12345));
 
 c.mixers.do{ |mix| mix.busnum.postln;}
 c.mixers.size()
@@ -30,10 +30,12 @@ s.waitForBoot({
 
 
 // s.scope(~dataBus.numChannels, ~dataBus.index, rate: 'control')
-
+~numChannels = 9
 s.scope(c.mixers.size(), c.mixers[0].busnum, rate: 'control')
 ~recorder = RecordControl( c.mixers[0].busnum, c.mixers.size(), "ctlTest", "~/Desktop".standardizePath,  makeGui: true )
 
+~recorder.record
+~recorder.stop
 
 
 
