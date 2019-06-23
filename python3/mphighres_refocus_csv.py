@@ -1,5 +1,8 @@
 #!/usr/local/bin/python3
 """
+
+    MULTIPROCESS / MULTITHREADED 
+
     this program creates high-res refocused images from light field data
 
     takes input from a resampled control signal csv file (generated in supercollider)
@@ -11,21 +14,21 @@
 
     example usage: 
     
-    OSX native res:
+OSX native res:
 
-    python3 highres_refocus_csv.py /Volumes/SATCHEL/lightfield/bigdata/shoots/ \
-        /Volumes/SATCHEL/lightfield/bigdata/shoots/bookcase/bookcase.xml \
-        /Volumes/Work/Projects/lightfield/data/highres_stills/ \
-        bookcase_1fs.png \
-        /Volumes/Work/Projects/lightfield/data/control_signals/rover_5_resampled_1fs.csv
+python3 mphighres_refocus_csv.py /Volumes/SATCHEL/lightfield/bigdata/shoots/ \
+    /Volumes/SATCHEL/lightfield/bigdata/shoots/bookcase/bookcase.xml \
+    /Volumes/Work/Projects/lightfield/data/highres_stills/ mpbookcase.jpg \
+    /Volumes/Work/Projects/lightfield/data/control_signals/rover_5_resampled_1fs.csv \
+    49 61
 
-    OSX 4k upscale: 
+OSX 4k upscale: 
 
-    python3 highres_refocus_csv.py /Volumes/SATCHEL/lightfield/bigdata/shoots/ \
-        /Volumes/SATCHEL/lightfield/bigdata/shoots/bookcase/bookcase.xml \
-        /Volumes/Work/Projects/lightfield/data/highres_stills/ \
-        bookcase4k.jpg --upscale 1.1112 \
-        /Volumes/Work/Projects/lightfield/data/control_signals/rover_5_resampled_1fs.csv 
+python3 highres_refocus_csv.py /Volumes/SATCHEL/lightfield/bigdata/shoots/ \
+    /Volumes/SATCHEL/lightfield/bigdata/shoots/bookcase/bookcase.xml \
+    /Volumes/Work/Projects/lightfield/data/highres_stills/ \
+    bookcase4k.jpg --upscale 1.1112 \
+    /Volumes/Work/Projects/lightfield/data/control_signals/rover_5_resampled_1fs.csv 
 
 
     
@@ -187,18 +190,22 @@ def nextFileName(filebase):
     return outfile % i
 
 
-def calcFrame(row):
+def calcFrame(row, i, paths, params, upres=1.0):
+
+    datapath, imagefiles, xmlfile, csvfile, outpath, outfilename = paths
+    grid_w, grid_h, camera_offsets, subimagewidth, reorder = params
+
     # get image params for current frame
     fscale = float(row[0])
     zoom = float(row[1])
     roll = np.array([float(row[2]), float(row[3])])
     ap_loc = np.array([int(float(row[4])), int(float(row[5]))])
     ap_size = np.array([int(float(row[6])), int(float(row[7]))])
-    print("file: {}".format(xmlfile))
-    print("focus: {}".format(fscale))
-    print("zoom: {}".format(zoom))
-    print("roll: {}".format(roll))
-    print("ap_loc: {}\tap_size: {}".format(ap_loc, ap_size))
+    # print("file: {}".format(xmlfile))
+    # print("focus: {}".format(fscale))
+    # print("zoom: {}".format(zoom))
+    # print("roll: {}".format(roll))
+    # print("ap_loc: {}\tap_size: {}".format(ap_loc, ap_size))
 
     # create output filename
     fname, ext = os.path.splitext(outfilename)
@@ -221,10 +228,9 @@ def calcFrame(row):
     h, w, channels = src_img_rgb.shape
 
     # upres = 1.0
-    upres = args.upscale
     newh = int(h * upres)
     neww = int(w * upres)
-    combined_image=np.zeros((newh, neww, channels),np.float64)
+    combined_image=np.zeros((newh, neww, channels), np.float64)
 
     # combined_image=np.zeros((h, w, channels),np.float64)
     # combined_image=np.zeros((h, w, channels),np.float128)
@@ -242,16 +248,19 @@ def calcFrame(row):
     rollx = roll[0]*neww/zoom#roll[0]*w/zoom
     rolly = roll[1]*newh/zoom#roll[1]*h/zoom
 
-    print("recenter: {}".format((recenterx, recentery)))
-    print("roll: {}".format((rollx, rolly)))
+    # print("recenter: {}".format((recenterx, recentery)))
+    # print("roll: {}".format((rollx, rolly)))
     numimages = ap_size[0] * ap_size[1]
 
     im2 = np.zeros((newh, neww, channels))
             
-    print("Cameras", end="")
+    # print("Cameras", end="")
+    print("Frame %05d" % i)
+    sys.stdout.flush()
+
     for y in range(ap_size[1]):
         ypos = ap_loc[1]+y
-        print("\n{}:".format(ypos), end="")
+        # print("\n{}:".format(ypos), end="")
         if ypos >= grid_h or ypos < 0:
             break
         for x in range(ap_size[0]):
@@ -265,7 +274,7 @@ def calcFrame(row):
             # reorder
             reorderednum = getReorderedNum(reorder, xpos, ypos, grid_w)
             # print([xpos, ypos], imagenum, "->", reorderednum)
-            print(" {}".format(xpos), end="")
+            # print(" {}".format(xpos), end="")
             sys.stdout.flush()
 
             # open image
@@ -290,7 +299,7 @@ def calcFrame(row):
 
             combined_image = combined_image + im2/numimages
     
-    print()
+    # print()
     # write results to file
     # cv2.imwrite(output, combined_image.astype(np.float64))
     # cv2.imwrite(output, combined_image, [int(cv2.IMWRITE_PNG_COMPRESSION), png_compression=9])
@@ -299,6 +308,53 @@ def calcFrame(row):
     else:
         cv2.imwrite(output, combined_image.astype(np.float64))
                 
+
+def mp_refocus(frames, start, paths, params, upres=1.0, nprocs=8):
+    
+    def worker(frames, start, paths, params, upres, out_q):
+        """ The worker function, invoked in a process. 'srcs' is a
+            list of input files, 'params' is a dict of calculated 
+            camera parameters by filename. R_avg and C_avg are the
+            compute average camera rotation and position to be 
+            rectified to.
+            Results are placed in a dictionary that's pushed to a queue.
+        """
+        outdict = {}
+
+        for i, frame in enumerate(frames):
+            # src_fname = os.path.basename(src)[:-7]+".jpg"
+            # sys.stdout.write(src_fname)
+            outdict[i] = calcFrame(frame, start+i, paths, params, upres)
+            # sys.stdout.write(".")
+            # sys.stdout.flush()
+            
+        out_q.put(outdict)
+ 
+    out_q = Queue()
+    chunksize = int(math.ceil(len(frames) / float(nprocs)))
+    procs = []
+
+    # call multithreaded refocuser
+    for i in range(nprocs):
+        p = multiprocessing.Process(
+                target=worker,
+                args=(frames[chunksize * i:chunksize * (i + 1)],
+                      start+chunksize*i, paths, params, upres, out_q))
+        procs.append(p)
+        p.start()
+    
+    # Collect all results into a single result dict. We know how many dicts
+    # with results to expect.
+    resultdict = {}
+    for i in range(nprocs):
+        resultdict.update(out_q.get())
+
+    # Wait for all worker processes to finish
+    for p in procs:
+        p.join()
+
+    print
+    return resultdict
 
 if __name__ == '__main__':
     global featurepath, warpedpath, undistortpath, thumbpath, max_texture_size, acq_grid, num_textures, contactimg_file
@@ -312,6 +368,8 @@ if __name__ == '__main__':
     parser.add_argument('outfilename', default='bookcase.jpg')
     parser.add_argument('--upscale', default=1.0, type=float, help='multiplier for output resolution')
     parser.add_argument('csvfile', help='control signals in csv file')
+    parser.add_argument('start', default=0, type=int, help='starting frame number')
+    parser.add_argument('end', default=-1, type=int, help='ending frame number')
 
     # parser.add_argument('fscale', default=1.0, type=float, help='focus')
     # parser.add_argument('roll', default="0.0,0.0", type=str, help='pixel roll')
@@ -327,17 +385,16 @@ if __name__ == '__main__':
     xmlfile = args.xmlfile  # snapshot description text file
     outpath = args.outpath # directory to save results
     outfilename = args.outfilename
-    csvfile = args.csvfile
+    upres = args.upscale # scaling up output
+    csvfile = args.csvfile # image parameters per frame saved from supercollider
+    start = args.start
+    end = args.end
 
+    # do refocusing in parallel
 
-    # refocuser control signals
-    # fscale = args.fscale
-    # roll = [float(i) for i in args.roll.split(',')]
-    # ap_loc = [int(i) for i in args.aploc.split(',')]
-    # ap_size = [int(i) for i in args.apsize.split(',')]
-    # zoom = args.zoom 
+   # 1. Read in scene information from input files
 
-    # filenames
+    # filenames and paths
     scenename = os.path.basename(xmlfile).split('.xml')[0]
     lfdatapath = os.path.join(datapath, scenename)
     warped = os.path.join(lfdatapath, 'warped')
@@ -347,27 +404,26 @@ if __name__ == '__main__':
     grid_w, grid_h, camera_offsets, subimagewidth = readSceneFile(scenefile)
     print(grid_w, grid_h, subimagewidth)
 
-
     # calculate image reordering
     reorder = calcReordering(grid_w, grid_h, 'wrap')
-    # print(grid_w*grid_h, size(reorder))            
     # print(reorder)
 
-    # read image file names
+    # read image file names for scene
     imagefiles = readImageFilenames(warped)
     # for i, image in enumerate(imagefiles):
     #     print(image, "->", reorder[i])
 
-    # exit()
-    # print(imagefiles)
+    paths = (datapath, imagefiles, xmlfile, csvfile, outpath, outfilename)
+    params = (grid_w, grid_h, camera_offsets, subimagewidth, reorder)
 
+    # 2. Read in refocusing parameters from csv file
     with open(csvfile) as signalfile:
         signalreader = csv.reader(signalfile)
-        rows = list(signalreader)
-        # for i in [0 49 97 145 193]:#range(len(rows)):
-        for i in [0, 49, 97]: #range(0, 49):
-            row = rows[i]
+        frames = list(signalreader)
+        # start = 49
+        # end = 96
+        results = mp_refocus(frames[start:end], start, paths, params, upres, 4)
 
-            calcFrame(row)
+    print(results)
             
             
