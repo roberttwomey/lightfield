@@ -27,8 +27,13 @@
         bookcase4k.jpg --upscale 1.1112 \
         /Volumes/Work/Projects/lightfield/data/control_signals/rover_5_resampled_1fs.csv 
 
+    Linux:
 
-    
+    python3 highres_refocus_csv.py /media/rtwomey/linuxdata/lightbox/shoots/ \
+        /media/rtwomey/linuxdata/lightbox/shoots/bookcase/bookcase.xml \
+        ~/projects/lightfield/data/highres_stills/ \
+        bookcase1fps/bookcase.png \
+        ~/projects/lightfield/data/control_signals/rover_5_resampled_1fs.csv
 """
 
 import os
@@ -41,6 +46,10 @@ from multiprocessing import Queue
 import multiprocessing
 import argparse
 import pickle
+<<<<<<< HEAD
+# from pylab import * 
+=======
+>>>>>>> 0e26af33f20fa0365cbcb3be72b066e5d578cc06
 import xml.etree.ElementTree as ET
 import re
 import csv
@@ -304,6 +313,7 @@ if __name__ == '__main__':
             # output res: (w,h)/(zoom)
             # difference: ((w,h) - (w,h)/zoom)/2 = (zoom(w,h)/zoom-(w,h)/zoom)/2)
             #               ((w,h)/2zoom)*(zoom-1)
+            
             recenterx = (halfw/zoom)*(1-zoom)
             recentery = (halfh/zoom)*(1-zoom)
 
