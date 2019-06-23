@@ -12,11 +12,20 @@
 
     example usage: 
     
+    osx
+
     python3 highres_refocus_csv.py /Volumes/SATCHEL/lightfield/bigdata/shoots/ \
         /Volumes/SATCHEL/lightfield/bigdata/shoots/bookcase/bookcase.xml \
         /Volumes/Work/Projects/lightfield/data/highres_stills/ \
         bookcase_1fs.png \
         /Volumes/Work/Projects/lightfield/data/control_signals/rover_scene1_resampled_1fs.csv
+
+
+    python3 highres_refocus_csv.py /media/rtwomey/linuxdata/lightbox/shoots/ \
+        /media/rtwomey/linuxdata/lightbox/shoots/bookcase/bookcase.xml \
+        ~/projects/lightfield/data/highres_stills/ \
+        bookcase1fps/bookcase.png \
+        ~/projects/lightfield/data/control_signals/rover_5_resampled_1fs.csv
 
 
 """
@@ -31,7 +40,7 @@ from multiprocessing import Queue
 import multiprocessing
 import argparse
 import pickle
-from pylab import * 
+# from pylab import * 
 import xml.etree.ElementTree as ET
 import re
 import csv
@@ -244,7 +253,7 @@ if __name__ == '__main__':
         signalreader = csv.reader(signalfile)
         rows = list(signalreader)
         # for i in [0 49 97 145 193]:#range(len(rows)):
-        for i in range(0, 49):
+        for i in range(0, 1440):
             row = rows[i]
 
             # get image params for current frame
