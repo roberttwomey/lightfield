@@ -330,7 +330,7 @@ def calc_matches(base_img, featuredict):
     else:
         return None
 
-def mp_match(files, featuredict,keyframe, nprocs):
+def mp_match(files, featuredict, keyframe, nprocs):
     
     def worker(files, featuredict, keyframe, out_q):
         """ The worker function, invoked in a process. 'files' is a

@@ -353,11 +353,6 @@ if __name__ == '__main__':
     cv2.imwrite(output, combined_image.astype(np.float64))
     
 
-
-
-
-
-
 # def mp_warp(srcs, params, R_avg, C_avg, nprocs):
     
 #     def worker(srcs, params, R_avg, C_avg, out_q):
