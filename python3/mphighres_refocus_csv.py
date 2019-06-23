@@ -32,14 +32,12 @@ python3 highres_refocus_csv.py /Volumes/SATCHEL/lightfield/bigdata/shoots/ \
 
 Linux:
 
-    python3 mphighres_refocus_csv.py /media/rtwomey/linuxdata/lightbox/shoots/ \
-        /media/rtwomey/linuxdata/lightbox/shoots/bookcase/bookcase.xml \
-        ~/projects/lightfield/data/highres_stills/ \
-        bookcase1fps/bookcase.png \
-        ~/projects/lightfield/data/control_signals/rover_5_resampled_1fs.csv
-        49 61 8
-
-
+python3 mphighres_refocus_csv.py /media/rtwomey/linuxdata/lightbox/shoots/ \
+    /media/rtwomey/linuxdata/lightbox/shoots/bookcase/bookcase.xml \
+    ~/projects/lightfield/data/highres_stills/ \
+    bookcase1fps/mpbookcase.png \
+    ~/projects/lightfield/data/control_signals/rover_5_resampled_1fs.csv \
+    49 67 8
     
 """
 
