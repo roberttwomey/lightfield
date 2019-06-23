@@ -20,7 +20,7 @@ python3 mphighres_refocus_csv.py /Volumes/SATCHEL/lightfield/bigdata/shoots/ \
     /Volumes/SATCHEL/lightfield/bigdata/shoots/bookcase/bookcase.xml \
     /Volumes/Work/Projects/lightfield/data/highres_stills/ mpbookcase.jpg \
     /Volumes/Work/Projects/lightfield/data/control_signals/rover_5_resampled_1fs.csv \
-    49 61
+    49 61 4
 
 OSX 4k upscale: 
 
@@ -29,6 +29,15 @@ python3 highres_refocus_csv.py /Volumes/SATCHEL/lightfield/bigdata/shoots/ \
     /Volumes/Work/Projects/lightfield/data/highres_stills/ \
     bookcase4k.jpg --upscale 1.1112 \
     /Volumes/Work/Projects/lightfield/data/control_signals/rover_5_resampled_1fs.csv 
+
+Linux:
+
+    python3 mphighres_refocus_csv.py /media/rtwomey/linuxdata/lightbox/shoots/ \
+        /media/rtwomey/linuxdata/lightbox/shoots/bookcase/bookcase.xml \
+        ~/projects/lightfield/data/highres_stills/ \
+        bookcase1fps/bookcase.png \
+        ~/projects/lightfield/data/control_signals/rover_5_resampled_1fs.csv
+        49 61 8
 
 
     
@@ -370,7 +379,7 @@ if __name__ == '__main__':
     parser.add_argument('csvfile', help='control signals in csv file')
     parser.add_argument('start', default=0, type=int, help='starting frame number')
     parser.add_argument('end', default=-1, type=int, help='ending frame number')
-
+    parser.add_argument('numcores', default=4, type=int, help='number of cores to use')
     # parser.add_argument('fscale', default=1.0, type=float, help='focus')
     # parser.add_argument('roll', default="0.0,0.0", type=str, help='pixel roll')
     # parser.add_argument('aploc', default="0,0", type=str, help='aperture locaton')
@@ -389,6 +398,7 @@ if __name__ == '__main__':
     csvfile = args.csvfile # image parameters per frame saved from supercollider
     start = args.start
     end = args.end
+    numcores = args.numcores
 
     # do refocusing in parallel
 
@@ -422,7 +432,7 @@ if __name__ == '__main__':
         frames = list(signalreader)
         # start = 49
         # end = 96
-        results = mp_refocus(frames[start:end], start, paths, params, upres, 4)
+        results = mp_refocus(frames[start:end], start, paths, params, upres, numcores)
 
     print(results)
             
