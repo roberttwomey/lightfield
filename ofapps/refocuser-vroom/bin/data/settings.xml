@@ -24,6 +24,9 @@ e.g. tiled for tiled refocuser, laptop for laptop, single for single.
 <scene>./textures/mike3_tile.xml</scene>
 
 <scene>./textures/mike3.xml</scene>
+<screenwidth>3840.0</screenwidth>
+<screenheight>1080.0</screenheight>
+
  -->
 
 <scene>./textures/tunnel.xml</scene>
@@ -35,9 +38,9 @@ e.g. tiled for tiled refocuser, laptop for laptop, single for single.
 <hidecursor>1</hidecursor>
 <debug>1</debug>
 <fullscreen>0</fullscreen>
+<screenwidth>1920.0</screenwidth>
+<screenheight>540.0</screenheight>
 
-<screenwidth>3840.0</screenwidth>
-<screenheight>1080.0</screenheight>
 
 <!-- port to receive osc -->
 <oscport>12345</oscport>
