@@ -339,6 +339,7 @@ def mp_refocus(frames, start, paths, params, upres=1.0, nprocs=8):
  
     out_q = Queue()
     chunksize = int(math.ceil(len(frames) / float(nprocs)))
+
     procs = []
 
     # call multithreaded refocuser

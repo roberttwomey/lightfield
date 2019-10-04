@@ -46,10 +46,6 @@ from multiprocessing import Queue
 import multiprocessing
 import argparse
 import pickle
-<<<<<<< HEAD
-# from pylab import * 
-=======
->>>>>>> 0e26af33f20fa0365cbcb3be72b066e5d578cc06
 import xml.etree.ElementTree as ET
 import re
 import csv

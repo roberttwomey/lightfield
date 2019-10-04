@@ -1,55 +1,48 @@
-// Actual Code for SCORING
 (
+// SCORING
 s = Server.default;
-s.options.sampleRate_(48000);
-s.options.numOutputBusChannels_(8);
+s.options.sampleRate_(44100);
+s.options.numOutputBusChannels_(4);//8);
 s.options.numInputBusChannels_(2);
-s.options.numWireBufs_(64*8);
-s.options.memSize_(8192*8);
+s.options.numWireBufs_(64*4);//8);
+s.options.memSize_(8192*4);//8);
 
 "startup loaded, initializing ROVER".postln;
 )
 
+(
 // setup audio recording
 s.recChannels_(4);
 s.recSampleFormat_("float");// or: "int8", "int16", "int24", "int32"
 s.recHeaderFormat_("wav");
-
+)
 // once booted
 s.prepareForRecord
 
 // start audio
-s.record.
+s.record
 
 s.stopRecording
 
-// setup control signal recording
-// ~numChannels = ~imageCtl.mixers.size()
-// s.scope(~imageCtl.mixers.size(), ~imageCtl.mixers[0].busnum, rate: 'control')
-// ~recorder = RecordControl( ~imageCtl.mixers[0].busnum, ~imageCtl.mixers.size(), "rover", "~/Desktop".standardizePath,  makeGui: true )
-
-
-
+(
 // start rover
 // SCORING
-(
-
-// ~refocuser_ip = "192.168.1.10"; // asimov
-~refocuser_ip = "192.168.1.136"; // VROOM
-// ~refocuser_ip = "192.168.1.231";
 
 //get audio initialized
 s.waitForBoot({
 	var intSndPath, extSndPath;
 
-	thisThread.randSeed_(12345);
+	// seed for rovercap1
+	// thisThread.randSeed_(12345);
+
+	// seed for rovercap2
+	// thisThread.randSeed_(2);
 
 	1.wait;
-	// ~eq = MasterEQ(4,s);
+	~eq = MasterEQ(4,s);
 
 	/* added!! */
-	/*~motorBuf = CtkBuffer.playbuf("/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/dining_room_capture_EDIT.WAV").load;*/
-	~motorBuf = CtkBuffer.playbuf("/Volumes/Work/Projects/lightfield/data/audio/EDITS/dining_room_capture_EDIT.WAV").load;
+	~motorBuf = CtkBuffer.playbuf("/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/dining_room_capture_EDIT.WAV").load;
 	s.sync;
 	~motorPB = MotorPlayback(0, ~motorBuf);
 	s.sync;
@@ -59,14 +52,16 @@ s.waitForBoot({
 	~gs2 !? {~gs2.free};
 
 	/* source file */
-	intSndPath = "/Volumes/Work/Projects/lightfield/data/audio/EDITS/around_the_dining_room_morning_EDIT.WAV";
+	intSndPath = "/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/around_the_dining_room_morning_EDIT.WAV";
+	// intSndPath = "/Volumes/Work/Projects/lightfield/data/audio/EDITS/around_the_dining_room_morning_EDIT.WAV";
 
 	/* GrainScanner1 with 3 GrainScan1's */
 	~gs1 = GrainScanner1( 3, intSndPath );
 	~gs1.presetGUI(3);
 	3.wait;
 
-	extSndPath = "/Volumes/Work/Projects/lightfield/data/audio/EDITS/discovery_cliffside_1_EDIT.WAV";
+	extSndPath = "/Users/dxlocal/Documents/ROVER/Rover_audio/EDITS/discovery_cliffside_1_EDIT.WAV";
+	// extSndPath = "/Volumes/Work/Projects/lightfield/data/audio/EDITS/discovery_cliffside_1_EDIT.WAV";
 
 	~gs2 = GrainScanner2( 0, extSndPath );
 	5.wait;
@@ -76,9 +71,8 @@ s.waitForBoot({
 
 	~imageCtl = ControlMixMaster(
 		["focus", "zoom", "xscroll", "yscroll", "xstart", "ystart", "xcount", "ycount" ],
-		// NetAddr("refocuser.local", 12345));
-		NetAddr(~refocuser_ip, 12345));
-		// NetAddr("localhost", 12345));
+		NetAddr("refocuser.local", 12345));
+	// NetAddr("localhost", 12345));
 	// NetAddr("192.168.0.100", 12345));
 
 	// NetAddr("localhost", 12345));
@@ -91,12 +85,6 @@ s.waitForBoot({
 	// ~fader.fadeTime_(6.0);
 	// ~fader.value_(1.0)
 	// ~fader.value_(0.0)
-
-	// control signal recording
-	// setup control signal recording
-	~numChannels = ~imageCtl.mixers.size();
-	// s.scope(~imageCtl.mixers.size(), ~imageCtl.mixers[0].busnum, rate: 'control');
-	// ~recorder = RecordControl( ~imageCtl.mixers[0].busnum, ~imageCtl.mixers.size(), "rover_vroom", "~/Desktop".standardizePath,  makeGui: true, overwrite: true );
 
 
 	// interiors
@@ -193,7 +181,7 @@ s.waitForBoot({
 		["mike3", 240, 5],
 		["dark_trees", 120, 3],
 		["carkeek_night", 120, 2],
- 		["diningroom3", 240, 5],
+		["diningroom3", 240, 5],
 		// int
 		// ext
 		// int
@@ -264,7 +252,7 @@ s.waitForBoot({
 			\mike1_3, 5.0, 5.0, // horizontal
 			\mike1_3_rover, 5.0, 5.0, //
 			\mike1_5_fruitbowl, 25.0, 15.0,
-			// \mike1_5_fruit, 25.0, 15.0,
+			\mike1_5_fruit, 25.0, 15.0,
 			\mike1_mirrorimage_moving, 5.0, 5.0, //
 			\mike1_parallax_left, 5.0, 5.0, //
 			\mike1_start, 10.0, 20.0, //
@@ -318,19 +306,13 @@ s.waitForBoot({
 
 	~scoreTask !? {~scoreTask.stop.clock.clear};
 
-
 	~scoreTask = Task({
 		var name, fade, waittime;
 
 		inf.do { |i|
 			// start with second scene for testing
 			// ~sceneScore = ~sceneScore.rotate(~sceneScore.size.rand);
-			// ~sceneScore = ~sceneScore.rotate(-2);
 			~sceneScore = ~sceneScore.rotate(0);
-
-/*			if (~recorder.recording.not) {
-				~recorder.record;
-			};*/
 
 			~sceneScore.do{ |sceneParams|
 				var scene, dur, nViews, sceneFileName, audioScene, whichScanner;
@@ -338,9 +320,10 @@ s.waitForBoot({
 				var randViewsToAdd;
 				var motorDur = 45, motorEnv = [0.4,0.2,0.4];
 
-				// ~recorder.stop;
-
 				#scene, dur, nViews = sceneParams;
+
+				nViews = ~sceneViews[scene.asSymbol].clump(3).size();
+				dur = nViews * 30;
 
 				// shorten times for testing
 				// dur = dur * 0.5;
@@ -352,11 +335,9 @@ s.waitForBoot({
 				[~gs1, ~gs2].do(_.release(fadeOut));
 				(fadeOut+1).wait;
 
-
 				// load scene
 				sceneFileName = format("./textures/%.xml", scene);
 				~imageCtl.loadScene(format("./textures/%.xml", scene));
-
 				~interiors.collect(_.asSymbol).includes(sceneFileName.asSymbol).if({
 					"new scene is INTERIOR".postln;
 					sceneType = \int;
@@ -394,17 +375,15 @@ s.waitForBoot({
 				// viewPresets = ~sceneViews[scene.asSymbol].clump(3).scramble.keep(nViews);
 
 				// choose the views within the scene
+				viewPresets = ~sceneViews[scene.asSymbol].clump(3).collect { |item| item[0] };
 				// viewPresets = ~sceneViews[scene.asSymbol].clump(3).scramble.keep(nViews).collect { |item| item[0] };
-
-				// did not scramble in original documentation / run
-				viewPresets = ~sceneViews[scene.asSymbol].clump(3).keep(nViews).collect { |item| item[0] };
-
-				// do not add random views in original documentation / run
-				randViewsToAdd = 0;//1;
-
-				viewPresets = viewPresets ++ ~imageCtl.presets.keys.asArray.scramble.keep(randViewsToAdd).collect(_.asSymbol);
+				//
+				// // add a few random views
+				// randViewsToAdd = 1;
+				//
+				// viewPresets = viewPresets ++ ~imageCtl.presets.keys.asArray.scramble.keep(randViewsToAdd).collect(_.asSymbol);
 				// viewPresets = viewPresets.scramble;
-				nViews = nViews + randViewsToAdd;
+				// nViews = nViews + randViewsToAdd;
 
 				viewPresets.do { |vPreset, viewCount|
 					var viewDur, transition, linger;
@@ -474,6 +453,7 @@ s.waitForBoot({
 
 					(transition + linger).wait;
 				};
+
 			};
 		}
 	}, AppClock);
@@ -484,45 +464,3 @@ s.waitForBoot({
 	// ~scoreTask.stop
 });
 )
-
-~scoreTask.stop
-
-
-// One time setup:
-
-/*Quarks.install("https://github.com/ambisonictoolkit/atk-sc3.git");
-
-(
-// Create ATK support directory
-// Place unzipped matrices in the directory opened
-
-Atk.createUserSupportDir;
-Atk.openUserSupportDir;
-)
-
-// get correct presets
-
-// read in controlmixers for video documentation script
-Archive.read("/Volumes/Work/Projects/lightfield/supercollider/preset_backups/ControlMixer_presets/FRIDAY_afternoon_150605_163419.sctxar")
-// save his control mixer settings to a variable
-~ctlMxrPresets = Archive.global[\roverPresets]
-// read in grainscanner presets for video documentation script
-Archive.read("/Volumes/Work/Projects/lightfield/supercollider/preset_backups/GrainScanner_presets/archive_BAK_150527_233940_gs1gs2.sctxar")
-// add Robert's mixer presets to my Archive
-Archive.global.put(\roverPresets, ~ctlMxrPresets )
-Archive.global[\roverPresets]
-Archive.write(format("/Users/rtwomey/Desktop/archive_BAK_%.sctxar",Date.getDate.stamp))
-
-*/
-
-// load old archives
-// Archive.read("/Volumes/Work/Projects/lightfield/supercollider/preset_backups/COMBINED_presets/DOCUMENTATION_archive_BAK_190621_101042.sctxar");
-// Archive.global[\roverPresets].keys
-
-
-// manually load scene
-~imageCtl.loadScene("./textures/cliffside.xml")
-~imageCtl.loadScene("./textures/mike1.xml")
-
-~imageCtl.loadScene("./textures/dark_trees.xml")
-
