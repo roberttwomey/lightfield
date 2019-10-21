@@ -1,0 +1,6 @@
+./textures/outsidelookingin.xml
+0
+0,0
+0,0
+5,7
+1

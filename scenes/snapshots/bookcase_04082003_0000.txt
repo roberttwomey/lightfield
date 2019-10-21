@@ -1,0 +1,6 @@
+./textures/bookcase.xml
+-0.143086
+0,0
+8,11
+15,8
+1

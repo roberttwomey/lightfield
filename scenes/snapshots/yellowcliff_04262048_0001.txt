@@ -1,0 +1,6 @@
+textures/yellowcliff.xml
+-0.0190476
+0,0
+3,2
+8,24
+0.997619

@@ -1,0 +1,6 @@
+./textures/cliffside.xml
+-0.0405983
+0,0
+0,0
+30,10
+1

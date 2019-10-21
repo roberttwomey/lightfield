@@ -1,0 +1,6 @@
+./textures/dark_trees.xml
+-0.00929487
+0,0
+8,4
+8,4
+1

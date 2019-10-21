@@ -1,0 +1,6 @@
+./textures/zcam_bear.xml
+0
+0,0
+6,2
+10,9
+1

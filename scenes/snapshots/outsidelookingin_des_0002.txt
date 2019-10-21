@@ -1,0 +1,6 @@
+./textures/outsidelookingin_des.xml
+-0.045464
+0.281636,-0.151323
+0,0
+4,23
+0.505203
