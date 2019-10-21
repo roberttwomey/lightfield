@@ -6,8 +6,14 @@
     app) and generates output image
 
     
-    Robert Twomey 2018
+    Robert Twomey 2019
     robert@roberttwomey.com
+
+    example usage:
+
+python3 highres_refocus_snapshot.py /Volumes/SATCHEL/lightfield/bigdata/shoots/ \
+     \
+    /Volumes/Work/Projects/lightfield/data/highres_stills/ \
 
 """
 
@@ -186,6 +192,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='render refocused snapshot at full resolution')
     parser.add_argument('datapath', help='path to lightfield data')
     parser.add_argument('infile', help='snapshot text file describing refocus parameters')
+    parser.add_argument('outpath', default='/Volumes/Work/Projects/lightfield/data/highres_stills', help='output directory to save result')
     parser.add_argument('--upscale', default=1.0, type=float, help='multiplier for output resolution')
 
     # parser.add_argument('outfile', help='filename to write')
@@ -195,6 +202,7 @@ if __name__ == '__main__':
     datapath = args.datapath
     snapshotfile = args.infile  # snapshot description text file
     # outfile = args.outfile
+    outpath = args.outpath
 
     # texture
     # fscale
@@ -215,7 +223,8 @@ if __name__ == '__main__':
     # output = outfile
     # output = nextFileName(outfile)
     # output = nextFileName(os.path.join("/Volumes/Work/Projects/lightfield/data/highres_stills", os.path.splitext(os.path.basename(snapshotfile))[0]+".tif"))
-    output = nextFileName(os.path.join("/Volumes/Work/Projects/lightfield/data/highres_stills", os.path.splitext(os.path.basename(snapshotfile))[0]+".jpg"))
+    # output = nextFileName(os.path.join("/Volumes/Work/Projects/lightfield/data/highres_stills", os.path.splitext(os.path.basename(snapshotfile))[0]+".jpg"))
+    output = nextFileName(os.path.join(outpath, os.path.splitext(os.path.basename(snapshotfile))[0]+".jpg"))
 
     scenefile = os.path.join(lfdatapath,os.path.basename(xmlfile))
     

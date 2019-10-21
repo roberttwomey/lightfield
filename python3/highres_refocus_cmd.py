@@ -10,10 +10,19 @@
     robert@roberttwomey.com
 
     example usage:
-    python3 highres_refocus_cmd.py /Volumes/SATCHEL/lightfield/bigdata/shoots/ \
-        /Volumes/SATCHEL/lightfield/bigdata/shoots/mike1/mike1.xml \
-        /Volumes/Work/Projects/lightfield/data/highres_stills/ \
-        -0.120619 "0.052,0.0164" "5,13" "11,16" 1.0
+python3 highres_refocus_cmd.py /Volumes/SATCHEL/lightfield/bigdata/shoots/ \
+    /Volumes/SATCHEL/lightfield/bigdata/shoots/mike1/mike1.xml \
+    /Volumes/Work/Projects/lightfield/data/highres_stills/ \
+    -0.120619 "0.052,0.0164" "5,13" "11,16" 1.0
+
+
+	rescaling and changing aspect ratio:
+python3 highres_refocus_cmd.py /Volumes/SATCHEL/lightfield/bigdata/shoots/ \
+    /Volumes/SATCHEL/lightfield/bigdata/shoots/mike1/mike1.xml \
+    /Volumes/Work/Projects/lightfield/data/highres_stills/ \
+    -0.120619 "0.052,0.0164" "5,13" "11,16" 1.0 --upscale 2.0 --outwidth 2916
+
+
 
 
 """
@@ -196,6 +205,8 @@ if __name__ == '__main__':
     parser.add_argument('xmlfile', help='.xml scene descriptor file')
     parser.add_argument('outpath', default='/Volumes/Work/Projects/lightfield/data/highres_stills', help='output directory to save result')
     parser.add_argument('--upscale', default=1.0, type=float, help='multiplier for output resolution')
+    parser.add_argument('--outwidth', type=int, default=2592)
+    parser.add_argument('--outheight', type=int, default=1944)
     parser.add_argument('fscale', default=1.0, type=float, help='focus')
     parser.add_argument('roll', default="0.0,0.0", type=str, help='pixel roll')
     parser.add_argument('aploc', default="0,0", type=str, help='aperture locaton')
@@ -261,8 +272,13 @@ if __name__ == '__main__':
     # average over a large number of images
     # https://stackoverflow.com/questions/17291455/how-to-get-an-average-picture-from-100-pictures-using-pil/17383621#17383621
 
+    # load image and read params
     src_img_rgb = cv2.imread(imagefiles[0])
     h, w, channels = src_img_rgb.shape
+
+    # optionally resize output
+    w = args.outwidth
+    h = args.outheight
 
     # upres = 1.0
     upres = args.upscale
