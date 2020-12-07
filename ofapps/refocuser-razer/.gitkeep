@@ -1,2 +1,2 @@
-bin/data/settings.xml
-bin/data/shaders
+./bin/data/settings.xml
+./bin/data/shaders/*
