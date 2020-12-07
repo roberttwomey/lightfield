@@ -1,4 +1,3 @@
 .vs
-bin/*
 !bin/data
 bin/data/textures
