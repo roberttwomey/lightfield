@@ -3,8 +3,11 @@ reference
 software
 documentation
 bin
+!bin/data/shaders
+!bin/data/settings.xml
 build
 obj
+.vs
 .DS_Store
 .AppleDouble
 Thumbs.DB
