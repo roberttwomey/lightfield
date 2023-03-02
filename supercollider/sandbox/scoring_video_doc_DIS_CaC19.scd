@@ -26,16 +26,19 @@ s.stopRecording
 // setup control signal recording
 // ~numChannels = ~imageCtl.mixers.size()
 // s.scope(~imageCtl.mixers.size(), ~imageCtl.mixers[0].busnum, rate: 'control')
-// ~recorder = RecordControl( ~imageCtl.mixers[0].busnum, ~imageCtl.mixers.size(), "rover", "~/Desktop".standardizePath,  makeGui: true )
+~recorder = RecordControl( ~imageCtl.mixers[0].busnum, ~imageCtl.mixers.size(), "rover", "~/Desktop".standardizePath,  makeGui: true )
 
-
+Server.killAll
 
 // start rover
 // SCORING
 (
 
 // ~refocuser_ip = "192.168.1.10"; // asimov
-~refocuser_ip = "192.168.1.136"; // VROOM
+// ~refocuser_ip = "192.168.1.136"; // VROOM
+// ~refocuser_ip = "192.168.1.111"; // Razer
+~refocuser_ip = "192.168.4.40"; // Asimov/EERO
+
 // ~refocuser_ip = "192.168.1.231";
 
 //get audio initialized
@@ -188,13 +191,13 @@ s.waitForBoot({
 		["mike1", 240, 5],
 		["mike2", 90, 3],
 		["tunnel", 150, 3],
-		["carkeek", 120, 3],
+		["carkeek", 120, 3], // want to make the first one here longer.... 150, 200?
 		["outsidelookingin", 130, 3],
 		["mike3", 240, 5],
 		["dark_trees", 120, 3],
 		["carkeek_night", 120, 2],
  		["diningroom3", 240, 5],
-		// int
+		// inte
 		// ext
 		// int
 		// lim

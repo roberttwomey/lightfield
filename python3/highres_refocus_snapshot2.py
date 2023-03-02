@@ -259,11 +259,16 @@ if __name__ == '__main__':
 	# exit()
 	# print(imagefiles)
 
+
 	# create output filename
+	snapshotname = os.path.splitext(os.path.basename(snapshotfile))[0]
+
 	if args.png:
-		output = nextFileName(os.path.join(outpath, os.path.splitext(os.path.basename(scenename))[0]+".png"))
+		# output = nextFileName(os.path.join(outpath, os.path.splitext(os.path.basename(scenename))[0]+".png"))
+		output = nextFileName(os.path.join(outpath, snapshotname+".png"))
 	else:
-		output = nextFileName(os.path.join(outpath, os.path.splitext(os.path.basename(scenename))[0]+".jpg"))
+		# output = nextFileName(os.path.join(outpath, os.path.splitext(os.path.basename(scenename))[0]+".jpg"))
+		output = nextFileName(os.path.join(outpath, snapshotname+".jpg"))
 
 
 	print("file: {}".format(xmlfile))
@@ -272,7 +277,7 @@ if __name__ == '__main__':
 	print("roll: {}".format(roll))
 	print("ap_loc: {}\tap_size: {}".format(ap_loc, ap_size))
 	print("outfile: {}".format(output))
-	
+
 	ap_loc = np.array(ap_loc)
 	ap_size = np.array(ap_size)
 
